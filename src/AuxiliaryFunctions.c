@@ -132,7 +132,7 @@ gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator,
 	return v;
 }
 
-int WriteGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum){
+int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum){
     
     double m = 0;
     

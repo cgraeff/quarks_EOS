@@ -72,7 +72,8 @@ double ZeroedGapEquation(double mass, void * input)
 
 double ScalarDensity(double mass, double fermi_momentum)
 {
-	return pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0)) * (F0(mass, fermi_momentum) - F0(mass, parameters.cutoff));
+	return NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0))
+           * (F0(mass, fermi_momentum) - F0(mass, parameters.cutoff));
 }
 
 double F0(double mass, double momentum)

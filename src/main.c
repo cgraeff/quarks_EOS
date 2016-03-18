@@ -49,17 +49,30 @@ int PerformCalculation(){
         barionic_density += density_step;
         gsl_vector_set(barionic_density_vector, i, barionic_density);
         
+        // Determination of Fermi momentum
         double fermi_momentum = pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS, 1.0 / 3.0);
         
+        // Write zeroed gap equation for every value of density (for checking purpouses)
         char filename[256];
         sprintf(filename, "data/gap/gap_dens_%d.dat", i);
-        WriteGapEquation(filename, parameters.gap_minimum_mass, parameters.gap_maximum_mass, parameters.gap_points_number, fermi_momentum);
+        WriteZeroedGapEquation(filename, parameters.gap_minimum_mass, parameters.gap_maximum_mass, parameters.gap_points_number, fermi_momentum);
 		
+        // Solution of Gap Equation, determination of scalar density
 		double mass = GapEquationSolver(fermi_momentum);
         gsl_vector_set(mass_vector, i, mass);
         
         double scalar_density = ScalarDensity(mass, fermi_momentum);
         gsl_vector_set(scalar_density_vector, i, scalar_density);
+        
+        // Determination of chemical potential
+        double chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
+        
+        // Determination of termodinamic potential
+        
+        // Determination of pressure
+        
+        // Determination of energy density
+        
     }
     
     // Write results
