@@ -16,8 +16,6 @@
 
 Parameters parameters;
 
-//char * lower_string(char s[]);
-
 void ParametersSetup(void)
 {
     // See header file for units and other relevant
@@ -80,22 +78,3 @@ void ParametersSetup(void)
     }
 }
 
-/*
-char * lower_string(char s[])
-{
-	char string[256];
-	
-	int c = 0;
- 
-	while (s[c] != '\0') {
-		if (s[c] >= 'A' && s[c] <= 'Z') {
-			string[c] = s[c] + 32;
-		}
-		c++;
-	}
-	
-	string[c] = '\0';
-	
-	return string;
-}
-*/
