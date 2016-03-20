@@ -11,6 +11,7 @@
 #include <math.h>
 #include <gsl/gsl_vector.h>
 
+#include "CommandlineOptions.h"
 #include "Parameters.h"
 #include "Constants.h"
 #include "EOS.h"
@@ -20,7 +21,7 @@ int PerformCalculation();
 
 int main(int argc, char * argv[])
 {
-    // ProcessCommandlineArguments();
+    CommandlineOptionsParse(argc, argv);
     ParametersSetup();
     
     PerformCalculation();
@@ -44,10 +45,15 @@ int PerformCalculation(){
 
     double density_step = (parameters.maximum_density - parameters.minimum_density) / (parameters.points_number - 1);
 
+	if (options.verbose)
+		printf("Solving gap equation and equations of state ...\n");
+
     for (int i = 0; i < parameters.points_number; i++){
         
         barionic_density += density_step;
         gsl_vector_set(barionic_density_vector, i, barionic_density);
+        if (options.verbose)
+        	printf("Barionic density: %20.15E\n", barionic_density);
         
         // Determination of Fermi momentum
         double fermi_momentum = pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS, 1.0 / 3.0);
@@ -65,7 +71,7 @@ int PerformCalculation(){
         gsl_vector_set(scalar_density_vector, i, scalar_density);
         
         // Determination of chemical potential
-        double chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
+        // double chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
         
         // Determination of termodinamic potential
         
@@ -76,6 +82,9 @@ int PerformCalculation(){
     }
     
     // Write results
+    if (options.verbose)
+    	printf("Saving results ...\n");
+
     WriteVectorsToFile("data/mass.dat",
                        "# barionic density, mass\n",
                        2,
@@ -91,6 +100,9 @@ int PerformCalculation(){
     gsl_vector_free(barionic_density_vector);
     gsl_vector_free(mass_vector);
     gsl_vector_free(scalar_density_vector);
+    
+    if (options.verbose)
+    	printf("Done!\n");
 
     return 0;
 }

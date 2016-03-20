@@ -1,4 +1,5 @@
 *.dat
 .DS_Store
 *.o
-quarks_eos
+quarks_eos/
+eos

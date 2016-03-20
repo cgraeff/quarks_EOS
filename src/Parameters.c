@@ -9,10 +9,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "Parameters.h"
+#include "CommandlineOptions.h"
 
 Parameters parameters;
+
+//char * lower_string(char s[]);
 
 void ParametersSetup(void)
 {
@@ -45,6 +49,19 @@ void ParametersSetup(void)
     
     Parameters_set par = Name_1;
     
+    if (NULL != options.parameterization){
+    	if (strcasecmp("name_1", options.parameterization)){
+    		par = Name_1;
+    	}
+    	else if (strcasecmp("name_2", options.parameterization)){
+    		par = Name_2;
+    	}
+    	else{
+    		printf("You must choose from a defined parameterization.\n");
+    		exit(EXIT_FAILURE);
+    	}
+    }
+    
     switch (par) {
         case Name_1:
             parameters.G_S = 4.855;
@@ -57,8 +74,28 @@ void ParametersSetup(void)
             parameters.bare_mass = 0.0;
             break;
         default:
-            printf("You must choose one of the available parameterizations.\n");
+            printf("You must define the parameters of the parameterization.\n");
             exit(EXIT_FAILURE);
             break;
     }
 }
+
+/*
+char * lower_string(char s[])
+{
+	char string[256];
+	
+	int c = 0;
+ 
+	while (s[c] != '\0') {
+		if (s[c] >= 'A' && s[c] <= 'Z') {
+			string[c] = s[c] + 32;
+		}
+		c++;
+	}
+	
+	string[c] = '\0';
+	
+	return string;
+}
+*/
