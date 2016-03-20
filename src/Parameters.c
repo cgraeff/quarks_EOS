@@ -48,10 +48,12 @@ void ParametersSetup(void)
     Parameters_set par = Name_1;
     
     if (NULL != options.parameterization){
-    	if (strcasecmp("name_1", options.parameterization)){
+    	// strcasecmp returns 0 if the strings are equal (in a case insensitive manner),
+    	// but 0 is false, so it's necessary to add the ! (not) operator.
+    	if (!strcasecmp("name_1", options.parameterization)){
     		par = Name_1;
     	}
-    	else if (strcasecmp("name_2", options.parameterization)){
+    	else if (!strcasecmp("name_2", options.parameterization)){
     		par = Name_2;
     	}
     	else{
