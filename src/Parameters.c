@@ -35,6 +35,12 @@ void ParametersSetup(void)
     parameters.gap_eq_solver_abs_error = 0.05;
     parameters.gap_eq_solver_rel_error = 5.0E-4;
     parameters.gap_eq_solver_max_iterations = 1000;
+    
+    parameters.vac_mass_det_lower_bound = 1.0E-3;
+    parameters.vac_mass_det_upper_bound = 3000.0;
+    parameters.vac_mass_det_abs_error = 0.05;
+    parameters.vac_mass_det_rel_error = 5.0E-4;
+    parameters.vac_mass_det_max_iterations = 1000;
 	
 
     // To make the use of different parameterizations easier, define a name in the enum

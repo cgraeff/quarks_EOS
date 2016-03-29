@@ -17,10 +17,16 @@ typedef struct _gap_equation_input{
 } gap_equation_input;
 
 double GapEquationSolver();
-double ZeroedGapEquation(double mass, void * input);
 
 double ScalarDensity(double mass, double fermi_momentum);
 
-double F0(double mass, double momentum);
+int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum);
+
+double VacuumMassDetermination();
+
+double TermodynamicPotential();
+double EnergyDensity();
+double Pressure();
+
 
 #endif /* EOS_h */

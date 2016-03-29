@@ -11,7 +11,6 @@
 #include <stdarg.h>
 
 #include "AuxiliaryFunctions.h"
-#include "EOS.h"
 
 int WriteVectorsToFile(const char * filename, const char * header, int vectors_count, ...)
 {
@@ -130,29 +129,4 @@ gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator,
 	}
 
 	return v;
-}
-
-int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum){
-    
-    double m = 0;
-    
-    double step = (maximum_mass - minimum_mass) / (points_number - 1);
-    
-    FILE * f = fopen(filename, "w");
-    
-    if (NULL == f) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
-    
-    gap_equation_input input;
-    input.fermi_momentum = fermi_momentum;
-    
-    while (m < points_number) {
-        fprintf(f, "%20.15E\t%20.15E\n", m, ZeroedGapEquation(m, &input));
-        m += step;
-    }
-    
-    return 0;
 }

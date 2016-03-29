@@ -22,24 +22,29 @@ typedef struct _parameters
     double gap_maximum_mass;
     double gap_points_number;
     
-/* Parameters for root finding in the solution of the Gap Equation:
-       - The root is assumed to be in the region bracketed by gap_eq_solver_lower_bound and
-         gap_eq_solver_upper_bound;
+/* Parameters for root finding in the solution of the Gap Equation and Vacuum Mass:
+       - The root is assumed to be in the region bracketed by *_lower_bound and *_upper_bound;
  		- Two kinds of error are defined:
-            - gap_eq_solving_const_abs_error: An absolute error in MeV for the width of the region
-                                              which contais the root
-            - gap_eq_solving_const_rel_error: Error as a fraction of the value of MIN(x_lower, x_upper),
-                                              where x_lower and x_upper are the values that bracket the
-                                              root after each iteration of the root findind algorithm
+            - *_const_abs_error: An absolute error in MeV for the width of the region
+                                 which contais the root
+            - *_const_rel_error: Error as a fraction of the value of MIN(x_lower, x_upper),
+                                 where x_lower and x_upper are the values that bracket the
+                                 root after each iteration of the root findind algorithm
        - The root is accepted when
-            |x_lower - x_upper| < const_abs_error_gap_eq_solving
-                                  + const_rel_error_gap_eq_solving * MIN(|x_upper|, |x_lower|)
+            |x_lower - x_upper| < *_const_abs_error
+                                  + *_const_rel_error * MIN(|x_upper|, |x_lower|)
 */
     double gap_eq_solver_lower_bound;
     double gap_eq_solver_upper_bound;
     double gap_eq_solver_abs_error;
     double gap_eq_solver_rel_error;
     double gap_eq_solver_max_iterations;
+    
+    double vac_mass_det_lower_bound;
+    double vac_mass_det_upper_bound;
+    double vac_mass_det_abs_error;
+    double vac_mass_det_rel_error;
+    double vac_mass_det_max_iterations;
     
     // Parameterization variables
     double G_S;             // scalar-isoscalar coupling (fm^2)

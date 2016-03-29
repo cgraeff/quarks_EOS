@@ -34,6 +34,9 @@ int main(int argc, char * argv[])
  */
 int PerformCalculation(){
     
+    // Vacuum mass determination
+    double vacuum_mass = VacuumMassDetermination();
+    
     // Vectors to store results
     gsl_vector * barionic_density_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * mass_vector = gsl_vector_alloc(parameters.points_number);

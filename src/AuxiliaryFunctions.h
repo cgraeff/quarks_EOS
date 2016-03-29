@@ -16,7 +16,4 @@ int WriteIndexedVectorsToFile(const char * filename, const char * header, int ve
 
 gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator, gsl_vector * denominator);
 
-int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum);
-
-
 #endif /* AuxiliaryFunctions_h */
