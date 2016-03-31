@@ -30,14 +30,14 @@ void ParametersSetup(void)
     parameters.gap_maximum_mass = 1000.0;
     parameters.gap_points_number = 2000;
     
-    parameters.gap_eq_solver_lower_bound = 1.0E-3;   // Low, but not zero. In zero f(M) = 0 if bare_mass is zero, and that may be a problem for root finding;
-    parameters.gap_eq_solver_upper_bound = 3000.0;	// MeV (about three times the nucleon mass)
+    parameters.gap_eq_solver_lower_bound = 1.0E-3;  // Low, but not zero. In zero f(M) = 0 if bare_mass is zero, and that may be a problem for root finding;
+    parameters.gap_eq_solver_upper_bound = 3000.0;  // MeV (about three times the nucleon mass)
     parameters.gap_eq_solver_abs_error = 0.05;
     parameters.gap_eq_solver_rel_error = 5.0E-4;
     parameters.gap_eq_solver_max_iterations = 1000;
     
-    parameters.vac_mass_det_lower_bound = 1.0E-3;
-    parameters.vac_mass_det_upper_bound = 3000.0;
+    parameters.vac_mass_det_lower_bound = 1.0E-3;   // Low, but not zero. Same reason as above.
+    parameters.vac_mass_det_upper_bound = 1000.0;   // Near the value of the nucleon mass.
     parameters.vac_mass_det_abs_error = 0.05;
     parameters.vac_mass_det_rel_error = 5.0E-4;
     parameters.vac_mass_det_max_iterations = 1000;
@@ -70,8 +70,8 @@ void ParametersSetup(void)
     
     switch (par) {
         case Name_1:
-            parameters.G_S = 4.855;
-            parameters.cutoff = 388.189;
+            parameters.G_S = 0.274869;  // Testing parameters taken from Debora's code.
+            parameters.cutoff = 587.9;  // MeV
             parameters.bare_mass = 0.0;
             break;
         case Name_2:

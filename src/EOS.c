@@ -16,6 +16,7 @@
 
 double UnidimensionalRootFinder(gsl_function * F, double lower_bound, double upper_bound, double abs_error, double rel_error, int max_iter);
 double F0(double mass, double momentum);
+double F_E(double mass, double momentum);
 double ZeroedGapEquation(double mass, void * input);
 double VacuumMassEquation(double mass, void * input);
 
@@ -92,7 +93,7 @@ double VacuumMassDetermination()
     // Prepare function to be passed to the root finding algorithm.
     // No parameters are needed.
     gsl_function F;
-    F.function = &VacuumMassDetermination;
+    F.function = &VacuumMassEquation;
     
     double root = UnidimensionalRootFinder(&F,
                                            parameters.vac_mass_det_lower_bound,
@@ -150,7 +151,20 @@ int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_
     return 0;
 }
 
-double TermodynamicPotential(double mass, double fermi_momentum, double barionic_density, double scalar_density, double vacuum_termodynamic_potential)
+double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum)
+{
+    double F_E_diff = F_E(vacuum_mass, parameters.cutoff) - F_E(vacuum_mass, fermi_momentum);
+    double F0_diff = F0(vacuum_mass, fermi_momentum) - F0(vacuum_mass, parameters.cutoff);
+    
+    double vacuum_scalar_density = NUM_FLAVORS * NUM_COLORS * F0_diff;
+    
+    double first_term = - NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * F_E_diff / pow(M_PI, 2.0);
+    double second_term = CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
+    
+    return -first_term + second_term;
+}
+
+double ThermodynamicPotential(double mass, double fermi_momentum, double barionic_density, double scalar_density, double vacuum_termodynamic_potential)
 {
     double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
     
@@ -159,23 +173,19 @@ double TermodynamicPotential(double mass, double fermi_momentum, double barionic
             - vacuum_termodynamic_potential;
 }
 
-double F_E(mass, momentum)
+double F_E(double mass, double momentum)
 {
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
     
-    return pow(momentum, 2.0)
+    return (momentum * pow(E, 3.0) - 0.5 * pow(mass, 2.0) * momentum * E - 0.5 * pow(mass, 4.0) * log ((momentum + E) / mass)) / 4.0;
 }
 
-double EnergyDensity()
+double EnergyDensity(double thermodynamic_potential, double chemical_potential, double barionic_density)
 {
-    double energy_density;
-    
-    return energy_density;
+    return thermodynamic_potential + NUM_COLORS * chemical_potential * barionic_density;
 }
 
-double Pressure()
+double Pressure(double thermodynamic_potential)
 {
-    double pressure;
-    
-    return pressure;
+    return -thermodynamic_potential;
 }
