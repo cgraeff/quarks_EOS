@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Constants.h"
 #include "Parameters.h"
 #include "CommandlineOptions.h"
 
@@ -30,7 +31,9 @@ void ParametersSetup(void)
     parameters.gap_maximum_mass = 1000.0;
     parameters.gap_points_number = 2000;
     
-    parameters.gap_eq_solver_lower_bound = 1.0E-3;  // Low, but not zero. In zero f(M) = 0 if bare_mass is zero, and that may be a problem for root finding;
+    parameters.gap_eq_solver_lower_bound = 1.0E-3;  // Low, but not zero. In zero f(M) = 0 if bare_mass is zero,
+                                                    // and that may be a problem for root finding;
+    
     parameters.gap_eq_solver_upper_bound = 3000.0;  // MeV (about three times the nucleon mass)
     parameters.gap_eq_solver_abs_error = 0.05;
     parameters.gap_eq_solver_rel_error = 5.0E-4;
@@ -47,20 +50,21 @@ void ParametersSetup(void)
     // and assign values for the variables in a case of the switch below.
     
     typedef enum{
-        Name_1,
-        Name_2
+        Buballa_1,  // Set 1 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408
+        Buballa_2,  // Set 2 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408
+        Buballa_3   // Set 3 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408
     }Parameters_set;
     
-    Parameters_set par = Name_1;
+    Parameters_set par = Buballa_1; // Default value
     
     if (NULL != options.parameterization){
     	// strcasecmp returns 0 if the strings are equal (in a case insensitive manner),
     	// but 0 is false, so it's necessary to add the ! (not) operator.
     	if (!strcasecmp("name_1", options.parameterization)){
-    		par = Name_1;
+    		par = Buballa_1;
     	}
     	else if (!strcasecmp("name_2", options.parameterization)){
-    		par = Name_2;
+    		par = Buballa_2;
     	}
     	else{
     		printf("You must choose from a defined parameterization.\n");
@@ -69,14 +73,19 @@ void ParametersSetup(void)
     }
     
     switch (par) {
-        case Name_1:
-            parameters.G_S = 0.274869;  // Testing parameters taken from Debora's code.
-            parameters.cutoff = 587.9;  // MeV
+        case Buballa_1:
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.14 / pow(650, 2.0); // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+            parameters.cutoff = 650;  // MeV
+            parameters.bare_mass = 0.0; // MeV
+            break;
+        case Buballa_2:
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.45 / pow(600, 2.0); // Same as Buballa_1
+            parameters.cutoff = 600;
             parameters.bare_mass = 0.0;
             break;
-        case Name_2:
-            parameters.G_S = 4.855;
-            parameters.cutoff = 388.189;
+        case Buballa_3:
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.84 / pow(570, 2.0); // Same as Buballa_1
+            parameters.cutoff = 570;
             parameters.bare_mass = 0.0;
             break;
         default:

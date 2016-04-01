@@ -110,7 +110,29 @@ double VacuumMassEquation(double mass, void * input)
     double F_diff = F0(mass, parameters.cutoff) - F0(mass, 0.0);
     double term = 2.0 * NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -2.0) * parameters.G_S * mass * F_diff / pow(M_PI, 2.0);
     
-    return mass - parameters.bare_mass + term;
+    return mass - parameters.bare_mass - term;
+}
+
+int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum_mass, int points_number){
+    
+    double m = 0;
+    
+    double step = (maximum_mass - minimum_mass) / (points_number - 1);
+    
+    FILE * f = fopen(filename, "w");
+    
+    if (NULL == f) {
+        printf("Could not open %s for writting.\n", filename);
+        perror("Reason");
+        exit(EXIT_FAILURE);
+    }
+    
+    while (m < points_number) {
+        fprintf(f, "%20.15E\t%20.15E\n", m, VacuumMassEquation(m, NULL));
+        m += step;
+    }
+    
+    return 0;
 }
 
 double ScalarDensity(double mass, double fermi_momentum)

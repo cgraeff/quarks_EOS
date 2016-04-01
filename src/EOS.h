@@ -22,9 +22,10 @@ double ScalarDensity(double mass, double fermi_momentum);
 
 int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum);
 
-double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum);
-
 double VacuumMassDetermination();
+int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum_mass, int points_number);
+
+double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum);
 
 double ThermodynamicPotential(double mass, double fermi_momentum, double barionic_density, double scalar_density, double vacuum_termodynamic_potential);
 

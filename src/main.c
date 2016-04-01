@@ -36,6 +36,7 @@ int PerformCalculation(){
     
     // Vectors to store results
     gsl_vector * barionic_density_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * fermi_momentum_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * mass_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * scalar_density_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * thermodynamic_potential_vector = gsl_vector_alloc(parameters.points_number);
@@ -43,6 +44,7 @@ int PerformCalculation(){
     gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
     
     // Vacuum mass determination
+    WriteVacuumMassEquation("data/vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
     double vacuum_mass = VacuumMassDetermination();
     
 	// Define the density step. We subtract 1 from the number of points to
@@ -63,6 +65,7 @@ int PerformCalculation(){
         
         // Determination of Fermi momentum
         double fermi_momentum = pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS, 1.0 / 3.0);
+        gsl_vector_set(fermi_momentum_vector, i, fermi_momentum);
         
         // Write zeroed gap equation for every value of density (for checking purpouses)
         char filename[256];
@@ -73,24 +76,24 @@ int PerformCalculation(){
 		double mass = GapEquationSolver(fermi_momentum);
         gsl_vector_set(mass_vector, i, mass);
         
-        double scalar_density = ScalarDensity(mass, fermi_momentum);
-        gsl_vector_set(scalar_density_vector, i, scalar_density);
+        // double scalar_density = ScalarDensity(mass, fermi_momentum);
+        // gsl_vector_set(scalar_density_vector, i, scalar_density);
         
         // Determination of chemical potential
-        double chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
+        // double chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
         
         // Determination of termodinamic potential
-        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
-        double thermodynamic_potential = ThermodynamicPotential(mass, fermi_momentum, barionic_density, scalar_density, vacuum_thermodynamic_potential);
-        gsl_vector_set(thermodynamic_potential_vector, i, thermodynamic_potential);
+        // double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
+        // double thermodynamic_potential = ThermodynamicPotential(mass, fermi_momentum, barionic_density, scalar_density, vacuum_thermodynamic_potential);
+        // gsl_vector_set(thermodynamic_potential_vector, i, thermodynamic_potential);
         
         // Determination of pressure
-        double pressure = Pressure(thermodynamic_potential);
-        gsl_vector_set(pressure_vector, i, pressure);
+        // double pressure = Pressure(thermodynamic_potential);
+        // gsl_vector_set(pressure_vector, i, pressure);
         
         // Determination of energy density
-        double energy_density = EnergyDensity(thermodynamic_potential, chemical_potential, barionic_density);
-        gsl_vector_set(energy_density_vector, i, energy_density);
+        // double energy_density = EnergyDensity(thermodynamic_potential, chemical_potential, barionic_density);
+        // gsl_vector_set(energy_density_vector, i, energy_density);
         
     }
     
@@ -104,32 +107,39 @@ int PerformCalculation(){
                        barionic_density_vector,
                        mass_vector);
     
-    WriteVectorsToFile("data/scalar_density.dat",
+    WriteVectorsToFile("data/fermi_momentum.dat",
+                       "# barionic density, fermi momentum\n",
+                       2,
+                       barionic_density_vector,
+                       fermi_momentum_vector);
+    
+/*    WriteVectorsToFile("data/scalar_density.dat",
                        "# barionic density, scalar density \n",
                        2,
                        barionic_density_vector,
                        scalar_density_vector);
-    
-    WriteVectorsToFile("data/thermodynamic_potential.dat",
+*/
+/*    WriteVectorsToFile("data/thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
                        2,
                        barionic_density_vector,
                        thermodynamic_potential_vector);
-    
-    WriteVectorsToFile("data/pressure.dat",
+*/
+/*    WriteVectorsToFile("data/pressure.dat",
                        "# barionic density, pressure \n",
                        2,
                        barionic_density_vector,
                        pressure_vector);
-    
-    WriteVectorsToFile("data/energy_density.dat",
+*/
+/*    WriteVectorsToFile("data/energy_density.dat",
                        "# barionic density, scalar density \n",
                        2,
                        barionic_density_vector,
                        energy_density_vector);
-    
+*/    
     // Free memory associated with vectors
     gsl_vector_free(barionic_density_vector);
+    gsl_vector_free(fermi_momentum_vector);
     gsl_vector_free(mass_vector);
     gsl_vector_free(scalar_density_vector);
     gsl_vector_free(thermodynamic_potential_vector);
