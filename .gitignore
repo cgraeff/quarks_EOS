@@ -1,5 +1,6 @@
 *.dat
 .DS_Store
 *.o
+*.swp
 quarks_eos/
 eos
