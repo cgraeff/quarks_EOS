@@ -24,7 +24,7 @@ void ParametersSetup(void)
     
     parameters.points_number = 1000;
     parameters.minimum_density = 0.01;
-    parameters.maximum_density = 0.35;
+    parameters.maximum_density = 0.2625;
     parameters.proton_fraction = 0.5;
     
     parameters.gap_minimum_mass = 0.0;
