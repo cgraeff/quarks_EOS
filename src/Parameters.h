@@ -11,11 +11,12 @@
 
 typedef struct _parameters
 {
+    char * parameters_set_identifier;
+    
     // Parameters for performing the calculation of the EOS
     int points_number;       // Number of points in which the above range will be divide into
     double minimum_density;     // (fm^-3)
     double maximum_density;     // (fm^-3)
-    double proton_fraction;     // (no dimension)
     
     // Parameters used when writing the zeroed gap equation
     double gap_minimum_mass;

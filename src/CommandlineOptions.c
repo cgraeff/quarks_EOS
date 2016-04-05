@@ -15,7 +15,7 @@
 
 // Default values for options and flags that will be acessible
 // during the execution (specified in order of declaration).
-Options options = {false, NULL};
+Options options = {true, NULL};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
@@ -44,11 +44,11 @@ int CommandlineOptionsParse(int argc, char * argv[])
 	// the arguments after the first will be misinterpreted as unknown, or unclaimed.
 	// This particular implementation will stop if there are any unprocessed arguments.
 	
-	char * short_options = "p:vuh";
+	char * short_options = "p:quh";
 	static struct option long_options[] = {{"parameterization", required_argument, NULL, 'p'},
-										   {"verbose", no_argument, NULL, 'v'},
+										   {"quiet", no_argument, NULL, 'q'},
 										   {"usage", no_argument, NULL, 'u'},
-										   {"help", no_argument, NULL, 'v'},
+										   {"help", no_argument, NULL, 'h'},
 										   {NULL, 0, NULL, 0}};
 	int opt;
 	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
@@ -58,8 +58,8 @@ int CommandlineOptionsParse(int argc, char * argv[])
 			case 'p':
 				options.parameterization = optarg;
 				break;
-			case 'v':
-				options.verbose = true;
+			case 'q':
+				options.verbose = false;
 				break;
 			case 'u':
 				CommandlineOptionsPrintUsage(argv[0]);
@@ -99,7 +99,7 @@ void CommandlineOptionsPrintUsage(char * prog_name)
 	printf("Usage: %s [options]\n", prog_name);
 	printf("Options:\n"
 		   "\t--parameterization, -p: Chooses a parameterization.\n"
-		   "\t--verbose, -v: Prints information to show progress.\n"
+		   "\t--quiet, -v: Supress information (may be useful in scripts).\n"
 		   "\t--usage, -u: Prints this message.\n"
 		   "\t--help, -h: Same as --usage.\n");
 	

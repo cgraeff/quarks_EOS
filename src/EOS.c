@@ -135,6 +135,7 @@ int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum
         m += step;
     }
     
+    fclose(f);
     return 0;
 }
 
@@ -173,9 +174,10 @@ int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_
         m += step;
     }
     
+    fclose(f);
     return 0;
 }
-
+/*
 double ThermodynamicPotential(double mass,
                               double barionic_density,
                               double fermi_momentum,
@@ -211,31 +213,32 @@ double F2(double mass, double momentum)
     return (1.0 / 8.0) * (-3.0 * pow(mass, 2.0) * momentum + 2.0 * pow(momentum, 3.0)) * E
     + (3.0 / 8.0) * pow(mass, 4.0) * log((momentum + E) / mass);
 }
+*/
 
-/*
 double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum)
 {
     double F_E_diff = F_E(vacuum_mass, parameters.cutoff) - F_E(vacuum_mass, fermi_momentum);
-    double F0_diff = F0(vacuum_mass, fermi_momentum) - F0(vacuum_mass, parameters.cutoff);
-    
-    double vacuum_scalar_density = NUM_FLAVORS * NUM_COLORS * F0_diff;
     
     double first_term = - NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * F_E_diff / pow(M_PI, 2.0);
-    double second_term = CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
+    double second_term = pow(vacuum_mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
     
     return first_term + second_term;
 }
 
-double ThermodynamicPotential(double mass, double fermi_momentum, double barionic_density, double scalar_density, double vacuum_thermodynamic_potential)
+double ThermodynamicPotential(double mass,
+                              double fermi_momentum,
+                              double barionic_density,
+                              double scalar_density,
+                              double chemical_potential,
+                              double vacuum_thermodynamic_potential)
 
 {
     double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
     
-    double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * F_diff / pow(M_PI, 2.0);
-    double second_term = - NUM_COLORS * fermi_momentum * barionic_density;
-    double third_term = CONST_HBAR_C *  parameters.G_S * pow(scalar_density, 2.0);
+    double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F_diff + chemical_potential * pow(fermi_momentum, 3.0)) / pow(M_PI, 2.0);
+    double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
     
-    return first_term + second_term + third_term - vacuum_thermodynamic_potential;
+    return first_term + second_term - vacuum_thermodynamic_potential;
 }
 
 double F_E(double mass, double momentum)
@@ -244,7 +247,7 @@ double F_E(double mass, double momentum)
     
     return (momentum * pow(E, 3.0) - 0.5 * pow(mass, 2.0) * momentum * E - 0.5 * pow(mass, 4.0) * log ((momentum + E) / mass)) / 4.0;
 }
-*/
+
 double EnergyDensity(double thermodynamic_potential, double chemical_potential, double barionic_density)
 {
     return thermodynamic_potential + NUM_COLORS * chemical_potential * barionic_density;

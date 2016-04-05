@@ -34,6 +34,10 @@ int main(int argc, char * argv[])
  */
 int PerformCalculation(){
     
+    // Print name of parametrization
+    if (options.verbose)
+        printf("Calculation performed with %s parameters set.\n", parameters.parameters_set_identifier);
+    
     // Vectors to store results
     gsl_vector * barionic_density_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * fermi_momentum_vector = gsl_vector_alloc(parameters.points_number);
@@ -45,8 +49,14 @@ int PerformCalculation(){
     gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
     
     // Vacuum mass determination
+    if (options.verbose)
+        printf("Determining the vacuum mass ...\n");
+    
     WriteVacuumMassEquation("data/vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
     double vacuum_mass = VacuumMassDetermination();
+    
+    if (options.verbose)
+        printf("\tVacuum mass: %f\n", vacuum_mass);
     
 	// Define the density step. We subtract 1 from the number of points to
 	// make sure that the last point corresponds to parameters.maximum_density
@@ -61,8 +71,10 @@ int PerformCalculation(){
         
         barionic_density += density_step;
         gsl_vector_set(barionic_density_vector, i, barionic_density);
-        if (options.verbose)
-        	printf("Barionic density: %20.15E\n", barionic_density);
+        if (options.verbose){
+            printf("\r\tBarionic density: %f", barionic_density);
+            fflush(stdout);
+        }
         
         // Determination of Fermi momentum
         double fermi_momentum = CONST_HBAR_C * pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS, 1.0 / 3.0);
@@ -85,13 +97,23 @@ int PerformCalculation(){
         gsl_vector_set(chemical_potential_vector, i, chemical_potential);
         
         // Determination of termodinamic potential
-        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, barionic_density, chemical_potential);
+/*      double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, barionic_density, chemical_potential);
         double thermodynamic_potential = ThermodynamicPotential(mass,
                                                                 barionic_density,
                                                                 fermi_momentum,
                                                                 scalar_density,
                                                                 chemical_potential,
                                                                 vacuum_thermodynamic_potential);
+ */
+        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
+        
+        double thermodynamic_potential = ThermodynamicPotential(mass,
+                                                                fermi_momentum,
+                                                                barionic_density,
+                                                                scalar_density,
+                                                                chemical_potential,
+                                                                vacuum_thermodynamic_potential);
+
         gsl_vector_set(thermodynamic_potential_vector, i, thermodynamic_potential);
         
         // Determination of pressure
@@ -106,7 +128,8 @@ int PerformCalculation(){
     
     // Write results
     if (options.verbose)
-    	printf("Saving results ...\n");
+        printf("\n"                     // Printing in the loop does't use new line, so here we need one 
+               "Saving results ...\n");
 
     WriteVectorsToFile("data/mass.dat",
                        "# barionic density, mass\n",
