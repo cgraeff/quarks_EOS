@@ -228,7 +228,6 @@ double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum)
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
                               double barionic_density,
-                              double scalar_density,
                               double chemical_potential,
                               double vacuum_thermodynamic_potential)
 

@@ -44,6 +44,7 @@ int PerformCalculation(){
     gsl_vector * mass_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * scalar_density_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * chemical_potential_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * vacuum_thermodynamic_potential_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * thermodynamic_potential_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * pressure_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
@@ -57,6 +58,44 @@ int PerformCalculation(){
     
     if (options.verbose)
         printf("\tVacuum mass: %f\n", vacuum_mass);
+    
+    // DEBUG    -> TODO: Testar com as funções que peguei do programa da Débora pra ver no que dá. Pelo menos pra potencial químico nulo tem que funcionar
+    {
+        double minimum_mass = 0.0;
+        double maximum_mass = 1000.0;
+        int points_number = 1000;
+        double chemical_potential = 410.0;
+        
+        double m = 0;
+        
+        double step = (maximum_mass - minimum_mass) / (points_number - 1);
+        
+        FILE * f = fopen("data/therm.dat", "w");
+        
+        if (NULL == f) {
+            printf("Could not open for writting.\n");
+            perror("Reason");
+            exit(EXIT_FAILURE);
+        }
+        
+        while (m <= maximum_mass) {
+
+            double fermi_momentum = 0;
+            if (pow(chemical_potential, 2.0) > pow(m, 2.0)){
+                fermi_momentum = sqrt(pow(chemical_potential, 2.0) - pow(m, 2.0));
+            }
+            double barionic_density = pow(fermi_momentum, 3.0) * NUM_FLAVORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
+
+            double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
+            fprintf(f, "%20.15E\t%20.15E\n", m, ThermodynamicPotential(m, fermi_momentum, barionic_density, chemical_potential, vacuum_thermodynamic_potential));
+            m += step;
+        }
+        
+        fclose(f);
+        printf("...\n");
+    }
+    exit(0);
+
     
 	// Define the density step. We subtract 1 from the number of points to
 	// make sure that the last point corresponds to parameters.maximum_density
@@ -106,11 +145,11 @@ int PerformCalculation(){
                                                                 vacuum_thermodynamic_potential);
  */
         double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
+        gsl_vector_set(vacuum_thermodynamic_potential_vector, i, vacuum_thermodynamic_potential);
         
         double thermodynamic_potential = ThermodynamicPotential(mass,
                                                                 fermi_momentum,
                                                                 barionic_density,
-                                                                scalar_density,
                                                                 chemical_potential,
                                                                 vacuum_thermodynamic_potential);
 
@@ -154,6 +193,12 @@ int PerformCalculation(){
                        2,
                        barionic_density_vector,
                        chemical_potential_vector);
+    
+    WriteVectorsToFile("data/vacuum_thermodynamic_potential.dat",
+                       "# barionic density, vacuum thermodynamic potential \n",
+                       2,
+                       barionic_density_vector,
+                       vacuum_thermodynamic_potential_vector);
 
     WriteVectorsToFile("data/thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
@@ -179,6 +224,12 @@ int PerformCalculation(){
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
+    
+    WriteVectorsToFile("data/thermodynamic_potential_vs_mass.dat",
+                       "# mass, thermodynamic potential\n",
+                       2,
+                       mass_vector,
+                       thermodynamic_potential_vector);
     
     // Free memory associated with vectors
     gsl_vector_free(barionic_density_vector);

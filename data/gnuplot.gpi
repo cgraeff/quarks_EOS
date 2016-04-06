@@ -30,6 +30,12 @@ plot "vacuum_mass_equation.dat" w l
 set out "graph/fermi_momentum.png"
 plot "fermi_momentum.dat" w l
 
+set out "graph/thermodynamic_potential_vs_mass.png"
+plot "thermodynamic_potential_vs_mass.dat" w l
+
+set out "graph/vacuum_thermodynamic_potential.png"
+plot "vacuum_thermodynamic_potential.dat" w l
+
 set out "graph/gap.png"
 plot "gap/gap_dens_333.dat" w l, \
 	 "gap/gap_dens_666.dat" w l, \

@@ -85,24 +85,31 @@ void ParametersSetup(void)
             parameters.cutoff = 650;  // MeV
             parameters.bare_mass = 0.0; // MeV
             break;
+            
         case Buballa_2:
             parameters.parameters_set_identifier = "Buballa_2";
             parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.45 / pow(600, 2.0); // Same as Buballa_1
             parameters.cutoff = 600;
             parameters.bare_mass = 0.0;
             break;
+            
         case Buballa_3:
             parameters.parameters_set_identifier = "Buballa_3";
             parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.84 / pow(570, 2.0); // Same as Buballa_1
             parameters.cutoff = 570;
             parameters.bare_mass = 0.0;
             break;
+            
         case D_1:
             parameters.parameters_set_identifier = "D_1";
             parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.44 / pow(570, 2.0); // Same as Buballa_1
             parameters.cutoff = 587.9;
             parameters.bare_mass = 5.6;
+            parameters.points_number = 1000;
+            parameters.minimum_density = 0.01;
+            parameters.maximum_density = 0.6;
             break;
+            
         default:
             printf("You must define the parameters of the parameterization.\n");
             exit(EXIT_FAILURE);

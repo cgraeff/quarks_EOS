@@ -28,7 +28,6 @@ double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum);
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
                               double barionic_density,
-                              double scalar_density,
                               double chemical_potential,
                               double vacuum_thermodynamic_potential);
 /*double ThermodynamicPotential(double mass,
@@ -40,6 +39,5 @@ double ThermodynamicPotential(double mass,
 */
 double EnergyDensity(double thermodynamic_potential, double chemical_potential, double barionic_density);
 double Pressure(double thermodynamic_potential);
-
 
 #endif /* EOS_h */
