@@ -177,8 +177,8 @@ int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_
     fclose(f);
     return 0;
 }
-/*
-double ThermodynamicPotential(double mass,
+
+double ThermodynamicPotential2(double mass,
                               double barionic_density,
                               double fermi_momentum,
                               double scalar_density,
@@ -190,10 +190,10 @@ double ThermodynamicPotential(double mass,
     double second_term = - 2.0 * CONST_HBAR_C * parameters.G_S * pow(scalar_density, 2.0);
     double third_term = - NUM_COLORS * chemical_potential * barionic_density;
     
-    return kinectic + first_term + second_term + third_term - vacuum_thermodynamic_potential;
+    return 2.0 * (kinectic + first_term + second_term + third_term) - vacuum_thermodynamic_potential;
 }
 
-double VacuumThermodynamicPotential(double vacuum_mass, double barionic_density, double chemical_potential)
+double VacuumThermodynamicPotential2(double vacuum_mass, double barionic_density, double chemical_potential)
 {
     double vacuum_scalar_density = NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (vacuum_mass / pow(M_PI, 2.0))
                                    * (F0(vacuum_mass, 0.0) - F0(vacuum_mass, parameters.cutoff));
@@ -201,9 +201,11 @@ double VacuumThermodynamicPotential(double vacuum_mass, double barionic_density,
     double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F2(vacuum_mass, parameters.cutoff) - F2(vacuum_mass, 0.0)) / pow(M_PI, 2.0);
     double first_term = parameters.bare_mass * vacuum_scalar_density;
     double second_term = - 2.0 * CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
+    
+    printf("\t::%20.15E\n", 2.0 * kinectic);
     double third_term = - NUM_COLORS * chemical_potential * barionic_density;
     
-    return kinectic + first_term + second_term + third_term;
+    return 2.0 * (kinectic + first_term + second_term + third_term);
 }
 
 double F2(double mass, double momentum)
@@ -213,7 +215,7 @@ double F2(double mass, double momentum)
     return (1.0 / 8.0) * (-3.0 * pow(mass, 2.0) * momentum + 2.0 * pow(momentum, 3.0)) * E
     + (3.0 / 8.0) * pow(mass, 4.0) * log((momentum + E) / mass);
 }
-*/
+
 
 double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum)
 {

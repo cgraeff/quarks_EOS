@@ -40,9 +40,9 @@ void ParametersSetup(void)
     
     parameters.vac_mass_det_lower_bound = 1.0E-3;   // Low, but not zero. Same reason as above.
     parameters.vac_mass_det_upper_bound = 1000.0;   // Near the value of the nucleon mass.
-    parameters.vac_mass_det_abs_error = 0.05;
-    parameters.vac_mass_det_rel_error = 5.0E-4;
-    parameters.vac_mass_det_max_iterations = 1000;
+    parameters.vac_mass_det_abs_error = 0.005;
+    parameters.vac_mass_det_rel_error = 5.0E-5;
+    parameters.vac_mass_det_max_iterations = 2000;
 	
 
     // To make the use of different parameterizations easier, define a name in the enum
@@ -81,30 +81,31 @@ void ParametersSetup(void)
     switch (par) {
         case Buballa_1:
             parameters.parameters_set_identifier = "Buballa_1";
-            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.14 / pow(650, 2.0); // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-            parameters.cutoff = 650;  // MeV
-            parameters.bare_mass = 0.0; // MeV
+            parameters.bare_mass = 0.0;                                                     // MeV
+            parameters.cutoff = 650.0;                                                      // MeV
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.14 / pow(parameters.cutoff, 2.0);   // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+                                                                                            // corrects the dimension
             break;
             
         case Buballa_2:
             parameters.parameters_set_identifier = "Buballa_2";
-            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.45 / pow(600, 2.0); // Same as Buballa_1
-            parameters.cutoff = 600;
             parameters.bare_mass = 0.0;
+            parameters.cutoff = 600.0;
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.45 / pow(parameters.cutoff, 2.0); // Same as Buballa_1
             break;
             
         case Buballa_3:
             parameters.parameters_set_identifier = "Buballa_3";
-            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.84 / pow(570, 2.0); // Same as Buballa_1
-            parameters.cutoff = 570;
             parameters.bare_mass = 0.0;
+            parameters.cutoff = 570.0;
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.84 / pow(parameters.cutoff, 2.0); // Same as Buballa_1
             break;
             
         case D_1:
             parameters.parameters_set_identifier = "D_1";
-            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.44 / pow(570, 2.0); // Same as Buballa_1
-            parameters.cutoff = 587.9;
             parameters.bare_mass = 5.6;
+            parameters.cutoff = 587.9;
+            parameters.G_S = pow(CONST_HBAR_C, 2.0) * 2.44 / pow(parameters.cutoff, 2.0); // Same as Buballa_1
             parameters.points_number = 1000;
             parameters.minimum_density = 0.01;
             parameters.maximum_density = 0.6;
