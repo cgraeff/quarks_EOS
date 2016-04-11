@@ -187,10 +187,10 @@ double ThermodynamicPotential2(double mass,
 {
     double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F2(mass, parameters.cutoff) - F2(mass, fermi_momentum)) / pow(M_PI, 2.0);
     double first_term = parameters.bare_mass * scalar_density;
-    double second_term = - 2.0 * CONST_HBAR_C * parameters.G_S * pow(scalar_density, 2.0);
+    double second_term = - CONST_HBAR_C * parameters.G_S * pow(scalar_density, 2.0);
     double third_term = - NUM_COLORS * chemical_potential * barionic_density;
     
-    return 2.0 * (kinectic + first_term + second_term + third_term) - vacuum_thermodynamic_potential;
+    return 2.0 * kinectic + first_term + second_term + third_term - vacuum_thermodynamic_potential;
 }
 
 double VacuumThermodynamicPotential2(double vacuum_mass, double barionic_density, double chemical_potential)
@@ -200,12 +200,9 @@ double VacuumThermodynamicPotential2(double vacuum_mass, double barionic_density
     
     double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F2(vacuum_mass, parameters.cutoff) - F2(vacuum_mass, 0.0)) / pow(M_PI, 2.0);
     double first_term = parameters.bare_mass * vacuum_scalar_density;
-    double second_term = - 2.0 * CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
+    double second_term = - CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
     
-    printf("\t::%20.15E\n", 2.0 * kinectic);
-    double third_term = - NUM_COLORS * chemical_potential * barionic_density;
-    
-    return 2.0 * (kinectic + first_term + second_term + third_term);
+    return 2.0 * kinectic + first_term + second_term;
 }
 
 double F2(double mass, double momentum)

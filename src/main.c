@@ -59,12 +59,12 @@ int PerformCalculation(){
     if (options.verbose)
         printf("\tVacuum mass: %f\n", vacuum_mass);
     
-/*    // DEBUG    -> TODO: Testar com as funções que peguei do programa da Débora pra ver no que dá. Pelo menos pra potencial químico nulo tem que funcionar
-    {
+    // DEBUG
+/*    {
         double minimum_mass = 0.0;
         double maximum_mass = 1000.0;
         int points_number = 1000;
-        double chemical_potential = 350.0;
+        double chemical_potential = 300.0;
         
         double m = 0;
         
@@ -84,19 +84,14 @@ int PerformCalculation(){
             if (pow(chemical_potential, 2.0) > pow(m, 2.0)){
                 fermi_momentum = sqrt(pow(chemical_potential, 2.0) - pow(m, 2.0));
             }
+            
             double barionic_density = pow(fermi_momentum, 3.0) * NUM_FLAVORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
             
-            //          rhosq(i)=-g*xmq(i)*(f1q(flambda,xmq(i))-f1q(pfq(i),xmq(i)))
-
-            double scalar_density = - 3.0 * pow(M_PI, 2.0) * m * (F0(m, parameters.cutoff) - F0(m, fermi_momentum));
-
             double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
-            double vacuum_thermodynamic_potential2 = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
             fprintf(f,
-                    "%20.15E\t%20.15E\t%20.15E\n",
+                    "%20.15E\t%20.15E\n",
                     m,
-                    ThermodynamicPotential(m, fermi_momentum, barionic_density, chemical_potential, vacuum_thermodynamic_potential),
-                    ThermodynamicPotential2(m, barionic_density, fermi_momentum, scalar_density, chemical_potential, vacuum_thermodynamic_potential2));
+                    ThermodynamicPotential(m, fermi_momentum, barionic_density, chemical_potential, vacuum_thermodynamic_potential));
             m += step;
         }
         
@@ -145,9 +140,7 @@ int PerformCalculation(){
         gsl_vector_set(chemical_potential_vector, i, chemical_potential);
         
         // Determination of termodinamic potential
-        // DEBUG
-        // double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
-        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(389.685, barionic_density, chemical_potential);
+        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
         double thermodynamic_potential = ThermodynamicPotential2(mass,
                                                                 barionic_density,
                                                                 fermi_momentum,
@@ -155,15 +148,14 @@ int PerformCalculation(){
                                                                 chemical_potential,
                                                                 vacuum_thermodynamic_potential);
  
-/*        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
-        gsl_vector_set(vacuum_thermodynamic_potential_vector, i, vacuum_thermodynamic_potential);
-        
+ /*     double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
         double thermodynamic_potential = ThermodynamicPotential(mass,
                                                                 fermi_momentum,
                                                                 barionic_density,
                                                                 chemical_potential,
                                                                 vacuum_thermodynamic_potential);
 */
+        gsl_vector_set(vacuum_thermodynamic_potential_vector, i, vacuum_thermodynamic_potential);
         gsl_vector_set(thermodynamic_potential_vector, i, thermodynamic_potential);
         
         // Determination of pressure
