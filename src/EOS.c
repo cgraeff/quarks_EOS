@@ -231,7 +231,7 @@ double ThermodynamicPotential(double mass,
                               double vacuum_thermodynamic_potential)
 
 {
-    double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
+    double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum); // From Buballa's Phys. Rep. 407 (2005), p. 233, 234, I guess that this should be from zero to cutoff, not from fermi momentum to cutoff (it's an integral, so the upper limit goes before the sign)
     
     double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F_diff + chemical_potential * pow(fermi_momentum, 3.0)) / pow(M_PI, 2.0);
     double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
