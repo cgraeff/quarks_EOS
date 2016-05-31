@@ -2,7 +2,7 @@ all:
 	cd src; make
 run:
 	mkdir -p data/gap
-	./eos
+	./eos $(ARGS)
 graph:
 	cd data; make
 clean:
