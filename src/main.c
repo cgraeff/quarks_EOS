@@ -60,11 +60,11 @@ int PerformCalculation(){
         printf("\tVacuum mass: %f\n", vacuum_mass);
     
     // DEBUG
-/*    {
+    {
         double minimum_mass = 0.0;
         double maximum_mass = 1000.0;
         int points_number = 1000;
-        double chemical_potential = 300.0;
+        double chemical_potential = 410.0;
         
         double m = 0;
         
@@ -87,7 +87,7 @@ int PerformCalculation(){
             
             double barionic_density = pow(fermi_momentum, 3.0) * NUM_FLAVORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
             
-            double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
+            double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, 0.0 * fermi_momentum);
             fprintf(f,
                     "%20.15E\t%20.15E\n",
                     m,
@@ -99,7 +99,7 @@ int PerformCalculation(){
         printf("...\n");
     }
     exit(0);
-*/
+
     
 	// Define the density step. We subtract 1 from the number of points to
 	// make sure that the last point corresponds to parameters.maximum_density
