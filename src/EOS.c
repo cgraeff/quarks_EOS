@@ -213,30 +213,19 @@ double F2(double mass, double momentum)
     + (3.0 / 8.0) * pow(mass, 4.0) * log((momentum + E) / mass);
 }
 
-
-double VacuumThermodynamicPotential(double vacuum_mass, double fermi_momentum)
-{
-    double F_E_diff = F_E(vacuum_mass, parameters.cutoff) - F_E(vacuum_mass, fermi_momentum);
-    
-    double first_term = - NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * F_E_diff / pow(M_PI, 2.0);
-    double second_term = pow(vacuum_mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
-    
-    return first_term + second_term;
-}
-
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
-                              double barionic_density,
-                              double chemical_potential,
-                              double vacuum_thermodynamic_potential)
+                              double chemical_potential)
 
 {
     double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
     
-    double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F_diff + chemical_potential * pow(fermi_momentum, 3.0) / 3.0) / pow(M_PI, 2.0);
+    double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0)
+                        * (F_diff + chemical_potential * pow(fermi_momentum, 3.0) / 3.0)
+                        / pow(M_PI, 2.0);
     double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
     
-    return first_term + second_term - vacuum_thermodynamic_potential;
+    return first_term + second_term;
 }
 
 double F_E(double mass, double momentum)
@@ -246,12 +235,12 @@ double F_E(double mass, double momentum)
     return (momentum * pow(E, 3.0) - 0.5 * pow(mass, 2.0) * momentum * E - 0.5 * pow(mass, 4.0) * log ((momentum + E) / mass)) / 4.0;
 }
 
-double EnergyDensity(double thermodynamic_potential, double chemical_potential, double barionic_density)
+double EnergyDensity(double regularized_thermodynamic_potential, double chemical_potential, double barionic_density)
 {
-    return thermodynamic_potential + NUM_COLORS * chemical_potential * barionic_density;
+    return regularized_thermodynamic_potential + NUM_COLORS * chemical_potential * barionic_density;
 }
 
-double Pressure(double thermodynamic_potential)
+double Pressure(double regularized_thermodynamic_potential)
 {
-    return -thermodynamic_potential;
+    return -regularized_thermodynamic_potential;
 }

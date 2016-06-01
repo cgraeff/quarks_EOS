@@ -55,7 +55,8 @@ int PerformCalculation(){
     
     WriteVacuumMassEquation("data/vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
     double vacuum_mass = VacuumMassDetermination();
-    
+    double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0);
+
     if (options.verbose)
         printf("\tVacuum mass: %f\n", vacuum_mass);
     
@@ -84,22 +85,17 @@ int PerformCalculation(){
             if (pow(chemical_potential, 2.0) > pow(m, 2.0)){
                 fermi_momentum = sqrt(pow(chemical_potential, 2.0) - pow(m, 2.0));
             }
-            
-            double barionic_density = pow(fermi_momentum, 3.0) * NUM_FLAVORS / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
-            
-            double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, 0.0 * fermi_momentum);
+
             fprintf(f,
                     "%20.15E\t%20.15E\n",
                     m,
-                    ThermodynamicPotential(m, fermi_momentum, barionic_density, chemical_potential, vacuum_thermodynamic_potential));
+                    ThermodynamicPotential(m, fermi_momentum, chemical_potential));
             m += step;
         }
         
         fclose(f);
         printf("...\n");
     }
-    exit(0);
-
     
 	// Define the density step. We subtract 1 from the number of points to
 	// make sure that the last point corresponds to parameters.maximum_density
@@ -140,30 +136,28 @@ int PerformCalculation(){
         gsl_vector_set(chemical_potential_vector, i, chemical_potential);
         
         // Determination of termodinamic potential
-        double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
+ /*       double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
         double thermodynamic_potential = ThermodynamicPotential2(mass,
                                                                 barionic_density,
                                                                 fermi_momentum,
                                                                 scalar_density,
                                                                 chemical_potential,
                                                                 vacuum_thermodynamic_potential);
- 
- /*     double vacuum_thermodynamic_potential = VacuumThermodynamicPotential(vacuum_mass, fermi_momentum);
-        double thermodynamic_potential = ThermodynamicPotential(mass,
-                                                                fermi_momentum,
-                                                                barionic_density,
-                                                                chemical_potential,
-                                                                vacuum_thermodynamic_potential);
-*/
+ */
+        double regularized_thermodynamic_potential = - vacuum_thermodynamic_potential
+                                                     + ThermodynamicPotential(mass,
+                                                                              fermi_momentum,
+                                                                              chemical_potential);
+
         gsl_vector_set(vacuum_thermodynamic_potential_vector, i, vacuum_thermodynamic_potential);
-        gsl_vector_set(thermodynamic_potential_vector, i, thermodynamic_potential);
+        gsl_vector_set(thermodynamic_potential_vector, i, regularized_thermodynamic_potential);
         
         // Determination of pressure
-        double pressure = Pressure(thermodynamic_potential);
+        double pressure = Pressure(regularized_thermodynamic_potential);
         gsl_vector_set(pressure_vector, i, pressure);
         
         // Determination of energy density
-        double energy_density = EnergyDensity(thermodynamic_potential, chemical_potential, barionic_density);
+        double energy_density = EnergyDensity(regularized_thermodynamic_potential, chemical_potential, barionic_density);
         gsl_vector_set(energy_density_vector, i, energy_density);
         
     }
