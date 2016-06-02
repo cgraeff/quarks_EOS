@@ -55,7 +55,7 @@ int PerformCalculation(){
     
     WriteVacuumMassEquation("data/vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
     double vacuum_mass = VacuumMassDetermination();
-    double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0);
+    double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0, 0.0);
 
     if (options.verbose)
         printf("\tVacuum mass: %f\n", vacuum_mass);
@@ -66,6 +66,7 @@ int PerformCalculation(){
         double maximum_mass = 1000.0;
         int points_number = 1000;
         double chemical_potential = 410.0;
+        double renormalized_chemical_potential = 0.0; // In this test G_V = 0 anyway
         
         double m = 0;
         
@@ -89,7 +90,7 @@ int PerformCalculation(){
             fprintf(f,
                     "%20.15E\t%20.15E\n",
                     m,
-                    ThermodynamicPotential(m, fermi_momentum, chemical_potential));
+                    ThermodynamicPotential(m, fermi_momentum, chemical_potential, renormalized_chemical_potential));
             m += step;
         }
         
@@ -132,8 +133,8 @@ int PerformCalculation(){
         gsl_vector_set(scalar_density_vector, i, scalar_density);
         
         // Determination of chemical potential
-        double chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
-        gsl_vector_set(chemical_potential_vector, i, chemical_potential);
+        double renormalized_chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
+        gsl_vector_set(chemical_potential_vector, i, renormalized_chemical_potential);
         
         // Determination of termodinamic potential
  /*       double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
@@ -144,10 +145,15 @@ int PerformCalculation(){
                                                                 chemical_potential,
                                                                 vacuum_thermodynamic_potential);
  */
+        double chemical_potential = renormalized_chemical_potential
+                                    - 2.0 * parameters.G_V * NUM_FLAVORS * NUM_COLORS * pow(fermi_momentum, 3.0)
+                                      / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
+        
         double regularized_thermodynamic_potential = - vacuum_thermodynamic_potential
                                                      + ThermodynamicPotential(mass,
                                                                               fermi_momentum,
-                                                                              chemical_potential);
+                                                                              chemical_potential,
+                                                                              renormalized_chemical_potential);
 
         gsl_vector_set(vacuum_thermodynamic_potential_vector, i, vacuum_thermodynamic_potential);
         gsl_vector_set(thermodynamic_potential_vector, i, regularized_thermodynamic_potential);

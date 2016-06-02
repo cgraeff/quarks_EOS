@@ -215,7 +215,8 @@ double F2(double mass, double momentum)
 
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
-                              double chemical_potential)
+                              double chemical_potential,
+                              double renormalized_chemical_potential)
 
 {
     double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
@@ -224,8 +225,9 @@ double ThermodynamicPotential(double mass,
                         * (F_diff + chemical_potential * pow(fermi_momentum, 3.0) / 3.0)
                         / pow(M_PI, 2.0);
     double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
+    double third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0) / (4.0 * parameters.G_V * CONST_HBAR_C);
     
-    return first_term + second_term;
+    return first_term + second_term - third_term;
 }
 
 double F_E(double mass, double momentum)

@@ -24,7 +24,8 @@ int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum
 
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
-                              double chemical_potential);
+                              double chemical_potential,
+                              double renormalized_chemical_potential);
 /*
 double VacuumThermodynamicPotential2(double vacuum_mass, double barionic_density, double chemical_potential);
 double ThermodynamicPotential2(double mass,

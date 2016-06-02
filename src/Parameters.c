@@ -84,28 +84,31 @@ void ParametersSetup(void)
             parameters.bare_mass = 0.0;                                             // MeV
             parameters.cutoff = 650.0;                                              // MeV
             parameters.G_S = 2.14 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
-            break;                                                                  // corrects the dimension
-            
+            parameters.G_V = 0.0;                                                   // corrects the dimension
+            break;
             
         case Buballa_2:
             parameters.parameters_set_identifier = "Buballa_2";
             parameters.bare_mass = 0.0;
             parameters.cutoff = 600.0;
-            parameters.G_S = 2.45 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same as Buballa_1
+            parameters.G_S = 2.45 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same correction of units as Buballa_1
+            parameters.G_V = 0.0;
             break;
             
         case Buballa_3:
             parameters.parameters_set_identifier = "Buballa_3";
             parameters.bare_mass = 0.0;
             parameters.cutoff = 570.0;
-            parameters.G_S = 2.84 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same as Buballa_1
+            parameters.G_S = 2.84 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same correction of units as Buballa_1
+            parameters.G_V = 0.0;
             break;
             
         case D_1:
             parameters.parameters_set_identifier = "D_1";
             parameters.bare_mass = 5.6;
             parameters.cutoff = 587.9;
-            parameters.G_S = 2.44 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same as Buballa_1
+            parameters.G_S = 2.44 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same correction of units as Buballa_1
+            parameters.G_V = 0.0;
             parameters.points_number = 1000;
             parameters.minimum_density = 0.01;
             parameters.maximum_density = 1.1;

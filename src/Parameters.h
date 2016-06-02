@@ -49,6 +49,7 @@ typedef struct _parameters
     
     // Parameterization variables
     double G_S;             // scalar-isoscalar coupling (fm^2)
+    double G_V;             // vector-isoscalar coupling (fm^2)
     double cutoff;          // \Lambda (MeV)
     double bare_mass;       // (MeV)
 	
