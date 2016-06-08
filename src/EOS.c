@@ -14,7 +14,6 @@
 #include "Constants.h"
 #include "EOS.h"
 
-double UnidimensionalRootFinder(gsl_function * F, double lower_bound, double upper_bound, double abs_error, double rel_error, int max_iter);
 double F0(double mass, double momentum);
 double F2(double mass, double momentum);
 double F_E(double mass, double momentum);
@@ -22,16 +21,22 @@ double ZeroedGapEquation(double mass, void * input);
 double VacuumMassEquation(double mass, void * input);
 
 
-double UnidimensionalRootFinder(gsl_function * F, double lower_bound, double upper_bound, double abs_error, double rel_error, int max_iter)
+double UnidimensionalRootFinder(gsl_function * F,
+								double lower_bound,
+								double upper_bound,
+								double abs_error,
+								double rel_error,
+								int max_iter)
 {
-    // Setup root finding solver
-    const gsl_root_fsolver_type * T	= gsl_root_fsolver_bisection; // Maybe this would be better: gsl_root_fsolver_brent
-    
+    // Setup root finding solver. Maybe this would be better: gsl_root_fsolver_brent
+    const gsl_root_fsolver_type * T	= gsl_root_fsolver_bisection;
+
     gsl_root_fsolver * s = gsl_root_fsolver_alloc(T);
 	gsl_root_fsolver_set(s, F, lower_bound, upper_bound);
 	
     // Iterate the algorithm until
-    // |x_lower - x_upper| < const_abs_error_gap_eq_solving + const_rel_error_gap_eq_solving * MIN(|x_upper|, |x_lower|)
+    // |x_lower - x_upper| < const_abs_error_gap_eq_solving
+	// 						 + const_rel_error_gap_eq_solving * MIN(|x_upper|, |x_lower|)
     // or i = gap_eq_solver_max_iterations
 	int i = 0;
 	double x_lower;
@@ -48,7 +53,11 @@ double UnidimensionalRootFinder(gsl_function * F, double lower_bound, double upp
 		
 		x_lower = gsl_root_fsolver_x_lower(s);
 		x_upper = gsl_root_fsolver_x_upper(s);
-	} while(GSL_CONTINUE == gsl_root_test_interval(x_lower, x_upper, abs_error, rel_error) && i <=  max_iter);
+	} while(GSL_CONTINUE == gsl_root_test_interval(x_lower,
+												   x_upper,
+												   abs_error,
+												   rel_error)
+			&& i <=  max_iter);
 
 	double result = gsl_root_fsolver_root(s);
 
@@ -83,9 +92,7 @@ double ZeroedGapEquation(double mass, void * input)
 	gap_equation_input * param = (gap_equation_input *)input;
 	
 	double scalar_density = ScalarDensity(mass, param->fermi_momentum);
-    
-    //    printf("fermi momentum: %f\t scalar density: %f\n", param->fermi_momentum, scalar_density);
-	
+
 	double gap_1st_term = 2.0  * CONST_HBAR_C * parameters.G_S * scalar_density;
 
 	return mass + gap_1st_term - parameters.bare_mass;
@@ -111,12 +118,29 @@ double VacuumMassDetermination()
 double VacuumMassEquation(double mass, void * input)
 {
     double F_diff = F0(mass, parameters.cutoff) - F0(mass, 0.0);
-    double term = 2.0 * NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -2.0) * parameters.G_S * mass * F_diff / pow(M_PI, 2.0);
+    double term = 2.0 * NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -2.0)
+  				  * parameters.G_S * mass * F_diff
+  				  / pow(M_PI, 2.0);
     
     return mass - parameters.bare_mass - term;
 }
 
-int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum_mass, int points_number){
+double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
+												   void * input)
+{
+  	renorm_chem_pot_equation_input * param = (renorm_chem_pot_equation_input *) input;
+
+  	double c = 2.0 * parameters.G_V * NUM_COLORS * NUM_FLAVORS
+  				   / (3.0 * pow(M_PI, 2.0));
+  	double arg = pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0);
+
+  	return renor_chem_pot - param->chemical_potential + c * pow(arg, 3.0 / 2.0);
+}
+
+int WriteVacuumMassEquation(char * filename,
+							double minimum_mass,
+							double maximum_mass,
+							int points_number){
     
     double m = 0;
     
@@ -152,7 +176,11 @@ double F0(double mass, double momentum)
 	return (1.0 / 2.0) * (momentum * E - pow(mass, 2.0) * log((momentum + E) / mass));
 }
 
-int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum){
+int WriteZeroedGapEquation(char * filename,
+						   double minimum_mass,
+						   double maximum_mass,
+						   int points_number,
+						   double fermi_momentum){
     
     double m = 0;
     
@@ -177,7 +205,7 @@ int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_
     fclose(f);
     return 0;
 }
-
+/*
 double ThermodynamicPotential2(double mass,
                               double barionic_density,
                               double fermi_momentum,
@@ -185,7 +213,9 @@ double ThermodynamicPotential2(double mass,
                               double chemical_potential,
                               double vacuum_thermodynamic_potential)
 {
-    double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F2(mass, parameters.cutoff) - F2(mass, fermi_momentum)) / pow(M_PI, 2.0);
+    double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0)
+  						* (F2(mass, parameters.cutoff) - F2(mass, fermi_momentum))
+  						/ pow(M_PI, 2.0);
     double first_term = parameters.bare_mass * scalar_density;
     double second_term = - CONST_HBAR_C * parameters.G_S * pow(scalar_density, 2.0);
     double third_term = - NUM_COLORS * chemical_potential * barionic_density;
@@ -193,18 +223,23 @@ double ThermodynamicPotential2(double mass,
     return 2.0 * kinectic + first_term + second_term + third_term - vacuum_thermodynamic_potential;
 }
 
-double VacuumThermodynamicPotential2(double vacuum_mass, double barionic_density, double chemical_potential)
+double VacuumThermodynamicPotential2(double vacuum_mass,
+									 double barionic_density,
+									 double chemical_potential)
 {
-    double vacuum_scalar_density = NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (vacuum_mass / pow(M_PI, 2.0))
+    double vacuum_scalar_density = NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0)
+  								   * (vacuum_mass / pow(M_PI, 2.0))
                                    * (F0(vacuum_mass, 0.0) - F0(vacuum_mass, parameters.cutoff));
     
-    double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (F2(vacuum_mass, parameters.cutoff) - F2(vacuum_mass, 0.0)) / pow(M_PI, 2.0);
+    double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0)
+  						* (F2(vacuum_mass, parameters.cutoff) - F2(vacuum_mass, 0.0))
+  						/ pow(M_PI, 2.0);
     double first_term = parameters.bare_mass * vacuum_scalar_density;
     double second_term = - CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
     
     return 2.0 * kinectic + first_term + second_term;
 }
-
+*/
 double F2(double mass, double momentum)
 {
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
@@ -224,8 +259,10 @@ double ThermodynamicPotential(double mass,
     double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0)
                         * (F_diff + chemical_potential * pow(fermi_momentum, 3.0) / 3.0)
                         / pow(M_PI, 2.0);
-    double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
-    double third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0) / (4.0 * parameters.G_V * CONST_HBAR_C);
+    double second_term = pow(mass - parameters.bare_mass, 2.0)
+  						 / (4.0 * parameters.G_S * CONST_HBAR_C);
+    double third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
+  						/ (4.0 * parameters.G_V * CONST_HBAR_C);
     
     return first_term + second_term - third_term;
 }
@@ -234,12 +271,18 @@ double F_E(double mass, double momentum)
 {
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
     
-    return (momentum * pow(E, 3.0) - 0.5 * pow(mass, 2.0) * momentum * E - 0.5 * pow(mass, 4.0) * log ((momentum + E) / mass)) / 4.0;
+    return (momentum * pow(E, 3.0)
+  			- 0.5 * pow(mass, 2.0) * momentum * E
+			- 0.5 * pow(mass, 4.0) * log ((momentum + E) / mass))
+  		   / 4.0;
 }
 
-double EnergyDensity(double regularized_thermodynamic_potential, double chemical_potential, double barionic_density)
+double EnergyDensity(double regularized_thermodynamic_potential,
+					 double chemical_potential,
+					 double barionic_density)
 {
-    return regularized_thermodynamic_potential + NUM_COLORS * chemical_potential * barionic_density;
+    return regularized_thermodynamic_potential
+  		   + NUM_COLORS * chemical_potential * barionic_density;
 }
 
 double Pressure(double regularized_thermodynamic_potential)

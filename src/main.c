@@ -66,8 +66,7 @@ int PerformCalculation(){
         double maximum_mass = 1000.0;
         int points_number = 1000;
         double chemical_potential = 410.0;
-        double renormalized_chemical_potential = 0.0; // In this test G_V = 0 anyway
-        
+
         double m = 0;
         
         double step = (maximum_mass - minimum_mass) / (points_number - 1);
@@ -79,30 +78,58 @@ int PerformCalculation(){
             perror("Reason");
             exit(EXIT_FAILURE);
         }
+
+	  	// Prepare input for ZeroedGapEquation
+    	renorm_chem_pot_equation_input input;
+    	input.chemical_potential = chemical_potential;
+
+    	// Prepare function to be passed to the root finding algorithm
+    	gsl_function F;
+    	F.function = &ZeroedRenormalizedChemicalPotentialEquation;
+    	F.params = &input;
         
         while (m <= maximum_mass) {
 
+			double renormalized_chemical_potential = chemical_potential;
+
+		    if (parameters.G_V != 0.0){
+
+		    	double renormalized_chemical_potential =
+			  			UnidimensionalRootFinder(gsl_function * F,
+												 parameters.renormalized_chemical_potential_lower_bound,
+												 parameters.renormalized_chemical_potential_upper_bound,
+												 parameters.renormalized_chemical_potential_abs_error,
+												 parameters.renormalized_chemical_potential_rel_error,
+												 parameters.renormalized_chemical_potential_max_iter);
+			}
+
             double fermi_momentum = 0;
-            if (pow(chemical_potential, 2.0) > pow(m, 2.0)){
-                fermi_momentum = sqrt(pow(chemical_potential, 2.0) - pow(m, 2.0));
+            if (pow(renormalized_chemical_potential, 2.0) > pow(m, 2.0)){
+                fermi_momentum = sqrt(pow(renormalized_chemical_potential, 2.0)
+			  						  - pow(m, 2.0));
             }
 
             fprintf(f,
                     "%20.15E\t%20.15E\n",
                     m,
-                    ThermodynamicPotential(m, fermi_momentum, chemical_potential, renormalized_chemical_potential));
+                    ThermodynamicPotential(m,
+										   fermi_momentum,
+										   chemical_potential,
+										   renormalized_chemical_potential));
             m += step;
         }
         
         fclose(f);
         printf("...\n");
     }
+	exit(0);
     
 	// Define the density step. We subtract 1 from the number of points to
 	// make sure that the last point corresponds to parameters.maximum_density
     double barionic_density = parameters.minimum_density;
 
-    double density_step = (parameters.maximum_density - parameters.minimum_density) / (parameters.points_number - 1);
+    double density_step = (parameters.maximum_density - parameters.minimum_density)
+  						  / (parameters.points_number - 1);
 
 	if (options.verbose)
 		printf("Solving gap equation and equations of state ...\n");
@@ -117,13 +144,19 @@ int PerformCalculation(){
         }
         
         // Determination of Fermi momentum
-        double fermi_momentum = CONST_HBAR_C * pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS, 1.0 / 3.0);
+        double fermi_momentum = CONST_HBAR_C
+	  							* pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS,
+									  1.0 / 3.0);
         gsl_vector_set(fermi_momentum_vector, i, fermi_momentum);
         
         // Write zeroed gap equation for every value of density (for checking purpouses)
         char filename[256];
         sprintf(filename, "data/gap/gap_dens_%d.dat", i);
-        WriteZeroedGapEquation(filename, parameters.gap_minimum_mass, parameters.gap_maximum_mass, parameters.gap_points_number, fermi_momentum);
+        WriteZeroedGapEquation(filename,
+							   parameters.gap_minimum_mass,
+							   parameters.gap_maximum_mass,
+							   parameters.gap_points_number,
+							   fermi_momentum);
 		
         // Solution of Gap Equation, determination of scalar density
 		double mass = GapEquationSolver(fermi_momentum);
@@ -136,42 +169,41 @@ int PerformCalculation(){
         double renormalized_chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
         gsl_vector_set(chemical_potential_vector, i, renormalized_chemical_potential);
         
-        // Determination of termodinamic potential
- /*       double vacuum_thermodynamic_potential = VacuumThermodynamicPotential2(vacuum_mass, barionic_density, chemical_potential);
-        double thermodynamic_potential = ThermodynamicPotential2(mass,
-                                                                barionic_density,
-                                                                fermi_momentum,
-                                                                scalar_density,
-                                                                chemical_potential,
-                                                                vacuum_thermodynamic_potential);
- */
-        double chemical_potential = renormalized_chemical_potential
-                                    - 2.0 * parameters.G_V * NUM_FLAVORS * NUM_COLORS * pow(fermi_momentum, 3.0)
-                                      / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
-        
-        double regularized_thermodynamic_potential = - vacuum_thermodynamic_potential
-                                                     + ThermodynamicPotential(mass,
-                                                                              fermi_momentum,
-                                                                              chemical_potential,
-                                                                              renormalized_chemical_potential);
+        double chemical_potential =
+	  			renormalized_chemical_potential
+                - 2.0 * parameters.G_V * NUM_FLAVORS * NUM_COLORS * pow(fermi_momentum, 3.0)
+                  / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
 
-        gsl_vector_set(vacuum_thermodynamic_potential_vector, i, vacuum_thermodynamic_potential);
-        gsl_vector_set(thermodynamic_potential_vector, i, regularized_thermodynamic_potential);
-        
+        double regularized_thermodynamic_potential =
+	  			- vacuum_thermodynamic_potential
+                + ThermodynamicPotential(mass,
+                                         fermi_momentum,
+                                         chemical_potential,
+                                         renormalized_chemical_potential);
+
+        gsl_vector_set(vacuum_thermodynamic_potential_vector,
+					   i,
+					   vacuum_thermodynamic_potential);
+        gsl_vector_set(thermodynamic_potential_vector,
+					   i,
+					   regularized_thermodynamic_potential);
+
         // Determination of pressure
         double pressure = Pressure(regularized_thermodynamic_potential);
         gsl_vector_set(pressure_vector, i, pressure);
         
         // Determination of energy density
-        double energy_density = EnergyDensity(regularized_thermodynamic_potential, chemical_potential, barionic_density);
+        double energy_density = EnergyDensity(regularized_thermodynamic_potential,
+											  chemical_potential,
+											  barionic_density);
         gsl_vector_set(energy_density_vector, i, energy_density);
         
     }
     
     // Write results
     if (options.verbose)
-        printf("\n"                     // Printing in the loop does't use new line, so here we need one 
-               "Saving results ...\n");
+        printf("\n"                     // As print inside the loop does't use new
+               "Saving results ...\n"); // line, we need one before the message
 
     WriteVectorsToFile("data/mass.dat",
                        "# barionic density, mass\n",
@@ -221,7 +253,9 @@ int PerformCalculation(){
                        barionic_density_vector,
                        energy_density_vector);
     
-    gsl_vector * energy_density_per_particle_vector = VectorNewVectorFromDivisionElementByElement(energy_density_vector, barionic_density_vector);
+    gsl_vector * energy_density_per_particle_vector =
+		VectorNewVectorFromDivisionElementByElement(energy_density_vector,
+													barionic_density_vector);
     WriteVectorsToFile("data/energy_density_per_particle.dat",
                        "# barionic density, energy density per particle \n",
                        2,

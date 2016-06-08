@@ -13,6 +13,17 @@ typedef struct _gap_equation_input{
     double fermi_momentum;
 } gap_equation_input;
 
+typedef struct _renorm_chem_pot_equation_input{
+    double chemical_potential;
+    double mass;
+} renorm_chem_pot_equation_input;
+
+double UnidimensionalRootFinder(gsl_function * F,
+								double lower_bound,
+								double upper_bound,
+								double abs_error,
+								double rel_error,
+								int max_iter);
 double GapEquationSolver();
 
 double ScalarDensity(double mass, double fermi_momentum);
