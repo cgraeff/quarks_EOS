@@ -30,9 +30,9 @@ void ParametersSetup(void)
     parameters.gap_maximum_mass = 1000.0;
     parameters.gap_points_number = 2000;
     
-    parameters.gap_eq_solver_lower_bound = 1.0E-3;  // Low, but not zero. In zero f(M) = 0 if bare_mass is zero,
-                                                    // and that may be a problem for root finding;
-    
+    // Lower bound: Low, but not zero. In zero f(M) = 0 if bare_mass is zero,
+    // and that may be a problem for root finding;
+    parameters.gap_eq_solver_lower_bound = 1.0E-3;
     parameters.gap_eq_solver_upper_bound = 1000.0;  // MeV (about three times the nucleon mass)
     parameters.gap_eq_solver_abs_error = 0.005;
     parameters.gap_eq_solver_rel_error = 5.0E-5;
@@ -43,7 +43,12 @@ void ParametersSetup(void)
     parameters.vac_mass_det_abs_error = 0.005;
     parameters.vac_mass_det_rel_error = 5.0E-5;
     parameters.vac_mass_det_max_iterations = 2000;
-	
+    
+    parameters.renormalized_chemical_potential_lower_bound = 1.0E-3;
+    parameters.renormalized_chemical_potential_upper_bound = 1000.0;
+    parameters.renormalized_chemical_potential_abs_error = 0.005;
+    parameters.renormalized_chemical_potential_rel_error = 5.0E-5;
+    parameters.renormalized_chemical_potential_max_iter = 2000;
 
     // To make the use of different parameterizations easier, define a name in the enum
     // and assign values for the variables in a case of the switch below.
@@ -52,10 +57,12 @@ void ParametersSetup(void)
         Buballa_1,  // Set 1 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408
         Buballa_2,  // Set 2 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408
         Buballa_3,  // Set 3 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408
+        BuballaR_2,     // Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376
+        BuballaR_2_GV,  // Same as BuballaR_2, but with G_V = G_S, instead of zero
         D_1         // Set found in Debora's code
     }Parameters_set;
     
-    Parameters_set par = Buballa_1; // Default value
+    Parameters_set par = BuballaR_2_GV; // Default value
     
     if (NULL != options.parameterization){
     	// strcasecmp returns 0 if the strings are equal (in a case insensitive manner),
@@ -68,6 +75,12 @@ void ParametersSetup(void)
     	}
         else if (!strcasecmp("Buballa_3", options.parameterization)){
             par = Buballa_3;
+        }
+        else if (!strcasecmp("BuballaR_2", options.parameterization)){
+            par = BuballaR_2;
+        }
+        else if (!strcasecmp("BuballaR_2_GV", options.parameterization)){
+            par = BuballaR_2_GV;
         }
         else if (!strcasecmp("D_1", options.parameterization)){
             par = D_1;
@@ -101,6 +114,22 @@ void ParametersSetup(void)
             parameters.cutoff = 570.0;
             parameters.G_S = 2.84 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same correction of units as Buballa_1
             parameters.G_V = 0.0;
+            break;
+            
+        case BuballaR_2:
+            parameters.parameters_set_identifier = "BuballaR_2";
+            parameters.bare_mass = 5.6;
+            parameters.cutoff = 587.9;
+            parameters.G_S = 2.44 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same correction of units as Buballa_1
+            parameters.G_V = 0.0;
+            break;
+        
+        case BuballaR_2_GV:
+            parameters.parameters_set_identifier = "Buballa_2_GV";
+            parameters.bare_mass = 5.6;
+            parameters.cutoff = 587.9;
+            parameters.G_S = 2.44 * pow(CONST_HBAR_C / parameters.cutoff, 2.0);     // Same correction of units as Buballa_1
+            parameters.G_V = parameters.G_S;
             break;
             
         case D_1:

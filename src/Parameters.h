@@ -23,7 +23,8 @@ typedef struct _parameters
     double gap_maximum_mass;
     double gap_points_number;
     
-/* Parameters for root finding in the solution of the Gap Equation and Vacuum Mass:
+/* Parameters for root finding in the solution of the Gap Equation, Vacuum Mass,
+   and Renormalized Chemical Potential:
        - The root is assumed to be in the region bracketed by *_lower_bound and *_upper_bound;
  		- Two kinds of error are defined:
             - *_const_abs_error: An absolute error in MeV for the width of the region
@@ -35,17 +36,23 @@ typedef struct _parameters
             |x_lower - x_upper| < *_const_abs_error
                                   + *_const_rel_error * MIN(|x_upper|, |x_lower|)
 */
+    int gap_eq_solver_max_iterations;
     double gap_eq_solver_lower_bound;
     double gap_eq_solver_upper_bound;
     double gap_eq_solver_abs_error;
     double gap_eq_solver_rel_error;
-    double gap_eq_solver_max_iterations;
     
+    int vac_mass_det_max_iterations;
     double vac_mass_det_lower_bound;
     double vac_mass_det_upper_bound;
     double vac_mass_det_abs_error;
     double vac_mass_det_rel_error;
-    double vac_mass_det_max_iterations;
+    
+    int renormalized_chemical_potential_max_iter;
+    double renormalized_chemical_potential_lower_bound;
+    double renormalized_chemical_potential_upper_bound;
+    double renormalized_chemical_potential_abs_error;
+    double renormalized_chemical_potential_rel_error;
     
     // Parameterization variables
     double G_S;             // scalar-isoscalar coupling (fm^2)

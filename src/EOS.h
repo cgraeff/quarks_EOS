@@ -33,6 +33,15 @@ int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_
 double VacuumMassDetermination();
 int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum_mass, int points_number);
 
+double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
+                                                   void * input);
+int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
+                                                     double minimum_renormalized_chemical_potential,
+                                                     double maximum_renormalized_chemical_potential,
+                                                     int points_number,
+                                                     double chemical_potential,
+                                                     double mass);
+
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
                               double chemical_potential,

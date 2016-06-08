@@ -163,6 +163,42 @@ int WriteVacuumMassEquation(char * filename,
     return 0;
 }
 
+int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
+                                                     double minimum_renormalized_chemical_potential,
+                                                     double maximum_renormalized_chemical_potential,
+                                                     int points_number,
+                                                     double chemical_potential,
+                                                     double mass){
+    
+    double mu = 0;
+    
+    double step = (maximum_renormalized_chemical_potential - minimum_renormalized_chemical_potential)
+                  / (points_number - 1);
+    
+    FILE * f = fopen(filename, "w");
+    
+    if (NULL == f) {
+        printf("Could not open %s for writting.\n", filename);
+        perror("Reason");
+        exit(EXIT_FAILURE);
+    }
+    
+    renorm_chem_pot_equation_input input;
+    input.chemical_potential = chemical_potential;
+    input.mass = mass;
+    
+    while (mu < points_number) {
+        fprintf(f,
+                "%20.15E\t%20.15E\n",
+                mu,
+                ZeroedRenormalizedChemicalPotentialEquation(mu, &input));
+        mu += step;
+    }
+    
+    fclose(f);
+    return 0;
+}
+
 double ScalarDensity(double mass, double fermi_momentum)
 {
 	return NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0))
@@ -261,8 +297,10 @@ double ThermodynamicPotential(double mass,
                         / pow(M_PI, 2.0);
     double second_term = pow(mass - parameters.bare_mass, 2.0)
   						 / (4.0 * parameters.G_S * CONST_HBAR_C);
-    double third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
-  						/ (4.0 * parameters.G_V * CONST_HBAR_C);
+    double third_term = 0.0;
+    if (parameters.G_V != 0)
+        third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
+                     / (4.0 * parameters.G_V * CONST_HBAR_C);
     
     return first_term + second_term - third_term;
 }
