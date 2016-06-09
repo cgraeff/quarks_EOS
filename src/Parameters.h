@@ -12,6 +12,7 @@
 typedef struct _parameters
 {
     char * parameters_set_identifier;
+    char * parameters_set_origin;
     
     // Parameters for performing the calculation of the EOS
     int points_number;       // Number of points in which the above range will be divide into

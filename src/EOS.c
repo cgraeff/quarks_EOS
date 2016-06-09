@@ -17,8 +17,6 @@
 double F0(double mass, double momentum);
 double F2(double mass, double momentum);
 double F_E(double mass, double momentum);
-double ZeroedGapEquation(double mass, void * input);
-double VacuumMassEquation(double mass, void * input);
 
 
 double UnidimensionalRootFinder(gsl_function * F,
@@ -137,68 +135,6 @@ double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
   	return renor_chem_pot - param->chemical_potential + c * pow(arg, 3.0 / 2.0);
 }
 
-int WriteVacuumMassEquation(char * filename,
-							double minimum_mass,
-							double maximum_mass,
-							int points_number){
-    
-    double m = 0;
-    
-    double step = (maximum_mass - minimum_mass) / (points_number - 1);
-    
-    FILE * f = fopen(filename, "w");
-    
-    if (NULL == f) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
-    
-    while (m < points_number) {
-        fprintf(f, "%20.15E\t%20.15E\n", m, VacuumMassEquation(m, NULL));
-        m += step;
-    }
-    
-    fclose(f);
-    return 0;
-}
-
-int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
-                                                     double minimum_renormalized_chemical_potential,
-                                                     double maximum_renormalized_chemical_potential,
-                                                     int points_number,
-                                                     double chemical_potential,
-                                                     double mass){
-    
-    double mu = 0;
-    
-    double step = (maximum_renormalized_chemical_potential - minimum_renormalized_chemical_potential)
-                  / (points_number - 1);
-    
-    FILE * f = fopen(filename, "w");
-    
-    if (NULL == f) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
-    
-    renorm_chem_pot_equation_input input;
-    input.chemical_potential = chemical_potential;
-    input.mass = mass;
-    
-    while (mu < points_number) {
-        fprintf(f,
-                "%20.15E\t%20.15E\n",
-                mu,
-                ZeroedRenormalizedChemicalPotentialEquation(mu, &input));
-        mu += step;
-    }
-    
-    fclose(f);
-    return 0;
-}
-
 double ScalarDensity(double mass, double fermi_momentum)
 {
 	return NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0))
@@ -212,70 +148,7 @@ double F0(double mass, double momentum)
 	return (1.0 / 2.0) * (momentum * E - pow(mass, 2.0) * log((momentum + E) / mass));
 }
 
-int WriteZeroedGapEquation(char * filename,
-						   double minimum_mass,
-						   double maximum_mass,
-						   int points_number,
-						   double fermi_momentum){
-    
-    double m = 0;
-    
-    double step = (maximum_mass - minimum_mass) / (points_number - 1);
-    
-    FILE * f = fopen(filename, "w");
-    
-    if (NULL == f) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
-    
-    gap_equation_input input;
-    input.fermi_momentum = fermi_momentum;
-    
-    while (m < maximum_mass) {
-        fprintf(f, "%20.15E\t%20.15E\n", m, ZeroedGapEquation(m, &input));
-        m += step;
-    }
-    
-    fclose(f);
-    return 0;
-}
-/*
-double ThermodynamicPotential2(double mass,
-                              double barionic_density,
-                              double fermi_momentum,
-                              double scalar_density,
-                              double chemical_potential,
-                              double vacuum_thermodynamic_potential)
-{
-    double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0)
-  						* (F2(mass, parameters.cutoff) - F2(mass, fermi_momentum))
-  						/ pow(M_PI, 2.0);
-    double first_term = parameters.bare_mass * scalar_density;
-    double second_term = - CONST_HBAR_C * parameters.G_S * pow(scalar_density, 2.0);
-    double third_term = - NUM_COLORS * chemical_potential * barionic_density;
-    
-    return 2.0 * kinectic + first_term + second_term + third_term - vacuum_thermodynamic_potential;
-}
 
-double VacuumThermodynamicPotential2(double vacuum_mass,
-									 double barionic_density,
-									 double chemical_potential)
-{
-    double vacuum_scalar_density = NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0)
-  								   * (vacuum_mass / pow(M_PI, 2.0))
-                                   * (F0(vacuum_mass, 0.0) - F0(vacuum_mass, parameters.cutoff));
-    
-    double kinectic = - NUM_COLORS * pow(CONST_HBAR_C, -3.0)
-  						* (F2(vacuum_mass, parameters.cutoff) - F2(vacuum_mass, 0.0))
-  						/ pow(M_PI, 2.0);
-    double first_term = parameters.bare_mass * vacuum_scalar_density;
-    double second_term = - CONST_HBAR_C * parameters.G_S * pow(vacuum_scalar_density, 2.0);
-    
-    return 2.0 * kinectic + first_term + second_term;
-}
-*/
 double F2(double mass, double momentum)
 {
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));

@@ -18,18 +18,19 @@
 // Chosen parameter set (globally accessible)
 Parameters parameters;
 static Parameters parameters_sets_list[256] = {0};
+static int parameters_sets_list_index = 0;
 
-void NewCopyOfDefaultParametersSet();
+Parameters NewCopyOfDefaultParametersSet();
 
 void ParametersSetup(void)
 {
     // See header file for units and other relevant
     // information about the parameters below.
-    int index = 0;
+
 
   	// Start list with default for easier listing of available parameterizations
-  	parameters_sets_list[0] = NewCopyOfDefaultParametersSet();
-  	index++;
+  	parameters_sets_list[parameters_sets_list_index] = NewCopyOfDefaultParametersSet();
+  	parameters_sets_list_index++;
 
   	// START DECLARATION OF PARAMETERS SETS:
 	//
@@ -51,8 +52,8 @@ void ParametersSetup(void)
     p.G_V = 0.0;
 
   	// Append to list of parameterizations
-  	parameters_sets_list[index] = p;
-  	index ++;
+  	parameters_sets_list[parameters_sets_list_index] = p;
+  	parameters_sets_list_index ++;
 
   	////
 
@@ -67,8 +68,8 @@ void ParametersSetup(void)
     p.G_V = 0.0;
 
   	// Append to list of parameterizations
-  	parameters_sets_list[index] = p;
-  	index ++;
+  	parameters_sets_list[parameters_sets_list_index] = p;
+  	parameters_sets_list_index ++;
 
   	////
 
@@ -83,8 +84,8 @@ void ParametersSetup(void)
     p.G_V = 0.0;
 
   	// Append to list of parameterizations
-  	parameters_sets_list[index] = p;
-  	index ++;
+  	parameters_sets_list[parameters_sets_list_index] = p;
+  	parameters_sets_list_index ++;
 
 	////
 
@@ -99,8 +100,8 @@ void ParametersSetup(void)
     p.G_V = 0.0;
 
   	// Append to list of parameterizations
-  	parameters_sets_list[index] = p;
-  	index ++;
+  	parameters_sets_list[parameters_sets_list_index] = p;
+  	parameters_sets_list_index ++;
 
   	////
 
@@ -115,14 +116,14 @@ void ParametersSetup(void)
     p.G_V = p.G_S;
 
   	// Append to list of parameterizations
-  	parameters_sets_list[index] = p;
-  	index ++;
+  	parameters_sets_list[parameters_sets_list_index] = p;
+  	parameters_sets_list_index ++;
 
   	// END DECLARATION OF PARAMETERS SETS
 
   	// If asked to, print parameters sets and exit
   	if (options.list_available_parameterizations){
-		for (int i = 0; i < index; i++){
+		for (int i = 0; i < parameters_sets_list_index; i++){
 		  	printf("Parameters set %s\n"
 				   "\tOrigin: %s\n",
 				   parameters_sets_list[i].parameters_set_identifier,
@@ -134,7 +135,7 @@ void ParametersSetup(void)
 
 void SetParametersSet(char * parameters_set_identifier)
 {
-	  for (int i = 0; i < index; i++)
+	  for (int i = 0; i < parameters_sets_list_index; i++)
 		if (!strcasecmp(parameters_sets_list[i].parameters_set_identifier,
 				   		parameters_set_identifier)){
 			parameters = parameters_sets_list[i];
@@ -147,7 +148,7 @@ void SetParametersSet(char * parameters_set_identifier)
 		}
 }
 
-void NewCopyOfDefaultParametersSet()
+Parameters NewCopyOfDefaultParametersSet()
 {
   	Parameters p;
 

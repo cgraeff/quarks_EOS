@@ -8,6 +8,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <getopt.h>
 
@@ -19,32 +20,20 @@ Options options = {true, false, false, NULL};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
-	// Short options and long options must be declared in the next two variables.
+	// Short options must be declared in the next variable.
 	// In short_options, each short option is declared in a string by the character that
 	// will invoke the option. If the option takes an argument, a colon (:) must be
 	// follow the character. When a character contained in this string is found in the
-	// options, the number that corresponds to this caracter is returned by getopt_long
+	// options, the number that corresponds to this caracter is returned by getopt()
 	// (that is "a" -> 'a', ...).
 	// EXAMPLE:
 	// char * short_options = "a:bvuh";
-	//
-	// In long_options, an option struct is defined with: a long name, a declaration
-	// of existence (or not) of argument for the option, an address of an int 
-	// variable to be written with value 'val', and the value 'val'.
-	// If instead of an address, NULL is given, then when getopt_long is invoked,
-	// it will just return 'val' uppon finding the long option. If we just use for 'val'
-	// the same character as in short_options, but numerically (with '' instead of ""),
-	// the return value will be the same as in short_options, so both cases can be
-	// covered by the same case in the switch.
-	// EXAMPLE:
-	// static struct option long_options[] = {{"a_option", required_argument, NULL, 'a'},
-	//									      {"b_flag", no_argument, NULL, 'b'}};
 	//
 	// BEWARE: if an option takes many arguments, the spaces must be escaped, otherwise
 	// the arguments after the first will be misinterpreted as unknown, or unclaimed.
 	// This particular implementation will stop if there are any unprocessed arguments.
 	
-	char * short_options = "p:lquh";
+	char * short_options = "p:lqsuh";
 
 	int opt;
 	while ((opt = getopt(argc, argv, short_options)) != -1){
@@ -60,6 +49,9 @@ int CommandlineOptionsParse(int argc, char * argv[])
 			case 'q':
 				options.verbose = false;
 				break;
+            case 's':
+                options.skip_tests = true;
+                break;
 			case 'u':
 				CommandlineOptionsPrintUsage(argv[0]);
 				exit(EXIT_SUCCESS);

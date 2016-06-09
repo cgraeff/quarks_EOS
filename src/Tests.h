@@ -9,4 +9,6 @@
 #ifndef Tests_h
 #define Tests_h
 
+void RunTests();
+
 #endif /* Tests_h */

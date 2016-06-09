@@ -25,40 +25,25 @@ double UnidimensionalRootFinder(gsl_function * F,
 								double rel_error,
 								int max_iter);
 double GapEquationSolver();
+double ZeroedGapEquation(double mass, void * input);
 
 double ScalarDensity(double mass, double fermi_momentum);
 
-int WriteZeroedGapEquation(char * filename, double minimum_mass, double maximum_mass, int points_number, double fermi_momentum);
-
 double VacuumMassDetermination();
-int WriteVacuumMassEquation(char * filename, double minimum_mass, double maximum_mass, int points_number);
+double VacuumMassEquation(double mass, void * input);
 
 double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
                                                    void * input);
-int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
-                                                     double minimum_renormalized_chemical_potential,
-                                                     double maximum_renormalized_chemical_potential,
-                                                     int points_number,
-                                                     double chemical_potential,
-                                                     double mass);
 
 double ThermodynamicPotential(double mass,
                               double fermi_momentum,
                               double chemical_potential,
                               double renormalized_chemical_potential);
-/*
-double VacuumThermodynamicPotential2(double vacuum_mass, double barionic_density, double chemical_potential);
-double ThermodynamicPotential2(double mass,
-                              double barionic_density,
-                              double fermi_momentum,
-                              double scalar_density,
-                              double chemical_potential,
-                              double vacuum_thermodynamic_potential);
-*/
-double EnergyDensity(double regularized_thermodynamic_potential, double chemical_potential, double barionic_density);
+
+double EnergyDensity(double regularized_thermodynamic_potential,
+                     double chemical_potential,
+                     double barionic_density);
+
 double Pressure(double regularized_thermodynamic_potential);
-
-double F0(double mass, double momentum);
-
 
 #endif /* EOS_h */
