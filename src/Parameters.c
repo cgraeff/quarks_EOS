@@ -17,6 +17,7 @@
 
 // Chosen parameter set (globally accessible)
 Parameters parameters;
+static Parameters parameters_sets_list[256] = {0};
 
 void NewCopyOfDefaultParametersSet();
 
@@ -25,7 +26,6 @@ void ParametersSetup(void)
     // See header file for units and other relevant
     // information about the parameters below.
     int index = 0;
-  	Parameters parameters_sets_list[256] = {0};
 
   	// Start list with default for easier listing of available parameterizations
   	parameters_sets_list[0] = NewCopyOfDefaultParametersSet();
@@ -130,17 +130,14 @@ void ParametersSetup(void)
 		}
 		exit(EXIT_SUCCESS);
 	}
+}
 
-  	// If option -p is used, set parameters set accordingly
-  	if (options.parameterization != NULL)
+void SetParametersSet(char * parameters_set_identifier)
+{
 	  for (int i = 0; i < index; i++)
 		if (!strcasecmp(parameters_sets_list[i].parameters_set_identifier,
-				   		options.parameterization)){
+				   		parameters_set_identifier)){
 			parameters = parameters_sets_list[i];
-			printf("Running with %s parameterization.\n"
-				   "\tOrigin: %s\n",
-				   parameters.parameters_set_identifier,
-				   parameters.parameters_set_origin);
 		}
   		else{
 		  	printf("Parameters set %s unrecognized.\n"
@@ -148,9 +145,6 @@ void ParametersSetup(void)
 				   options.parameterization);
 		  	exit(EXIT_FAILURE);
 		}
-
-  	// If no parameterization was chosen through -p, use default
-	parameters = NewCopyOfDefaultParametersSet;
 }
 
 void NewCopyOfDefaultParametersSet()

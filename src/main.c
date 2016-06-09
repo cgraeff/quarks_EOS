@@ -29,6 +29,10 @@ int main(int argc, char * argv[])
   	if (!options.skip_tests)
   		RunTests();
     
+  	// If option -p is used, set parameters set accordingly,
+	// otherwise, use default set
+  	SetParametersSet(options.parameterization);
+
     PerformCalculation();
     
     return 0;

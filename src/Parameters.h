@@ -66,5 +66,6 @@ typedef struct _parameters
 extern Parameters parameters;
 
 void ParametersSetup(void);
+void SetParametersSet(char * parameters_set_identifier);
 
 #endif /* Parameters_h */
