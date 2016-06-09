@@ -15,7 +15,7 @@
 
 // Default values for options and flags that will be acessible
 // during the execution (specified in order of declaration).
-Options options = {true, NULL};
+Options options = {true, false, false, NULL};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
@@ -44,20 +44,19 @@ int CommandlineOptionsParse(int argc, char * argv[])
 	// the arguments after the first will be misinterpreted as unknown, or unclaimed.
 	// This particular implementation will stop if there are any unprocessed arguments.
 	
-	char * short_options = "p:quh";
-	static struct option long_options[] = {{"parameterization", required_argument, NULL, 'p'},
-										   {"quiet", no_argument, NULL, 'q'},
-										   {"usage", no_argument, NULL, 'u'},
-										   {"help", no_argument, NULL, 'h'},
-										   {NULL, 0, NULL, 0}};
+	char * short_options = "p:lquh";
+
 	int opt;
-	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
-	
+	while ((opt = getopt(argc, argv, short_options)) != -1){
+
 		// If an option have an argument, it is accessed through 'optarg'
 		switch (opt){
 			case 'p':
 				options.parameterization = optarg;
 				break;
+			case 'l':
+		  		options.list_available_parameterizations = true;
+		  		break;
 			case 'q':
 				options.verbose = false;
 				break;
@@ -70,24 +69,36 @@ int CommandlineOptionsParse(int argc, char * argv[])
 				exit(EXIT_SUCCESS);
 				break;
 			case '?':
-				// getopt_long should print an error
-				printf("Use --usage or -u to print a list of accepted options.\n");
+		  		if (optopt == 'p'){
+          			fprintf (stderr,
+							 "Option -%c requires an argument. Use -h for help.\n",
+							 optopt);
+				}else if (isprint (optopt)){
+          			fprintf (stderr,
+							 "Unknown option `-%c'.  Use -h for help.\n",
+							 optopt);
+				}else{
+          			fprintf (stderr,
+							 "Unknown option character `\\x%x'.  Use -h for help.\n",
+							 optopt);
+				}
 				exit(EXIT_FAILURE);
 				break;
 			default:
-				printf("Use --usage or -u to print a list of accepted options.\n");
+				printf("Use -h to print a list of accepted options.\n");
 				exit(EXIT_FAILURE);
 		}
 	}
 
 
 	// Print any remaining command line arguments (not options)
+	// and let the user know that they are invalid
 	if (optind < argc){
 		printf ("%s: invalid arguments -- ", argv[0]);
 		while (optind < argc)
 			printf ("%s ", argv[optind++]);
 		putchar ('\n');
-		printf("Use --usage or -u to print a list of accepted options.\n");
+		printf("Use -h or -u to print a list of accepted options.\n");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -98,10 +109,13 @@ void CommandlineOptionsPrintUsage(char * prog_name)
 {
 	printf("Usage: %s [options]\n", prog_name);
 	printf("Options:\n"
-		   "\t--parameterization, -p: Chooses a parameterization.\n"
-		   "\t--quiet, -v: Supress information (may be useful in scripts).\n"
-		   "\t--usage, -u: Prints this message.\n"
-		   "\t--help, -h: Same as --usage.\n");
+		   "\t-p: Chooses a builtin parameterization.\n"
+		   "\t-l: Lists availeable builtin parameterizations.\n"
+		   "\t-f: Chooses a parameterization file.\n"
+		   "\t-t: Saves a template parameterization file in current dir.\n"
+		   "\t-q: Supress information (may be useful in scripts).\n"
+		   "\t-u: Prints this message.\n"
+		   "\t-h: Same as -u.\n");
 	
 	return;
 }

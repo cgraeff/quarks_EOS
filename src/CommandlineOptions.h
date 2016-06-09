@@ -15,6 +15,8 @@ typedef struct _options{
 	// List options and flags that will be acessible
 	// during the execution
 	bool verbose;
+  	bool skip_tests;
+  	bool list_available_parameterizations;
 	char * parameterization;
 } Options;
 
