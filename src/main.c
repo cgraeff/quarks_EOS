@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
 	// otherwise, use default set
   	SetParametersSet(options.parameterization);
 
-    PerformCalculation();
+    //    PerformCalculation();
     
     return 0;
 }

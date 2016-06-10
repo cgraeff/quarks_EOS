@@ -1,5 +1,9 @@
 set term png
 
+set out "graph/vacuum_mass_equation.png"
+plot "data/vacuum_mass_equation.dat" w l, \
+	 0 notitle
+
 set out "graph/zeroed_gap_equation.png"
 plot "data/zeroed_gap_equation_0.dat" w l, \
 	 "data/zeroed_gap_equation_1.dat" w l, \

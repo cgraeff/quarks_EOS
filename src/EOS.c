@@ -170,6 +170,8 @@ double ThermodynamicPotential(double mass,
                         / pow(M_PI, 2.0);
     double second_term = pow(mass - parameters.bare_mass, 2.0)
   						 / (4.0 * parameters.G_S * CONST_HBAR_C);
+    
+    // If G_V == 0, we have to avoid a division by zero
     double third_term = 0.0;
     if (parameters.G_V != 0)
         third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)

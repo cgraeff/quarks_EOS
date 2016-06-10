@@ -79,7 +79,7 @@ void RunTests()
         fprintf(log_file, "The following tests were executed for %s parameterization:\n", parameters.parameters_set_identifier);
         fprintf(log_file, "\tVacuum mass equation was written in data/vacuum_mass_equation.dat\n");
         fprintf(log_file, "\tZeroed renormalized chemical potential equation was written in data/zeroed_renorm_chemical_pot_equation.dat\n");
-        fprintf(log_file, "\tZeroed gap equation was written in tests/data/zeroed_gap_equation.dat\n");
+        fprintf(log_file, "\tZeroed gap equation was written in tests/data/zeroed_gap_equation_*.dat\n");
 
     }
     
@@ -115,7 +115,7 @@ void RunTests()
 
             double m = 0;
 
-            for (int j; j < points_number; j++) {
+            for (int j = 0; j < points_number; j++) {
                 
                 // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
                 input.chemical_potential = chemical_potential[i];
@@ -154,7 +154,7 @@ void RunTests()
             sprintf(filename, "tests/data/Fig1_Buballa_%d.dat", i);
             
             WriteVectorsToFile(filename,
-                               "# mass, thermodynamic potential",
+                               "# mass, thermodynamic potential\n",
                                2,
                                mass_vector,
                                output);
@@ -163,12 +163,14 @@ void RunTests()
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
+        fprintf(log_file, "\tCalculation of vacuum mass, resultin in %f MeV.\n", vacuum_mass);
         fprintf(log_file,
-                "\tThermodynamic potential as function of mass "
+                "\tCalculation of the thermodynamic potential as function of mass "
                 "(Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408).\n"
                 "\tfiles: data/Fig1_Buballa_*.dat\n");
     }
-    
+  
+    exit(0);
     fprintf(log_file, "\n");
 
     // Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376
@@ -240,7 +242,7 @@ void RunTests()
             sprintf(filename, "tests/data/Fig2.8L_BuballaR_%d.dat", i);
             
             WriteVectorsToFile(filename,
-                               "# mass, thermodynamic potential",
+                               "# mass, thermodynamic potential\n",
                                2,
                                mass_vector,
                                output);
@@ -250,7 +252,7 @@ void RunTests()
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
         fprintf(log_file,
-                "\tThermodynamic potential as function of mass "
+                "\tCalculation of the hermodynamic potential as function of mass "
                 "(Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
                 "\tFiles:data/Fig2.8L_BuballaR_*.dat\n");
     }
@@ -260,7 +262,7 @@ void RunTests()
     // Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = G_S)
     {
-        SetParametersSet("BuballaR_2");
+        SetParametersSet("BuballaR_2_GV");
         
         double chemical_potential[4] = {0.0, 430.0, 440.0, 444.3};
         
@@ -326,7 +328,7 @@ void RunTests()
             sprintf(filename, "tests/data/Fig2.8R_BuballaR_%d.dat", i);
             
             WriteVectorsToFile(filename,
-                               "# mass, thermodynamic potential",
+                               "# mass, thermodynamic potential\n",
                                2,
                                mass_vector,
                                output);
@@ -336,7 +338,7 @@ void RunTests()
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
         fprintf(log_file,
-                "\tThermodynamic potential as function of mass "
+                "\tCalculation of the hermodynamic potential as function of mass "
                 "(Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
                 "\tFiles:data/Fig2.8R_BuballaR_*.dat\n");
     }
