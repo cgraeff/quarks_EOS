@@ -76,10 +76,16 @@ void RunTests()
         }
         
         
-        fprintf(log_file, "The following tests were executed for %s parameterization:\n", parameters.parameters_set_identifier);
-        fprintf(log_file, "\tVacuum mass equation was written in data/vacuum_mass_equation.dat\n");
-        fprintf(log_file, "\tZeroed renormalized chemical potential equation was written in data/zeroed_renorm_chemical_pot_equation.dat\n");
-        fprintf(log_file, "\tZeroed gap equation was written in tests/data/zeroed_gap_equation_*.dat\n");
+        fprintf(log_file,
+				"The following tests were executed for %s parameterization:\n",
+				parameters.parameters_set_identifier);
+        fprintf(log_file,
+				"\tVacuum mass equation was written in data/vacuum_mass_equation.dat\n");
+        fprintf(log_file,
+				"\tZeroed renormalized chemical potential equation was "
+				"written in data/zeroed_renorm_chemical_pot_equation.dat\n");
+        fprintf(log_file,
+				"\tZeroed gap equation was written in tests/data/zeroed_gap_equation_*.dat\n");
 
     }
     
@@ -170,7 +176,6 @@ void RunTests()
                 "\tfiles: data/Fig1_Buballa_*.dat\n");
     }
   
-    exit(0);
     fprintf(log_file, "\n");
 
     // Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376
@@ -203,7 +208,7 @@ void RunTests()
             
             double m = 0;
             
-            for (int j; j < points_number; j++) {
+            for (int j = 0; j < points_number; j++) {
                 
                 // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
                 input.chemical_potential = chemical_potential[i];
@@ -289,7 +294,7 @@ void RunTests()
             
             double m = 0;
             
-            for (int j; j < points_number; j++) {
+            for (int j = 0; j < points_number; j++) {
                 
                 // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
                 input.chemical_potential = chemical_potential[i];
