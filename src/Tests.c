@@ -129,17 +129,6 @@ void RunTests()
 
                 double renormalized_chemical_potential = chemical_potential[i];
 
-                if (parameters.G_V != 0.0){
-
-                    renormalized_chemical_potential =
-                            UnidimensionalRootFinder(&F,
-                                                     parameters.renormalized_chemical_potential_lower_bound,
-                                                     parameters.renormalized_chemical_potential_upper_bound,
-                                                     parameters.renormalized_chemical_potential_abs_error,
-                                                     parameters.renormalized_chemical_potential_rel_error,
-                                                     parameters.renormalized_chemical_potential_max_iter);
-                }
-
                 double fermi_momentum = 0;
                 if (pow(renormalized_chemical_potential, 2.0) > pow(m, 2.0)){
                     fermi_momentum = sqrt(pow(renormalized_chemical_potential, 2.0)
@@ -183,6 +172,9 @@ void RunTests()
     {
         SetParametersSet("BuballaR_2");
         
+        // In the reference, the bare mass was zero for this test
+        parameters.bare_mass = 0;
+        
         double chemical_potential[4] = {0.0, 300.0, 368.6, 400.0};
         
         double vacuum_mass = VacuumMassDetermination();
@@ -191,6 +183,10 @@ void RunTests()
         
         for (int i = 0; i < 4; i++){
             
+            char filename_1[256];
+            sprintf(filename_1, "tests/data/ZeroedRenormalizedChemPotEquation_BR2L_%d.dat", i);
+            WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], 0.0);
+
             double minimum_mass = 0.0;
             double maximum_mass = 1000.0;
             int points_number = 1000;
@@ -215,17 +211,6 @@ void RunTests()
                 input.mass = m;
                 
                 double renormalized_chemical_potential = chemical_potential[i];
-                
-                if (parameters.G_V != 0.0){
-                    
-                    renormalized_chemical_potential =
-                    UnidimensionalRootFinder(&F,
-                                             parameters.renormalized_chemical_potential_lower_bound,
-                                             parameters.renormalized_chemical_potential_upper_bound,
-                                             parameters.renormalized_chemical_potential_abs_error,
-                                             parameters.renormalized_chemical_potential_rel_error,
-                                             parameters.renormalized_chemical_potential_max_iter);
-                }
                 
                 double fermi_momentum = 0;
                 if (pow(renormalized_chemical_potential, 2.0) > pow(m, 2.0)){
@@ -251,6 +236,7 @@ void RunTests()
                                2,
                                mass_vector,
                                output);
+  
         }
         
         fprintf(log_file,
@@ -269,7 +255,16 @@ void RunTests()
     {
         SetParametersSet("BuballaR_2_GV");
         
+        // In the reference, the bare mass was zero for this test
+        parameters.bare_mass = 0;
+        
         double chemical_potential[4] = {0.0, 430.0, 440.0, 444.3};
+        
+        for (int i = 0; i < 4; i++){
+            char filename_1[256];
+            sprintf(filename_1, "tests/data/ZeroedRenormalizedChemPotEquation_BR2R_%d.dat", i);
+            WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], 2.0);
+        }
         
         double vacuum_mass = VacuumMassDetermination();
         
@@ -285,6 +280,7 @@ void RunTests()
             
             gsl_vector * mass_vector = gsl_vector_alloc(points_number);
             gsl_vector * output = gsl_vector_alloc(points_number);
+            gsl_vector * renormalized_chemical_potential_vector = gsl_vector_alloc(points_number);
             
             // Prepare function to be passed to the root finding algorithm
             gsl_function F;
@@ -303,15 +299,27 @@ void RunTests()
                 double renormalized_chemical_potential = chemical_potential[i];
                 
                 if (parameters.G_V != 0.0){
-                    
-                    renormalized_chemical_potential =
-                    UnidimensionalRootFinder(&F,
-                                             parameters.renormalized_chemical_potential_lower_bound,
-                                             parameters.renormalized_chemical_potential_upper_bound,
-                                             parameters.renormalized_chemical_potential_abs_error,
-                                             parameters.renormalized_chemical_potential_rel_error,
-                                             parameters.renormalized_chemical_potential_max_iter);
+ 
+                    // If mass and chemical potential are zero, the solution is
+                    // zero.
+                    if (chemical_potential[i] == 0){// && m == 0){
+                        renormalized_chemical_potential = 0;
+                    }
+/*                    else if (pow(chemical_potential[i], 2.0) - pow(m, 2.0) <= 0){
+                        renormalized_chemical_potential = chemical_potential[i];
+                    }
+*/                    else{
+                        renormalized_chemical_potential =
+                            UnidimensionalRootFinder(&F,
+                                                     parameters.renormalized_chemical_potential_lower_bound,
+                                                     parameters.renormalized_chemical_potential_upper_bound,
+                                                     parameters.renormalized_chemical_potential_abs_error,
+                                                     parameters.renormalized_chemical_potential_rel_error,
+                                                     parameters.renormalized_chemical_potential_max_iter);
+                    }
                 }
+                
+                gsl_vector_set(renormalized_chemical_potential_vector, j, renormalized_chemical_potential);
                 
                 double fermi_momentum = 0;
                 if (pow(renormalized_chemical_potential, 2.0) > pow(m, 2.0)){
@@ -337,15 +345,31 @@ void RunTests()
                                2,
                                mass_vector,
                                output);
+            
+            sprintf(filename, "tests/data/renormalized_chemical_potential_%d.dat", i);
+            WriteVectorsToFile(filename,
+                               "#mass, renormalized_chemical_potential\n",
+                               2,
+                               mass_vector,
+                               renormalized_chemical_potential_vector);
+            
+            gsl_vector_free(output);
+            gsl_vector_free(mass_vector);
+            gsl_vector_free(renormalized_chemical_potential_vector);
+ 
         }
         
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
         fprintf(log_file,
-                "\tCalculation of the hermodynamic potential as function of mass "
+                "\tCalculation of the thermodynamic potential as function of mass "
                 "(Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
                 "\tFiles:data/Fig2.8R_BuballaR_*.dat\n");
+        fprintf(log_file,
+                "\tZeroed renormalized chemical potential equation for selected parameters (as function of renormalized chemical potential)\n");
+        fprintf(log_file,
+                "\tRenormalized chemical potential (as function of mass)\n");
     }
 
     fclose(log_file);

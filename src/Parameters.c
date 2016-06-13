@@ -169,7 +169,7 @@ void SetParametersSet(char * parameters_set_identifier)
     
     printf("Parameters set %s unrecognized.\n"
            "Use -l to list available parameterizations.\n",
-           options.parameterization);
+           parameters_set_identifier);
     exit(EXIT_FAILURE);
 }
 

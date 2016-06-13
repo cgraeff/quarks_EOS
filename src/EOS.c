@@ -130,7 +130,11 @@ double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
 
   	double c = 2.0 * parameters.G_V * NUM_COLORS * NUM_FLAVORS
   				   / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
-  	double arg = pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0);
+    
+    // The 'if' statement does the work of a step function
+    double arg = 0;
+    if (pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0) >= 0)
+        arg = pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0);
 
   	return renor_chem_pot - param->chemical_potential + c * pow(arg, 3.0 / 2.0);
 }
