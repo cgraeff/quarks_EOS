@@ -181,7 +181,7 @@ double ThermodynamicPotential(double mass,
         third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
                      / (4.0 * parameters.G_V * CONST_HBAR_C);
     
-    return first_term + second_term - third_term;
+    return first_term + second_term + third_term;
 }
 
 double F_E(double mass, double momentum)

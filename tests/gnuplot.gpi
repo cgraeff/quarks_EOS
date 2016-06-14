@@ -11,18 +11,50 @@ plot "data/zeroed_gap_equation_0.dat" w l, \
 	 "data/zeroed_gap_equation_3.dat" w l, \
 	 0 notitle
 
+set yrange[-75:150]
 set out "graph/Fig1_Buballa.png"
 plot "data/Fig1_Buballa_0.dat" w l, \
 	 "data/Fig1_Buballa_1.dat" w l, \
 	 "data/Fig1_Buballa_2.dat" w l, \
 	 "data/Fig1_Buballa_3.dat" w l
 
+set yrange[-50:150]
 set out "graph/Fig2.8L_BuballaR.png"
 plot "data/Fig2.8L_BuballaR_0.dat" w l, \
 	 "data/Fig2.8L_BuballaR_1.dat" w l, \
 	 "data/Fig2.8L_BuballaR_2.dat" w l, \
 	 "data/Fig2.8L_BuballaR_3.dat" w l
 
+set yrange[*:*]
+set out "graph/zeroed_renor_chem_pot_eq_BR2L.png"
+plot "data/ZeroedRenormalizedChemPotEquation_BR2L_0.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2L_1.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2L_2.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2L_3.dat" w l, \
+	 0 notitle
+
+set out "graph/zeroed_renor_chem_pot_eq_BR2R.png"
+plot "data/ZeroedRenormalizedChemPotEquation_BR2R_0_0.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_0_1.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_0_2.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_0_3.dat" w l, \
+	 "data/ZeroedRenormalizedChemPotEquation_BR2R_1_0.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_1_1.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_1_2.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_1_3.dat" w l, \
+	 "data/ZeroedRenormalizedChemPotEquation_BR2R_2_0.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_2_1.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_2_2.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_2_3.dat" w l, \
+	 "data/ZeroedRenormalizedChemPotEquation_BR2R_3_0.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_3_1.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_3_2.dat" w l, \
+     "data/ZeroedRenormalizedChemPotEquation_BR2R_3_3.dat" w l, \
+	 0 notitle
+
+set yrange[-20:10]
+set ytics 1
+#set yrange[-75:150]
 set out "graph/Fig2.8R_BuballaR.png"
 plot "data/Fig2.8R_BuballaR_0.dat" w l, \
 	 "data/Fig2.8R_BuballaR_1.dat" w l, \

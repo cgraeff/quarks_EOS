@@ -259,11 +259,15 @@ void RunTests()
         parameters.bare_mass = 0;
         
         double chemical_potential[4] = {0.0, 430.0, 440.0, 444.3};
+
+        double mass[4] = {1.0, 100, 300, 700};
         
         for (int i = 0; i < 4; i++){
-            char filename_1[256];
-            sprintf(filename_1, "tests/data/ZeroedRenormalizedChemPotEquation_BR2R_%d.dat", i);
-            WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], 2.0);
+            for (int j = 0; j < 4; j++){
+                char filename_1[256];
+                sprintf(filename_1, "tests/data/ZeroedRenormalizedChemPotEquation_BR2R_%d_%d.dat", i, j);
+                WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], mass[i]);
+            }
         }
         
         double vacuum_mass = VacuumMassDetermination();
@@ -300,15 +304,11 @@ void RunTests()
                 
                 if (parameters.G_V != 0.0){
  
-                    // If mass and chemical potential are zero, the solution is
-                    // zero.
-                    if (chemical_potential[i] == 0){// && m == 0){
+                    // If chemical potential is zero, the solution is zero
+                    if (chemical_potential[i] == 0){
                         renormalized_chemical_potential = 0;
                     }
-/*                    else if (pow(chemical_potential[i], 2.0) - pow(m, 2.0) <= 0){
-                        renormalized_chemical_potential = chemical_potential[i];
-                    }
-*/                    else{
+                    else{
                         renormalized_chemical_potential =
                             UnidimensionalRootFinder(&F,
                                                      parameters.renormalized_chemical_potential_lower_bound,
