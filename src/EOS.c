@@ -8,7 +8,9 @@
 
 #include <math.h>
 #include <gsl/gsl_roots.h>
+#include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
 
 #include "Parameters.h"
 #include "Constants.h"
@@ -18,61 +20,138 @@ double F0(double mass, double momentum);
 double F2(double mass, double momentum);
 double F_E(double mass, double momentum);
 
+typedef struct _multi_dim_gap_eq_param {
+    double temperature;
+    double barionic_density;
+} multi_dim_gap_eq_param;
+
+typedef struct _fermi_dirac_distrib_integrand{
+    double mass;
+    double chemical_potential;
+    double temperature;
+} fermi_dirac_distrib_integrand;
+
+#define ROOT_FINDER_DIMENSION_2 2
+
+int ZeroedGapAndRenormalizedChemicalPotentialEquations(const gsl_vector * x,
+                                                       void * p,
+                                                       gsl_vector * f);
+void TwodimensionalRootFinder(gsl_multiroot_function * f,
+                              double x_initial_guess,
+                              double y_initial_guess,
+                              double * return_x,
+                              double * return_y);
+
+double FermiDiracDistributionIntegral(double mass,
+                                      double renormalized_chemical_potential);
+
+double SomethingFermiDiracDistributionIntegral(double mass,
+                                               double renormalized_chemical_potential);
+
+double FermiDiracDistributionIntegralIntegrand(double momentum, void * parameters);
+double SomethingFermiDiracDistributionIntegralIntegrand(double momentum,
+                                                        void * params);
+
+double FermiDiracDistributionForParticles(double energy,
+                                          double chemical_potential,
+                                          double temperature);
+double FermiDiracDistributionForAntiparticles(double energy,
+                                              double chemical_potential,
+                                              double temperature);
+double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit);
+
+
+
+void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double temperature,
+                                                                 double barionic_density,
+                                                                 double * return_mass,
+                                                                 double * return_renormalized_chemical_potential)
+{
+    multi_dim_gap_eq_param p;
+    p.temperature = temperature;
+    p.barionic_density = barionic_density;
+    
+    gsl_multiroot_function f;
+    f.f = &ZeroedGapAndRenormalizedChemicalPotentialEquations;
+    f.n = ROOT_FINDER_DIMENSION_2;
+    f.params = (void *)&p;
+    
+    double x;
+    double y;
+    
+    TwodimensionalRootFinder(&f,
+                             parameters.mass_and_renor_chem_pot_solution_mass_guess,
+                             parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess,
+                             &x,
+                             &y);
+    
+    *return_mass = x;
+    *return_renormalized_chemical_potential = y;
+}
 
 void TwodimensionalRootFinder(gsl_multiroot_function * f,
-								double * x,
-								double * y)
+                              double x_initial_guess,
+                              double y_initial_guess,
+                              double * return_x,
+                              double * return_y)
 {
-
- 	const gsl_multiroot_fsolver_type *T;
- 	gsl_multiroot_fsolver *s;
-
  	int status;
-  	size_t i, iter = 0;
+  	size_t iter = 0;
 
-  	const size_t n = 2;
-  	struct rparams p = {1.0, 10.0};
-  	gsl_multiroot_function f = {&rosenbrock_f, n, &p};
+  	gsl_vector * initial_guess = gsl_vector_alloc(ROOT_FINDER_DIMENSION_2);
 
-  	double x_init[2] = {-10.0, -5.0};
-  	gsl_vector *x = gsl_vector_alloc (n);
+  	gsl_vector_set(initial_guess, 0, x_initial_guess);
+  	gsl_vector_set(initial_guess, 1, y_initial_guess);
 
-  	gsl_vector_set(x, 0, x_init[0]);
-  	gsl_vector_set(x, 1, x_init[1]);
-
-  	T = gsl_multiroot_fsolver_hybrids;
-  	s = gsl_multiroot_fsolver_alloc(T, 2);
-  	gsl_multiroot_fsolver_set (s, &f, x);
-
-  	//print_state (iter, s); // ?
+    const gsl_multiroot_fsolver_type * solver_type = gsl_multiroot_fsolver_hybrids;
+    gsl_multiroot_fsolver * solver = gsl_multiroot_fsolver_alloc(solver_type,
+                                                                 ROOT_FINDER_DIMENSION_2);
+    
+  	gsl_multiroot_fsolver_set(solver, f, initial_guess);
 
   	do {
 		iter++;
-      	status = gsl_multiroot_fsolver_iterate(s);
+      	status = gsl_multiroot_fsolver_iterate(solver);
 
       	//print_state(iter, s);
 
-      	if (status)   /* check if solver is stuck */
-        	break;
+        if (status == GSL_EBADFUNC){
+            printf("TwodimensionalRootFinder: Error: Infinity or division by zero.\n");
+            exit(EXIT_FAILURE);
+        }
+        else if (status == GSL_ENOPROG){
+            printf("TwodimensionalRootFinder: Error: Solver is stuck. Try a different initial guess.\n");
+            exit(EXIT_FAILURE);
+        }
 
-      	status = gsl_multiroot_test_residual(s->f, 1e-7);
-    } while (status == GSL_CONTINUE && iter < 1000);
+        // Check if the root is good enough:
+        // tests for the convergence of the sequence by comparing the last step dx with the
+        // absolute error epsabs and relative error epsrel to the current position x. The test
+        // returns GSL_SUCCESS if the following condition is achieved,
+        //
+        // |dx_i| < epsabs + epsrel |x_i|
 
-  	printf ("status = %s\n", gsl_strerror (status));
+        gsl_vector * x = gsl_multiroot_fsolver_root(solver); // current root
+        gsl_vector * dx = gsl_multiroot_fsolver_dx(solver); // last step
+        
+      	status = gsl_multiroot_test_delta(dx,
+                                          x,
+                                          parameters.mass_and_renorm_chem_pot_solution_abs_error,
+                                          parameters.mass_and_renorm_chem_pot_solution_rel_error);
+        
+    } while (status == GSL_CONTINUE
+             && iter < parameters.mass_and_renor_chem_pot_solution_max_iter);
 
-  	*x = gsl_vector_get(s->x, 0);
-  	*y = gsl_vector_get(s->y, 1);
+    gsl_vector * solution = gsl_multiroot_fsolver_root(solver);
+    
+  	*return_x = gsl_vector_get(solution, 0);
+  	*return_y = gsl_vector_get(solution, 1);
 
-  	gsl_multiroot_fsolver_free (s);
-  	gsl_vector_free (x);
+  	gsl_multiroot_fsolver_free(solver);
+  	gsl_vector_free (initial_guess);
 }
 
-typedef scruct _multi_dim_gap_eq_param {
-	double temperature;
-  	double barionic_density;
-} multi_dim_gap_eq_param;
-
-int ZeroedGapAndRenormalizedChemicalPotentialEquations(gsl_vector * x,
+int ZeroedGapAndRenormalizedChemicalPotentialEquations(const gsl_vector * x,
 													   void * p,
 													   gsl_vector * f)
 {
@@ -82,14 +161,10 @@ int ZeroedGapAndRenormalizedChemicalPotentialEquations(gsl_vector * x,
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
 
   	double integral = FermiDiracDistributionIntegral(mass,
-													 renormalized_chemical_potential,
-													 0.0,
-													 parameters.cutoff);
+													 renormalized_chemical_potential);
 
   	double integral_2 = SomethingFermiDiracDistributionIntegral(mass,
-																renormalized_chemical_potential,
-																0.0,
-																parameters.cutoff);
+																renormalized_chemical_potential);
 
   	double zeroed_gap_eq = mass
   						   - parameters.bare_mass
@@ -100,100 +175,110 @@ int ZeroedGapAndRenormalizedChemicalPotentialEquations(gsl_vector * x,
    	gsl_vector_set (f, 0, zeroed_gap_eq);
    	gsl_vector_set (f, 1, zeroed_chemical_pot_eq);
 
-   return GSL_SUCCESS
+    return GSL_SUCCESS;
 }
 
-double FermiDiracDistributionIntegral(mass,
-									  renormalized_chemical_potential,
-									  0.0,
-									  parameters.cutoff)
+double FermiDiracDistributionIntegral(double mass,
+                                      double renormalized_chemical_potential)
 {
-	gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
-
-	double result, error;
- 	double expected = -4.0;
-  	double alpha = 1.0;
-
-  	gsl_function F;
-  	F.function = &FermiDiracDistributionIntegralIntegrand;
-  	F.params = &alpha;
-
-  	gsl_integration_qag(&F, 0, 1, 0, 1e-7, 1000, w, &result, &error);
-
-	printf ("result          = % .18f\n", result);
-	printf ("exact result    = % .18f\n", expected);
-	printf ("estimated error = % .18f\n", error);
-	printf ("actual error    = % .18f\n", result - expected);
-	printf ("intervals       = %zu\n", w->size);
-
-	gsl_integration_workspace_free (w);
-
-	return solution;
+    fermi_dirac_distrib_integrand p;
+    p.mass = mass;
+    p.chemical_potential = renormalized_chemical_potential;
+    p.temperature = parameters.temperature;
+    
+    gsl_function F;
+    F.function = &FermiDiracDistributionIntegralIntegrand;
+    F.params = &p;
+    
+    return OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
 }
 
-void FermiDiracDistributionIntegralIntegrand(double momentum, void * parameters)
+double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit)
 {
- 	double E = sqrt(pow(momentum, 2.0) + pow(params->mass, 2.0));
+	gsl_integration_workspace * workspace =
+        gsl_integration_workspace_alloc(parameters.mass_and_renor_chem_pot_solution_fermi_dirac_integ_max_interval_num);
 
-  	double particle_term = FermiDiracDistributionForParticles(double energy,
-															  double chemical_potential,
-															  double temperature);
-  	double antiparticle_term = FermiDiracDistributionForAntiparticles(double energy,
-																	  double chemical_potential,
-																	  double temperature);
+    double integral;
+    double abserr;
+  	gsl_integration_qag(F,
+                        lower_limit,
+                        upper_limit,
+                        parameters.mass_and_renor_chem_pot_solution_fermi_dirac_integ_abs_error,
+                        parameters.mass_and_renor_chem_pot_solution_fermi_dirac_integ_rel_error,
+                        parameters.mass_and_renor_chem_pot_solution_fermi_dirac_integ_max_sub_interval,
+                        parameters.mass_and_renor_chem_pot_solution_fermi_dirac_integ_key,
+                        workspace,
+                        &integral,
+                        &abserr);
+
+	gsl_integration_workspace_free(workspace);
+
+	return integral;
+}
+
+double FermiDiracDistributionIntegralIntegrand(double momentum, void * params)
+{
+    fermi_dirac_distrib_integrand * p = (fermi_dirac_distrib_integrand *) params;
+    
+ 	double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+
+  	double particle_term = FermiDiracDistributionForParticles(E,
+															  p->chemical_potential,
+															  p->temperature);
+  	double antiparticle_term = FermiDiracDistributionForAntiparticles(E,
+																	  p->chemical_potential,
+																	  p->temperature);
   	return (particle_term - antiparticle_term) * pow(momentum, 2.0);
 }
 
-double SomethingFermiDiracDistributionIntegral(mass,
-											   renormalized_chemical_potential,
-											   0.0,
-											   parameters.cutoff)
+double SomethingFermiDiracDistributionIntegral(double mass,
+											   double renormalized_chemical_potential)
 {
 	// Maybe it's possible to write the first term as the scalar density
 	// at zero temperature
 
-	gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
-
-	double result, error;
- 	double expected = -4.0;
-  	double alpha = 1.0;
-
-  	gsl_function F;
-  	F.function = &SomethingFermiDiracDistributionIntegralIntegrand;
-  	F.params = &alpha;
-
-  	gsl_integration_qag(&F, 0, 1, 0, 1e-7, 1000, w, &result, &error);
-
-	printf ("result          = % .18f\n", result);
-	printf ("exact result    = % .18f\n", expected);
-	printf ("estimated error = % .18f\n", error);
-	printf ("actual error    = % .18f\n", result - expected);
-	printf ("intervals       = %zu\n", w->size);
-
-	gsl_integration_workspace_free (w);
-
-  	return solution;
+    fermi_dirac_distrib_integrand p;
+    p.mass = mass;
+    p.chemical_potential = renormalized_chemical_potential;
+    p.temperature = parameters.temperature;
+    
+    gsl_function F;
+    F.function = &SomethingFermiDiracDistributionIntegralIntegrand;
+    F.params = &p;
+    
+    return OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
 }
 
 double SomethingFermiDiracDistributionIntegralIntegrand(double momentum,
-														void * parameters)
+														void * params)
 {
-
+    fermi_dirac_distrib_integrand * p = (fermi_dirac_distrib_integrand *) params;
+    
+    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+    
+    double particle_term = FermiDiracDistributionForParticles(E,
+                                                              p->chemical_potential,
+                                                              p->temperature);
+    double antiparticle_term = FermiDiracDistributionForAntiparticles(E,
+                                                                      p->chemical_potential,
+                                                                      p->temperature);
+    return (1.0 + particle_term - antiparticle_term) * pow(momentum, 2.0) / E;
 }
 
 double FermiDiracDistributionForParticles(double energy,
 										  double chemical_potential,
 										  double temperature)
 {
-	return 1.0 / (1.0 + exp((energy - chemical_potential)/temperature);
+	return 1.0 / (1.0 + exp((energy - chemical_potential)/temperature));
 }
 
 double FermiDiracDistributionForAntiparticles(double energy,
 											  double chemical_potential,
 											  double temperature)
 {
-  	return 1.0 / (1.0 + exp((energy - chemical_potential)/temperature);
+  	return 1.0 / (1.0 + exp((energy - chemical_potential)/temperature));
 }
+
 double UnidimensionalRootFinder(gsl_function * F,
 								double lower_bound,
 								double upper_bound,

@@ -55,6 +55,23 @@ typedef struct _parameters
     double renormalized_chemical_potential_abs_error;
     double renormalized_chemical_potential_rel_error;
     
+    // Parameters for simultaneous solution of mass and renormalized
+    // chemical potential at finite temperature
+    double temperature;
+    
+    int mass_and_renor_chem_pot_solution_max_iter;
+    double mass_and_renor_chem_pot_solution_mass_guess;
+    double mass_and_renor_chem_pot_solution_renor_chem_pot_guess;
+    double mass_and_renorm_chem_pot_solution_abs_error;
+    double mass_and_renorm_chem_pot_solution_rel_error;
+    
+    int mass_and_renor_chem_pot_solution_fermi_dirac_integ_max_interval_num;
+    int mass_and_renor_chem_pot_solution_fermi_dirac_integ_max_iter;
+    int mass_and_renor_chem_pot_solution_fermi_dirac_integ_key;
+    int mass_and_renor_chem_pot_solution_fermi_dirac_integ_max_sub_interval;
+    double mass_and_renor_chem_pot_solution_fermi_dirac_integ_abs_error;
+    double mass_and_renor_chem_pot_solution_fermi_dirac_integ_rel_error;
+    
     // Parameterization variables
     double G_S;             // scalar-isoscalar coupling (fm^2)
     double G_V;             // vector-isoscalar coupling (fm^2)
