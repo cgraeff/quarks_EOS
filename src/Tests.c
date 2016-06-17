@@ -433,7 +433,7 @@ void RunTests()
                                    "# mass, integral of fermi dirac dist from gap eq\n",
                                    2,
                                    mass_vector,
-                                   fermi_dirac_int_1);
+                                   fermi_dirac_int_2);
             }
         }
         
