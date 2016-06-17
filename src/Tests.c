@@ -13,7 +13,7 @@
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_vector.h>
 
-#include "EOS.h"
+#include "ZeroTemperatureEOS.h"
 #include "Parameters.h"
 #include "CommandlineOptions.h"
 #include "AuxiliaryFunctions.h"

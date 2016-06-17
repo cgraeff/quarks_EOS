@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gsl/gsl_integration.h>
 
 #include "Constants.h"
 #include "Parameters.h"
@@ -213,6 +214,20 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.renormalized_chemical_potential_abs_error = 0.005;
     p.renormalized_chemical_potential_rel_error = 5.0E-5;
     p.renormalized_chemical_potential_max_iter = 2000;
+    
+    p.temperature = 100.0; // (MeV)
+    
+    p.mass_and_renor_chem_pot_solution_max_iter = 2000;
+    p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)
+    p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 200.0; //(MeV)
+    p.mass_and_renorm_chem_pot_solution_abs_error = 1.0E-4;
+    p.mass_and_renorm_chem_pot_solution_rel_error = 1.0E-4;
+    
+    p.fermi_dirac_integrals_max_interval_num = 2000;
+    p.fermi_dirac_integrals_integration_key = GSL_INTEG_GAUSS61;
+    p.fermi_dirac_integrals_max_sub_interval = 1500;
+    p.fermi_dirac_integrals_abs_error = 1.0E-4;
+    p.fermi_dirac_integrals_rel_error = 1.0E-4;
 
   	return p;
 }

@@ -1,13 +1,13 @@
 //
-//  EOS.h
+//  ZeroTemperatureEOS.h
 //  quarks EOS
 //
 //  Created by Clebson Graeff on 2016-03-17.
 //  Copyright © 2016 Clebson Graeff. All rights reserved.
 //
 
-#ifndef EOS_h
-#define EOS_h
+#ifndef ZeroTemperatureEOS_h
+#define ZeroTemperatureEOS_h
 
 typedef struct _gap_equation_input{
     double fermi_momentum;
@@ -46,4 +46,4 @@ double EnergyDensity(double regularized_thermodynamic_potential,
 
 double Pressure(double regularized_thermodynamic_potential);
 
-#endif /* EOS_h */
+#endif /* ZeroTemperatureEOS_h */

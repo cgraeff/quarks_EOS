@@ -16,7 +16,7 @@
 #include "Parameters.h"
 #include "Constants.h"
 #include "Tests.h"
-#include "EOS.h"
+#include "ZeroTemperatureEOS.h"
 #include "AuxiliaryFunctions.h"
 
 int PerformCalculation();
