@@ -26,12 +26,6 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
                               double * return_x,
                               double * return_y);
 
-double FermiDiracDistributionFromDensityIntegral(double mass,
-                                                 double renormalized_chemical_potential);
-
-double FermiDiracDistributionIntegralFromGapEquation(double mass,
-                                                     double renormalized_chemical_potential);
-
 double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void * parameters);
 double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
                                                               void * params);
@@ -46,13 +40,11 @@ double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upp
 
 
 
-void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double temperature,
-                                                                 double barionic_density,
+void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic_density,
                                                                  double * return_mass,
                                                                  double * return_renormalized_chemical_potential)
 {
     multi_dim_gap_eq_param p;
-    p.temperature = temperature;
     p.barionic_density = barionic_density;
     
     gsl_multiroot_function f;
@@ -145,10 +137,10 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
     
     double integral = FermiDiracDistributionFromDensityIntegral(mass,
-                                                     renormalized_chemical_potential);
+                                                                renormalized_chemical_potential);
     
     double integral_2 = FermiDiracDistributionIntegralFromGapEquation(mass,
-                                                                renormalized_chemical_potential);
+                                                                      renormalized_chemical_potential);
     
     double zeroed_gap_eq = mass
                            - parameters.bare_mass
@@ -165,7 +157,7 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
 }
 
 double FermiDiracDistributionFromDensityIntegral(double mass,
-                                      double renormalized_chemical_potential)
+                                                 double renormalized_chemical_potential)
 {
     fermi_dirac_distrib_integrand p;
     p.mass = mass;

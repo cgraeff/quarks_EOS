@@ -14,6 +14,7 @@
 #include <gsl/gsl_vector.h>
 
 #include "ZeroTemperatureEOS.h"
+#include "FiniteTemperatureEOS.h"
 #include "Parameters.h"
 #include "CommandlineOptions.h"
 #include "AuxiliaryFunctions.h"
@@ -162,7 +163,7 @@ void RunTests()
         fprintf(log_file,
                 "\tCalculation of the thermodynamic potential as function of mass "
                 "(Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408).\n"
-                "\tfiles: data/Fig1_Buballa_*.dat\n");
+                "\tfiles: tests/data/Fig1_Buballa_*.dat\n");
     }
   
     fprintf(log_file, "\n");
@@ -245,7 +246,7 @@ void RunTests()
         fprintf(log_file,
                 "\tCalculation of the hermodynamic potential as function of mass "
                 "(Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
-                "\tFiles:data/Fig2.8L_BuballaR_*.dat\n");
+                "\tFiles:tests/data/Fig2.8L_BuballaR_*.dat\n");
     }
     
     fprintf(log_file, "\n");
@@ -365,13 +366,152 @@ void RunTests()
         fprintf(log_file,
                 "\tCalculation of the thermodynamic potential as function of mass "
                 "(Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
-                "\tFiles:data/Fig2.8R_BuballaR_*.dat\n");
+                "\tFiles:tests/data/Fig2.8R_BuballaR_*.dat\n");
         fprintf(log_file,
                 "\tZeroed renormalized chemical potential equation for selected parameters (as function of renormalized chemical potential)\n");
         fprintf(log_file,
                 "\tRenormalized chemical potential (as function of mass)\n");
     }
 
+    fprintf(log_file, "\n");
+    
+    { // Tests integration of Fermi-Dirac distributions
+        SetParametersSet("BuballaR_2");
+        
+        int num_points = 1000;
+        
+        double min_mass = 0.01;
+        double max_mass = 1000;
+        double step = (max_mass - min_mass) / ((double)(num_points - 1));
+        
+        double renormalized_chemical_potential[4] = {100.0, 200.0, 400.0, 600.0};
+        double temperature[4] = {5.0, 10.0, 15.0, 20.0};
+        
+        gsl_vector * mass_vector = gsl_vector_alloc(num_points);
+        gsl_vector * fermi_dirac_int_1 = gsl_vector_alloc(num_points);
+        gsl_vector * fermi_dirac_int_2 = gsl_vector_alloc(num_points);
+        
+        for (int i = 0; i < 4; i++){
+            
+            parameters.temperature = temperature[i];
+            
+            for (int j =0; j < 4; j++){
+                
+                double m = min_mass;
+                
+                for (int k = 0; k < num_points; k++){
+                    
+                    double int_1 = FermiDiracDistributionFromDensityIntegral(m, renormalized_chemical_potential[j]);
+                    double int_2 = FermiDiracDistributionIntegralFromGapEquation(m, renormalized_chemical_potential[j]);
+                
+                    gsl_vector_set(mass_vector, k, m);
+                    gsl_vector_set(fermi_dirac_int_1, k, int_1);
+                    gsl_vector_set(fermi_dirac_int_2, k, int_2);
+                    
+                    m += step;
+                    
+                }
+                
+                char filename[256];
+                sprintf(filename,
+                        "tests/data/fermi_dirac_distribution_from_density_integral_T=%f_renor_chem_pot=%f.dat",
+                        temperature[i],
+                        renormalized_chemical_potential[j]);
+                
+                WriteVectorsToFile(filename,
+                                   "# mass, integral of fermi dirac dist from density\n",
+                                   2,
+                                   mass_vector,
+                                   fermi_dirac_int_1);
+                
+                sprintf(filename,
+                        "tests/data/fermi_dirac_distribution_from_gap_eq_integral_T=%f_renor_chem_pot=%f.dat",
+                        temperature[i],
+                        renormalized_chemical_potential[j]);
+                
+                WriteVectorsToFile(filename,
+                                   "# mass, integral of fermi dirac dist from gap eq\n",
+                                   2,
+                                   mass_vector,
+                                   fermi_dirac_int_1);
+            }
+        }
+        
+        gsl_vector_free(mass_vector);
+        gsl_vector_free(fermi_dirac_int_1);
+        gsl_vector_free(fermi_dirac_int_2);
+        
+        fprintf(log_file,
+                "The following tests were executed for %s parameterization:\n",
+                parameters.parameters_set_identifier);
+        fprintf(log_file,
+                "\tCalculation of integrals of fermi distributions as function of mass\n"
+                "\tFiles:tests/data/fermi_dirac_distribution_*.dat\n");
+    }
+    
+    fprintf(log_file, "\n");
+    
+    { // Tests mass and renormalized chemical potential calculation as function
+      // of barionic density
+        SetParametersSet("BuballaR_2");
+        
+        int n_pts = 1000;
+        
+        double min_barionic_density = 0.01;
+        double max_barionic_denstiy = 0.4;
+        double step = (max_barionic_denstiy - min_barionic_density) / ((double)(n_pts - 1));
+        
+        double temperature[4] = {5.0, 10.0, 15.0, 20.0};
+        
+        gsl_vector * dens_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * renormalized_chemical_potential_vector = gsl_vector_alloc(n_pts);
+        
+        for (int i = 0; i < 4; i++){
+            
+            double dens = min_barionic_density;
+            parameters.temperature = temperature[i];
+            
+            double mass;
+            double renormalized_chemical_potential;
+            
+            for (int j = 0; j < n_pts; j++){
+                
+                CalculateMassAndRenormalizedChemicalPotentialSimultaneously(dens,
+                                                                            &mass,
+                                                                            &renormalized_chemical_potential);
+                
+                gsl_vector_set(dens_vector, j, dens);
+                gsl_vector_set(mass_vector, j, mass);
+                gsl_vector_set(renormalized_chemical_potential_vector, j, renormalized_chemical_potential);
+                
+                dens += step;
+                
+            }
+            
+            char filename[256];
+            sprintf(filename, "tests/data/mass_and_renorm_chem_pot_T=%f.dat", temperature[i]);
+            
+            WriteVectorsToFile(filename,
+                               "# barionic density, mass, renormalized chemical potential\n",
+                               3,
+                               dens_vector,
+                               mass_vector,
+                               renormalized_chemical_potential_vector);
+        }
+        
+        gsl_vector_free(dens_vector);
+        gsl_vector_free(mass_vector);
+        gsl_vector_free(renormalized_chemical_potential_vector);
+        
+        fprintf(log_file,
+                "The following tests were executed for %s parameterization:\n",
+                parameters.parameters_set_identifier);
+        fprintf(log_file,
+                "\tCalculation of mass and renormalized chemical potential as function of barionic density "
+                "\tFiles:tests/data/mass_and_renorm_chem_pot_*.dat\n");
+    }
+    
     fclose(log_file);
 }
 

@@ -53,11 +53,65 @@ plot "data/ZeroedRenormalizedChemPotEquation_BR2R_0_0.dat" w l, \
 	 0 notitle
 
 set yrange[-20:10]
-set ytics 1
-#set yrange[-75:150]
 set out "graph/Fig2.8R_BuballaR.png"
 plot "data/Fig2.8R_BuballaR_0.dat" w l, \
 	 "data/Fig2.8R_BuballaR_1.dat" w l, \
 	 "data/Fig2.8R_BuballaR_2.dat" w l, \
 	 "data/Fig2.8R_BuballaR_3.dat" w l
 
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_density_integral_T=5.png"
+plot "data/fermi_dirac_distribution_from_density_integral_T=5.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=5.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=5.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=5.000000_renor_chem_pot=600.000000.dat" w l
+
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_density_integral_T=10.png"
+plot "data/fermi_dirac_distribution_from_density_integral_T=10.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=10.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=10.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=10.000000_renor_chem_pot=600.000000.dat" w l
+
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_density_integral_T=15.png"
+plot "data/fermi_dirac_distribution_from_density_integral_T=15.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=15.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=15.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=15.000000_renor_chem_pot=600.000000.dat" w l
+
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_density_integral_T=20.png"
+plot "data/fermi_dirac_distribution_from_density_integral_T=20.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=20.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=20.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_density_integral_T=20.000000_renor_chem_pot=600.000000.dat" w l
+
+#
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_gap_eq_integral_T=5.png"
+plot "data/fermi_dirac_distribution_from_gap_eq_integral_T=5.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=5.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=5.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=5.000000_renor_chem_pot=600.000000.dat" w l
+
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_gap_eq_integral_T=10.png"
+plot "data/fermi_dirac_distribution_from_gap_eq_integral_T=10.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=10.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=10.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=10.000000_renor_chem_pot=600.000000.dat" w l
+
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_gap_eq_integral_T=15.png"
+plot "data/fermi_dirac_distribution_from_gap_eq_integral_T=15.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=15.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=15.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=15.000000_renor_chem_pot=600.000000.dat" w l
+
+set yrange[*:*]
+set out "graph/fermi_dirac_distribution_from_gap_eq_integral_T=20.png"
+plot "data/fermi_dirac_distribution_from_gap_eq_integral_T=20.000000_renor_chem_pot=100.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=20.000000_renor_chem_pot=200.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=20.000000_renor_chem_pot=400.000000.dat" w l, \
+	 "data/fermi_dirac_distribution_from_gap_eq_integral_T=20.000000_renor_chem_pot=600.000000.dat" w l
