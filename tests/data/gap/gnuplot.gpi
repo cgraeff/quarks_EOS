@@ -1,0 +1,28 @@
+set term png
+
+set dgrid3d
+set pm3d map
+set contour
+
+do for [i=0:9] {
+	do for [j=0:9] {
+
+		gap_infile = sprintf('data/gap_%d_%d.dat', i, j)
+		dens_gap_infile = sprintf('data/dens_gap_%d_%d.dat', i, j)
+		
+		outfile = sprintf('graph/maps_%d_%d.png', i, j)
+
+		set output outfile
+
+		set multiplot layout 1,2
+
+		set title 'gap'
+		splot gap_infile
+
+		set title 'dens gap'
+		splot dens_gap_infile
+
+		unset multiplot
+	}
+}
+

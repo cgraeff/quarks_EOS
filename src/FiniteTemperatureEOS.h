@@ -27,4 +27,17 @@ void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic
                                                                  double * return_mass,
                                                                  double * return_renormalized_chemical_potential);
 
+double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_chemical_potential);
+
+double ZeroedBarionicDensityEquationForFiniteDensity(double mass,
+                                                     double renormalized_chemical_potential,
+                                                     double barionic_density);
+
+double FermiDiracDistributionForParticles(double energy,
+                                          double chemical_potential,
+                                          double temperature);
+double FermiDiracDistributionForAntiparticles(double energy,
+                                              double chemical_potential,
+                                              double temperature);
+
 #endif /* FiniteTemperatureEOS_h */

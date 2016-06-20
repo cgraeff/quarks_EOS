@@ -30,12 +30,6 @@ double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void 
 double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
                                                               void * params);
 
-double FermiDiracDistributionForParticles(double energy,
-                                          double chemical_potential,
-                                          double temperature);
-double FermiDiracDistributionForAntiparticles(double energy,
-                                              double chemical_potential,
-                                              double temperature);
 double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit);
 
 
@@ -136,22 +130,31 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
    	const double mass = gsl_vector_get(x,0);
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
     
-    double integral = FermiDiracDistributionFromDensityIntegral(mass,
-                                                                renormalized_chemical_potential);
-    
-    double integral_2 = FermiDiracDistributionIntegralFromGapEquation(mass,
-                                                                      renormalized_chemical_potential);
-    
-    double zeroed_gap_eq = mass
-                           - parameters.bare_mass
-                           - integral_2;
-    double zeroed_bar_dens_eq = params->barionic_density
-                                - integral;
+    double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
+    double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteDensity(mass,
+                                                                              renormalized_chemical_potential,
+                                                                              params->barionic_density);
 
    	gsl_vector_set (f, 0, zeroed_gap_eq);
    	gsl_vector_set (f, 1, zeroed_bar_dens_eq);
     
     return GSL_SUCCESS;
+}
+
+double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_chemical_potential)
+{
+    double integral = FermiDiracDistributionIntegralFromGapEquation(mass,
+                                                                    renormalized_chemical_potential);
+    return mass - parameters.bare_mass - integral;
+}
+
+double ZeroedBarionicDensityEquationForFiniteDensity(double mass,
+                                                     double renormalized_chemical_potential,
+                                                     double barionic_density)
+{
+    double integral = FermiDiracDistributionFromDensityIntegral(mass,
+                                                                renormalized_chemical_potential);
+    return barionic_density - integral;
 }
 
 double FermiDiracDistributionFromDensityIntegral(double mass,

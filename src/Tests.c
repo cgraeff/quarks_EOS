@@ -380,6 +380,64 @@ void RunTests()
 
     fprintf(log_file, "\n");
     
+    { // Prints Fermi-Dirac distributions for selected values of temperature
+      // and chemical potential as function of momentum
+        
+        int n_pts = 1000;
+        
+        double min_momentum = 0.0;
+        double max_momentum = 400.0;
+        double step = (max_momentum - min_momentum) / (n_pts - 1);
+        
+        double temperature[4] = {5, 10.0, 20.0, 30.0};
+        double chemical_potential[4] = {50.0, 100.0, 200.0, 300.0};
+        double mass[4] = {50.0, 100.0, 150.0, 200.0};
+        
+        gsl_vector * momentum_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * fp_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * fa_vector = gsl_vector_alloc(n_pts);
+        
+        for (int i = 0; i < 4; i++){ // temperature
+            for (int j = 0; j < 4; j++){ // chemical potential
+                for (int k = 0; k < 4; k++){ // mass
+                    
+                    double momentum = min_momentum;
+                    
+                    for (int l = 0; l < n_pts; l++){
+
+                        double energy = sqrt(pow(momentum, 2.0) + pow(mass[k], 2.0));
+                        
+                        double fp = FermiDiracDistributionForParticles(energy, chemical_potential[j], temperature[i]);
+                        double fa = FermiDiracDistributionForAntiparticles(energy, chemical_potential[j], temperature[i]);
+                        
+                        gsl_vector_set(momentum_vector, l, momentum);
+                        gsl_vector_set(fp_vector, l, fp);
+                        gsl_vector_set(fa_vector, l, fa);
+                        
+                        momentum += step;
+                    }
+                    
+                    char filename[256];
+                    sprintf(filename, "tests/data/FD/FD_%d_%d_%d.dat", i, j, k);
+                    
+                    WriteVectorsToFile(filename,
+                                       "# momentum, Fermi-Dirac distribution for particles, = for antiparticles\n",
+                                       3,
+                                       momentum_vector,
+                                       fp_vector,
+                                       fa_vector);
+                }
+            }
+        }
+        
+        gsl_vector_free(momentum_vector);
+        gsl_vector_free(fp_vector);
+        gsl_vector_free(fa_vector);
+        
+    }
+    
+    fprintf(log_file, "\n");
+    
     { // Tests integration of Fermi-Dirac distributions
         SetParametersSet("BuballaR_2");
         
@@ -400,7 +458,7 @@ void RunTests()
             
             parameters.temperature = temperature[i];
             
-            for (int j =0; j < 4; j++){
+            for (int j = 0; j < 4; j++){
                 
                 double m = min_mass;
                 
@@ -472,13 +530,15 @@ void RunTests()
 	  	gsl_vector * m_vector = gsl_vector_alloc(n_pts);
 	  	gsl_vector * zeroed_gap_vector = gsl_vector_alloc(n_pts);
 
-	  	double m = min_mass;
 
 	  	for (int i = 0; i < 4; i++){
 
 		  	parameters.temperature = temperature[i];
 
 			for (int j = 0; j < 4; j++){
+
+                double m = min_mass;
+
 				for (int k = 0; k < n_pts; k++){
 
 			  		double integ = FermiDiracDistributionIntegralFromGapEquation(m, renormalized_chemical_potential[j]);
@@ -511,19 +571,98 @@ void RunTests()
                 parameters.parameters_set_identifier);
         fprintf(log_file,
                 "\tCalculation of zeroed gap eq for T != 0 as function of mass\n"
-                "\tFiles:tests/data/fermi_dirac_distribution_*.dat\n");
+                "\tFiles:tests/data/zeroed_gap_eq_T_*_renorm_chem_pot_*.dat\n");
 	}
 
+    fprintf(log_file, "\n");
+    if (false)
+    { // Calculates zeroed gap and barionic densities equations so we can see both
+      // and have an insight of what's going on
+        
+        int mass_n_pts = 500;
+        int renorm_chem_pot_n_pts = 500;
+        
+        double min_mass = 0.0;
+        double max_mass = 600.0;
+        double mass_step = (max_mass - min_mass) / (mass_n_pts - 1);
+        
+        double min_renormalized_chemical_potential = 0.0;
+        double max_renormalized_chemical_potential = 600.0;
+        double renorm_chem_pot_step = (max_renormalized_chemical_potential - min_renormalized_chemical_potential)
+                                      / (renorm_chem_pot_n_pts - 1);
+        
+        double temperature[10] = {5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0};
+        double barionic_density[10] = {0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.5};
+
+        
+        for (int i = 0; i < 10; i++){ // Temperature
+            
+            parameters.temperature = temperature[i];
+            
+            for (int l = 0; l < 10; l++){
+                
+                double mass = min_mass;
+                
+                char filename[256];
+                sprintf(filename, "tests/data/gap/data/gap_%d_%d.dat", i, l);
+                FILE * gap_file = fopen(filename, "w");
+                
+                sprintf(filename, "tests/data/gap/data/dens_gap_%d_%d.dat", i, l);
+                FILE * dens_gap_file = fopen(filename, "w");
+                
+                if (gap_file == NULL || dens_gap_file == NULL){
+                    printf("Could not open gap_file or dens_gap_file\n");
+                    exit(EXIT_FAILURE);
+                }
+                    
+                    
+                for (int j = 0; j < mass_n_pts; j++) { // mass
+                    
+                    double renormalized_chemical_potential = min_renormalized_chemical_potential;
+                    
+                    for (int k = 0; k < renorm_chem_pot_n_pts; k++){ // renormalized chemical potential
+                        double gap = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
+                        
+                        double dens_gap = ZeroedBarionicDensityEquationForFiniteDensity(mass,
+                                                                                        renormalized_chemical_potential,
+                                                                                        barionic_density[l]);
+                        
+                        fprintf(gap_file,
+                                "%20.15E\t%20.15E\t%20.15E\n",
+                                mass,
+                                renormalized_chemical_potential,
+                                gap);
+                        
+                        fprintf(dens_gap_file,
+                                "%20.15E\t%20.15E\t%20.15E\n",
+                                mass,
+                                renormalized_chemical_potential,
+                                dens_gap);
+                        
+                        renormalized_chemical_potential += renorm_chem_pot_step;
+                    }
+                    
+                    mass += mass_step;
+                }
+                
+                fclose(gap_file);
+                fclose(dens_gap_file);
+            }
+            
+        }
+
+    }
+    
     fprintf(log_file, "\n");
     
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
         
-        int n_pts = 1000;
+        int n_pts = 100;
         
-        double min_barionic_density = 0.01;
-        double max_barionic_denstiy = 0.4;
+        double min_barionic_density = 0.6;
+        double max_barionic_denstiy = 0.8;
         double step = (max_barionic_denstiy - min_barionic_density) / ((double)(n_pts - 1));
         
         double temperature[4] = {5.0, 10.0, 15.0, 20.0};
