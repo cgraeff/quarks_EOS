@@ -133,10 +133,11 @@ double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
     
     // The 'if' statement does the work of a step function
     double arg = 0;
-    if (pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0) >= 0)
+    if (pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0) >= 0){
         arg = pow(renor_chem_pot, 2.0) - pow(param->mass, 2.0);
+	}
 
-  	return renor_chem_pot - param->chemical_potential + c * pow(arg, 3.0 / 2.0);
+	return renor_chem_pot - param->chemical_potential + c * pow(arg, 3.0 / 2.0);
 }
 
 double ScalarDensity(double mass, double fermi_momentum)

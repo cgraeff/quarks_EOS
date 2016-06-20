@@ -114,26 +114,25 @@ void RunTests()
             gsl_vector * mass_vector = gsl_vector_alloc(points_number);
             gsl_vector * output = gsl_vector_alloc(points_number);
 
-            // Prepare function to be passed to the root finding algorithm
-            gsl_function F;
-            renorm_chem_pot_equation_input input;
-            F.function = &ZeroedRenormalizedChemicalPotentialEquation;
-            F.params = &input;
+ //           // Prepare function to be passed to the root finding algorithm
+ //           gsl_function F;
+ //           renorm_chem_pot_equation_input input;
+ //           F.function = &ZeroedRenormalizedChemicalPotentialEquation;
+ //           F.params = &input;
 
             double m = 0;
 
             for (int j = 0; j < points_number; j++) {
                 
                 // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
-                input.chemical_potential = chemical_potential[i];
-                input.mass = m;
+//                input.chemical_potential = chemical_potential[i];
+//                input.mass = m;
 
                 double renormalized_chemical_potential = chemical_potential[i];
 
                 double fermi_momentum = 0;
                 if (pow(renormalized_chemical_potential, 2.0) > pow(m, 2.0)){
-                    fermi_momentum = sqrt(pow(renormalized_chemical_potential, 2.0)
-                                          - pow(m, 2.0));
+                    fermi_momentum = sqrt(pow(renormalized_chemical_potential, 2.0) - pow(m, 2.0));
                 }
                 
                 double thermodynamic_potential = ThermodynamicPotential(m,
@@ -198,18 +197,18 @@ void RunTests()
             gsl_vector * output = gsl_vector_alloc(points_number);
             
             // Prepare function to be passed to the root finding algorithm
-            gsl_function F;
-            renorm_chem_pot_equation_input input;
-            F.function = &ZeroedRenormalizedChemicalPotentialEquation;
-            F.params = &input;
+//            gsl_function F;
+//            renorm_chem_pot_equation_input input;
+//            F.function = &ZeroedRenormalizedChemicalPotentialEquation;
+//            F.params = &input;
             
             double m = 0;
             
             for (int j = 0; j < points_number; j++) {
                 
                 // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
-                input.chemical_potential = chemical_potential[i];
-                input.mass = m;
+//                input.chemical_potential = chemical_potential[i];
+//                input.mass = m;
                 
                 double renormalized_chemical_potential = chemical_potential[i];
                 
@@ -267,7 +266,12 @@ void RunTests()
             for (int j = 0; j < 4; j++){
                 char filename_1[256];
                 sprintf(filename_1, "tests/data/ZeroedRenormalizedChemPotEquation_BR2R_%d_%d.dat", i, j);
-                WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], mass[i]);
+                WriteZeroedRenormalizedChemicalPotentialEquation(filename_1,
+																 0,
+																 1000,
+																 1000,
+																 chemical_potential[i],
+																 mass[i]);
             }
         }
         
@@ -368,7 +372,8 @@ void RunTests()
                 "(Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
                 "\tFiles:tests/data/Fig2.8R_BuballaR_*.dat\n");
         fprintf(log_file,
-                "\tZeroed renormalized chemical potential equation for selected parameters (as function of renormalized chemical potential)\n");
+                "\tZeroed renormalized chemical potential equation for selected parameters"
+				" (as function of renormalized chemical potential)\n");
         fprintf(log_file,
                 "\tRenormalized chemical potential (as function of mass)\n");
     }
@@ -448,10 +453,70 @@ void RunTests()
                 "\tCalculation of integrals of fermi distributions as function of mass\n"
                 "\tFiles:tests/data/fermi_dirac_distribution_*.dat\n");
     }
+
+  	fprintf(log_file, "\n");
     
+	{ // writes gap equation as function of mass for selected temperatures
+	  //
+	  	SetParametersSet("BuballaR_2");
+
+	  	int n_pts = 1000;
+
+	  	double min_mass = 0.0;
+	  	double max_mass = 1000.0;
+	  	double step = (max_mass - min_mass) / (n_pts - 1);
+
+	  	double temperature[4] = {5.0, 10.0, 15.0, 20.0};
+	  	double renormalized_chemical_potential[4] = {100.0, 200.0, 400.0, 600.0};
+
+	  	gsl_vector * m_vector = gsl_vector_alloc(n_pts);
+	  	gsl_vector * zeroed_gap_vector = gsl_vector_alloc(n_pts);
+
+	  	double m = min_mass;
+
+	  	for (int i = 0; i < 4; i++){
+
+		  	parameters.temperature = temperature[i];
+
+			for (int j = 0; j < 4; j++){
+				for (int k = 0; k < n_pts; k++){
+
+			  		double integ = FermiDiracDistributionIntegralFromGapEquation(m, renormalized_chemical_potential[j]);
+			 		gsl_vector_set(zeroed_gap_vector, k, m - parameters.bare_mass - integ);
+
+				  	gsl_vector_set(m_vector, k, m);
+
+				  	m += step;
+				}
+
+				char filename[256];
+			  	sprintf(filename,
+						"tests/data/zeroed_gap_eq_T_%f_renorm_chem_pot_%f.dat",
+						temperature[i],
+						renormalized_chemical_potential[j]);
+
+				WriteVectorsToFile(filename,
+								   "# mass, zeroed gap equation\n",
+								   2,
+								   m_vector,
+								   zeroed_gap_vector);
+			}
+	  	}
+
+	  	gsl_vector_free(m_vector);
+	  	gsl_vector_free(zeroed_gap_vector);
+
+		fprintf(log_file,
+                "The following tests were executed for %s parameterization:\n",
+                parameters.parameters_set_identifier);
+        fprintf(log_file,
+                "\tCalculation of zeroed gap eq for T != 0 as function of mass\n"
+                "\tFiles:tests/data/fermi_dirac_distribution_*.dat\n");
+	}
+
     fprintf(log_file, "\n");
     
-    { // Tests mass and renormalized chemical potential calculation as function
+    { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
         

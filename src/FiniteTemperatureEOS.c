@@ -144,12 +144,10 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
     
     double zeroed_gap_eq = mass
                            - parameters.bare_mass
-                           - 2.0 * NUM_COLORS * NUM_FLAVORS * mass
-                             * parameters.G_S * integral_2 / pow(M_PI * CONST_HBAR_C, 2.0);
+                           - integral_2;
     double zeroed_bar_dens_eq = params->barionic_density
-                                - NUM_COLORS * NUM_FLAVORS * integral
-                                  / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
-    
+                                - integral;
+
    	gsl_vector_set (f, 0, zeroed_gap_eq);
    	gsl_vector_set (f, 1, zeroed_bar_dens_eq);
     
@@ -167,8 +165,10 @@ double FermiDiracDistributionFromDensityIntegral(double mass,
     gsl_function F;
     F.function = &FermiDiracDistributionFromDensityIntegralIntegrand;
     F.params = &p;
-    
-    return OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+
+  	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+
+  	return NUM_COLORS * NUM_FLAVORS * integral / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
 }
 
 double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit)
@@ -224,7 +224,10 @@ double FermiDiracDistributionIntegralFromGapEquation(double mass,
     F.function = &FermiDiracDistributionIntegralFromGapEquationIntegrand;
     F.params = &p;
     
-    return OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+
+	return 2.0 * NUM_COLORS * NUM_FLAVORS * mass
+           * parameters.G_S * integral / pow(M_PI * CONST_HBAR_C, 2.0);
 }
 
 double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
