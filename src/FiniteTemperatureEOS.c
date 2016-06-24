@@ -83,8 +83,6 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
         iter++;
         status = gsl_multiroot_fsolver_iterate(solver);
         
-        //print_state(iter, s);
-        
         if (status == GSL_EBADFUNC){
             printf("TwodimensionalRootFinder: Error: Infinity or division by zero.\n");
             exit(EXIT_FAILURE);
@@ -121,19 +119,27 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
     gsl_vector_free (initial_guess);
 }
 
+//static int num_calls = 0;
+
 int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
                                          void * p,
                                          gsl_vector * f)
 {
+    //    num_calls++;
+    
+    //    printf("num_cals = %d\n", num_calls);
+    
     multi_dim_gap_eq_param * params = (multi_dim_gap_eq_param *)p;
     
    	const double mass = gsl_vector_get(x,0);
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
+        printf("\tmass = %f\n\tmu = %f\n", mass, renormalized_chemical_potential);
     
     double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
     double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteDensity(mass,
                                                                               renormalized_chemical_potential,
                                                                               params->barionic_density);
+    printf("gap: %20.15E \ndgap: %20.15E\n", zeroed_gap_eq, zeroed_bar_dens_eq);
 
    	gsl_vector_set (f, 0, zeroed_gap_eq);
    	gsl_vector_set (f, 1, zeroed_bar_dens_eq);
@@ -154,7 +160,10 @@ double ZeroedBarionicDensityEquationForFiniteDensity(double mass,
 {
     double integral = FermiDiracDistributionFromDensityIntegral(mass,
                                                                 renormalized_chemical_potential);
-    return barionic_density - integral;
+    
+    double quarks_dens = NUM_COLORS * NUM_FLAVORS * integral / (pow(M_PI, 2.0));
+    
+    return 3.0 * barionic_density  * pow(CONST_HBAR_C, 3.0) - quarks_dens;
 }
 
 double FermiDiracDistributionFromDensityIntegral(double mass,
@@ -170,8 +179,9 @@ double FermiDiracDistributionFromDensityIntegral(double mass,
     F.params = &p;
 
   	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+    //    printf("integral = %f\n", integral);
 
-  	return NUM_COLORS * NUM_FLAVORS * integral / (pow(M_PI, 2.0) * pow(CONST_HBAR_C, 3.0));
+  	return integral;
 }
 
 double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit)
@@ -179,7 +189,7 @@ double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upp
     gsl_integration_workspace * workspace =
     gsl_integration_workspace_alloc(parameters.fermi_dirac_integrals_max_interval_num);
     
-    double integral;
+    double integral = 0;
     double abserr;
     gsl_integration_qag(F,
                         lower_limit,

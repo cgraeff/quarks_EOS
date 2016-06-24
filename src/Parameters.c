@@ -218,16 +218,16 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.temperature = 100.0; // (MeV)
     
     p.mass_and_renor_chem_pot_solution_max_iter = 4000;
-    p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)
-    p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 200.0; //(MeV)
+    p.mass_and_renor_chem_pot_solution_mass_guess = 200.0; // (MeV)
+    p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 400.0; //(MeV)
     p.mass_and_renorm_chem_pot_solution_abs_error = 1.0E-4;
     p.mass_and_renorm_chem_pot_solution_rel_error = 1.0E-4;
     
-    p.fermi_dirac_integrals_max_interval_num = 2000;
+    p.fermi_dirac_integrals_max_interval_num = 8000;
     p.fermi_dirac_integrals_integration_key = GSL_INTEG_GAUSS61;
-    p.fermi_dirac_integrals_max_sub_interval = 1500;
-    p.fermi_dirac_integrals_abs_error = 1.0E-4;
-    p.fermi_dirac_integrals_rel_error = 1.0E-4;
+    p.fermi_dirac_integrals_max_sub_interval = 8000;
+    p.fermi_dirac_integrals_abs_error = 1.0E-12;
+    p.fermi_dirac_integrals_rel_error = 1.0E-12;
 
   	return p;
 }

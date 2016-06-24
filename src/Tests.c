@@ -92,6 +92,8 @@ void RunTests()
     
     fprintf(log_file, "\n");
     
+#pragma mark Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611
+    
     // Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408
     // (the figure uses parameters of Set II from the article)
     {
@@ -114,20 +116,10 @@ void RunTests()
             gsl_vector * mass_vector = gsl_vector_alloc(points_number);
             gsl_vector * output = gsl_vector_alloc(points_number);
 
- //           // Prepare function to be passed to the root finding algorithm
- //           gsl_function F;
- //           renorm_chem_pot_equation_input input;
- //           F.function = &ZeroedRenormalizedChemicalPotentialEquation;
- //           F.params = &input;
-
             double m = 0;
 
             for (int j = 0; j < points_number; j++) {
                 
-                // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
-//                input.chemical_potential = chemical_potential[i];
-//                input.mass = m;
-
                 double renormalized_chemical_potential = chemical_potential[i];
 
                 double fermi_momentum = 0;
@@ -166,6 +158,8 @@ void RunTests()
     }
   
     fprintf(log_file, "\n");
+    
+#pragma mark Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports
 
     // Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = 0)
@@ -196,19 +190,9 @@ void RunTests()
             gsl_vector * mass_vector = gsl_vector_alloc(points_number);
             gsl_vector * output = gsl_vector_alloc(points_number);
             
-            // Prepare function to be passed to the root finding algorithm
-//            gsl_function F;
-//            renorm_chem_pot_equation_input input;
-//            F.function = &ZeroedRenormalizedChemicalPotentialEquation;
-//            F.params = &input;
-            
             double m = 0;
             
             for (int j = 0; j < points_number; j++) {
-                
-                // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
-//                input.chemical_potential = chemical_potential[i];
-//                input.mass = m;
                 
                 double renormalized_chemical_potential = chemical_potential[i];
                 
@@ -249,6 +233,8 @@ void RunTests()
     }
     
     fprintf(log_file, "\n");
+    
+#pragma mark Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports
     
     // Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = G_S)
@@ -311,7 +297,7 @@ void RunTests()
  
                     // If chemical potential is zero, the solution is zero
                     if (chemical_potential[i] == 0){
-                        renormalized_chemical_potential = 0;
+                        renormalized_chemical_potential = 0; // FIXME: this is not necessary
                     }
                     else{
                         renormalized_chemical_potential =
@@ -380,6 +366,8 @@ void RunTests()
 
     fprintf(log_file, "\n");
     
+#pragma mark Fermi-Dirac Distributions
+    
     { // Prints Fermi-Dirac distributions for selected values of temperature
       // and chemical potential as function of momentum
         
@@ -437,6 +425,8 @@ void RunTests()
     }
     
     fprintf(log_file, "\n");
+    
+#pragma mark Fermi-Dirac Distribution Integrals
     
     { // Tests integration of Fermi-Dirac distributions
         SetParametersSet("BuballaR_2");
@@ -514,6 +504,8 @@ void RunTests()
 
   	fprintf(log_file, "\n");
     
+#pragma mark Mass Polynomial Equation for Selected Temperatures
+    
 	{ // writes gap equation as function of mass for selected temperatures
 	  //
 	  	SetParametersSet("BuballaR_2");
@@ -575,6 +567,9 @@ void RunTests()
 	}
 
     fprintf(log_file, "\n");
+    
+#pragma mark Maps of Mass and Renormalized Chemical Potential Polynomial Equations
+    
     if (false)
     { // Calculates zeroed gap and barionic densities equations so we can see both
       // and have an insight of what's going on
@@ -655,6 +650,8 @@ void RunTests()
     
     fprintf(log_file, "\n");
     
+#pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
+    
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
@@ -665,7 +662,7 @@ void RunTests()
         double max_barionic_denstiy = 0.8;
         double step = (max_barionic_denstiy - min_barionic_density) / ((double)(n_pts - 1));
         
-        double temperature[4] = {5.0, 10.0, 15.0, 20.0};
+        double temperature[4] = {10.0, 15.0, 20.0, 25.0};
         
         gsl_vector * dens_vector = gsl_vector_alloc(n_pts);
         gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
