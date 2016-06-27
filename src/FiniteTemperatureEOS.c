@@ -151,7 +151,10 @@ double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_ch
 {
     double integral = FermiDiracDistributionIntegralFromGapEquation(mass,
                                                                     renormalized_chemical_potential);
-    return mass - parameters.bare_mass - integral;
+    
+    double constant = 2.0 * NUM_COLORS * NUM_FLAVORS * parameters.G_S / pow(M_PI * CONST_HBAR_C, 2.0);
+    
+    return mass - parameters.bare_mass - constant * mass * integral;
 }
 
 double ZeroedBarionicDensityEquationForFiniteDensity(double mass,
@@ -239,8 +242,7 @@ double FermiDiracDistributionIntegralFromGapEquation(double mass,
     
 	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
 
-	return 2.0 * NUM_COLORS * NUM_FLAVORS * mass
-           * parameters.G_S * integral / pow(M_PI * CONST_HBAR_C, 2.0);
+    return integral;
 }
 
 double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,

@@ -47,6 +47,7 @@ void RunTests()
     }
     
     // Run tests for requested parameterization
+    if (false)
     {
         SetParametersSet(options.parameterization);
     
@@ -96,6 +97,7 @@ void RunTests()
     
     // Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408
     // (the figure uses parameters of Set II from the article)
+    if (false)
     {
         SetParametersSet("Buballa_2");
         
@@ -163,6 +165,7 @@ void RunTests()
 
     // Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = 0)
+    if (false)
     {
         SetParametersSet("BuballaR_2");
         
@@ -238,6 +241,7 @@ void RunTests()
     
     // Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = G_S)
+    if (false)
     {
         SetParametersSet("BuballaR_2_GV");
         
@@ -368,6 +372,7 @@ void RunTests()
     
 #pragma mark Fermi-Dirac Distributions
     
+    if (false)
     { // Prints Fermi-Dirac distributions for selected values of temperature
       // and chemical potential as function of momentum
         
@@ -428,6 +433,7 @@ void RunTests()
     
 #pragma mark Fermi-Dirac Distribution Integrals
     
+    if (false)
     { // Tests integration of Fermi-Dirac distributions
         SetParametersSet("BuballaR_2");
         
@@ -506,6 +512,7 @@ void RunTests()
     
 #pragma mark Mass Polynomial Equation for Selected Temperatures
     
+    if (false)
 	{ // writes gap equation as function of mass for selected temperatures
 	  //
 	  	SetParametersSet("BuballaR_2");
@@ -570,12 +577,13 @@ void RunTests()
     
 #pragma mark Maps of Mass and Renormalized Chemical Potential Polynomial Equations
     
-    if (false)
+    if (true)
     { // Calculates zeroed gap and barionic densities equations so we can see both
       // and have an insight of what's going on
+        SetParametersSet("BuballaR_2");
         
-        int mass_n_pts = 500;
-        int renorm_chem_pot_n_pts = 500;
+        int mass_n_pts = 1500;
+        int renorm_chem_pot_n_pts = 1500;
         
         double min_mass = 0.0;
         double max_mass = 600.0;
@@ -586,15 +594,21 @@ void RunTests()
         double renorm_chem_pot_step = (max_renormalized_chemical_potential - min_renormalized_chemical_potential)
                                       / (renorm_chem_pot_n_pts - 1);
         
-        double temperature[10] = {5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0};
-        double barionic_density[10] = {0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.5};
-
+        const int num_densities = 20;
+        const int num_temperatures = 4;
+        double temperature[num_temperatures] = {5.0, 10.0, 15.0, 20.0};
+        double barionic_density[num_densities];
         
-        for (int i = 0; i < 10; i++){ // Temperature
+        for (int i = 0; i < num_densities; i++)
+            barionic_density[i] =  0.15 + 0.005 * (double)i;
+
+        printf("Mapping polynomial functions. This may take a while ...\n");
+        
+        for (int i = 0; i < num_temperatures; i++){ // Temperature
             
             parameters.temperature = temperature[i];
             
-            for (int l = 0; l < 10; l++){
+            for (int l = 0; l < num_densities; l++){
                 
                 double mass = min_mass;
                 
@@ -610,7 +624,7 @@ void RunTests()
                     exit(EXIT_FAILURE);
                 }
                     
-                    
+                int counter = 0;
                 for (int j = 0; j < mass_n_pts; j++) { // mass
                     
                     double renormalized_chemical_potential = min_renormalized_chemical_potential;
@@ -635,10 +649,20 @@ void RunTests()
                                 dens_gap);
                         
                         renormalized_chemical_potential += renorm_chem_pot_step;
+                        
+                        if ((100 * counter) % (mass_n_pts * renorm_chem_pot_n_pts) == 0){
+                            printf("\r[T = %2.2f, barionic density = %2.3f] %d %%",
+                                   temperature[i],
+                                   barionic_density[l],
+                                   (100 * counter) / (mass_n_pts * renorm_chem_pot_n_pts));
+                            fflush(stdout);
+                        }
+                        counter++;
                     }
                     
                     mass += mass_step;
                 }
+                printf("\n");
                 
                 fclose(gap_file);
                 fclose(dens_gap_file);
@@ -651,7 +675,7 @@ void RunTests()
     fprintf(log_file, "\n");
     
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
-    
+    if (true)
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
