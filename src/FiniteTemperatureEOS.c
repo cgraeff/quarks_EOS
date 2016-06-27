@@ -133,13 +133,13 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
     
    	const double mass = gsl_vector_get(x,0);
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
-        printf("\tmass = %f\n\tmu = %f\n", mass, renormalized_chemical_potential);
+    //        printf("\tmass = %f\n\tmu = %f\n", mass, renormalized_chemical_potential);
     
     double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
     double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteDensity(mass,
                                                                               renormalized_chemical_potential,
                                                                               params->barionic_density);
-    printf("gap: %20.15E \ndgap: %20.15E\n", zeroed_gap_eq, zeroed_bar_dens_eq);
+    //   printf("gap: %20.15E \ndgap: %20.15E\n", zeroed_gap_eq, zeroed_bar_dens_eq);
 
    	gsl_vector_set (f, 0, zeroed_gap_eq);
    	gsl_vector_set (f, 1, zeroed_bar_dens_eq);

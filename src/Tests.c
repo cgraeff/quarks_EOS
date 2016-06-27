@@ -582,8 +582,8 @@ void RunTests()
       // and have an insight of what's going on
         SetParametersSet("BuballaR_2");
         
-        int mass_n_pts = 1500;
-        int renorm_chem_pot_n_pts = 1500;
+        int mass_n_pts = 150;
+        int renorm_chem_pot_n_pts = 150;
         
         double min_mass = 0.0;
         double max_mass = 600.0;
@@ -594,7 +594,9 @@ void RunTests()
         double renorm_chem_pot_step = (max_renormalized_chemical_potential - min_renormalized_chemical_potential)
                                       / (renorm_chem_pot_n_pts - 1);
         
-        const int num_densities = 20;
+        double tolerance_dens = 0.1;
+        double tolerance_gap = 0.1;
+        const int num_densities = 1;
         const int num_temperatures = 4;
         double temperature[num_temperatures] = {5.0, 10.0, 15.0, 20.0};
         double barionic_density[num_densities];
@@ -616,8 +618,14 @@ void RunTests()
                 sprintf(filename, "tests/data/gap/data/gap_%d_%d.dat", i, l);
                 FILE * gap_file = fopen(filename, "w");
                 
+                sprintf(filename, "tests/data/gap/data/lgap_%d_%d.dat", i, l);
+                FILE * lgap_file = fopen(filename, "w");
+
                 sprintf(filename, "tests/data/gap/data/dens_gap_%d_%d.dat", i, l);
                 FILE * dens_gap_file = fopen(filename, "w");
+                
+                sprintf(filename, "tests/data/gap/data/ldens_gap_%d_%d.dat", i, l);
+                FILE * ldens_gap_file = fopen(filename, "w");
                 
                 if (gap_file == NULL || dens_gap_file == NULL){
                     printf("Could not open gap_file or dens_gap_file\n");
@@ -648,6 +656,18 @@ void RunTests()
                                 renormalized_chemical_potential,
                                 dens_gap);
                         
+                        if (abs(gap) < tolerance_gap)
+                            fprintf(lgap_file,
+                                    "%20.15E\t%20.15E\n",
+                                    mass,
+                                    renormalized_chemical_potential);
+                        
+                        if (abs(dens_gap) < tolerance_dens)
+                            fprintf(ldens_gap_file,
+                                    "%20.15E\t%20.15E\n",
+                                    mass,
+                                    renormalized_chemical_potential);
+                        
                         renormalized_chemical_potential += renorm_chem_pot_step;
                         
                         if ((100 * counter) % (mass_n_pts * renorm_chem_pot_n_pts) == 0){
@@ -666,6 +686,8 @@ void RunTests()
                 
                 fclose(gap_file);
                 fclose(dens_gap_file);
+                fclose(lgap_file);
+                fclose(ldens_gap_file);
             }
             
         }
