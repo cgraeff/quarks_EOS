@@ -577,13 +577,13 @@ void RunTests()
     
 #pragma mark Maps of Mass and Renormalized Chemical Potential Polynomial Equations
     
-    if (true)
+    if (false)
     { // Calculates zeroed gap and barionic densities equations so we can see both
       // and have an insight of what's going on
         SetParametersSet("BuballaR_2");
 
-        int mass_n_pts = 300;
-        int renorm_chem_pot_n_pts = 300;
+        int mass_n_pts = 150;
+        int renorm_chem_pot_n_pts = 150;
         
         double min_mass = 0.0;
         double max_mass = 600.0;
@@ -595,14 +595,14 @@ void RunTests()
                                       / (renorm_chem_pot_n_pts - 1);
         
         double tolerance_dens = 0.05;
-        double tolerance_gap = 0.1;
-        const int num_densities = 1;
-        const int num_temperatures = 1;
-        const double temperature[4] = {5.0, 10.0, 15.0, 20.0};
+        double tolerance_gap = 0.5;
+        const int num_densities = 30;
+        const int num_temperatures = 10;
+        const double temperature[10] = {1.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0};
         double barionic_density[num_densities];
 
         for (int i = 0; i < num_densities; i++)
-            barionic_density[i] =  0.1 + 0.05 * (double)i;
+            barionic_density[i] =  0.05 + 0.01 * (double)i;
 
         printf("Mapping polynomial functions. This may take a while ...\n");
         
@@ -697,15 +697,15 @@ void RunTests()
     fprintf(log_file, "\n");
     
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
-    if (false)
+    if (true)
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
         
         int n_pts = 100;
         
-        double min_barionic_density = 0.6;
-        double max_barionic_denstiy = 0.8;
+        double min_barionic_density = 0.1;
+        double max_barionic_denstiy = 0.3;
         double step = (max_barionic_denstiy - min_barionic_density) / ((double)(n_pts - 1));
         
         double temperature[4] = {10.0, 15.0, 20.0, 25.0};

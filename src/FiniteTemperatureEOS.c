@@ -85,11 +85,11 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
         
         if (status == GSL_EBADFUNC){
             printf("TwodimensionalRootFinder: Error: Infinity or division by zero.\n");
-            exit(EXIT_FAILURE);
+            abort();
         }
         else if (status == GSL_ENOPROG){
             printf("TwodimensionalRootFinder: Error: Solver is stuck. Try a different initial guess.\n");
-            exit(EXIT_FAILURE);
+            abort();
         }
         
         // Check if the root is good enough:
