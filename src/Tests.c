@@ -581,9 +581,9 @@ void RunTests()
     { // Calculates zeroed gap and barionic densities equations so we can see both
       // and have an insight of what's going on
         SetParametersSet("BuballaR_2");
-        
-        int mass_n_pts = 150;
-        int renorm_chem_pot_n_pts = 150;
+
+        int mass_n_pts = 300;
+        int renorm_chem_pot_n_pts = 300;
         
         double min_mass = 0.0;
         double max_mass = 600.0;
@@ -594,15 +594,15 @@ void RunTests()
         double renorm_chem_pot_step = (max_renormalized_chemical_potential - min_renormalized_chemical_potential)
                                       / (renorm_chem_pot_n_pts - 1);
         
-        double tolerance_dens = 0.1;
+        double tolerance_dens = 0.05;
         double tolerance_gap = 0.1;
         const int num_densities = 1;
-        const int num_temperatures = 4;
-        double temperature[num_temperatures] = {5.0, 10.0, 15.0, 20.0};
+        const int num_temperatures = 1;
+        const double temperature[4] = {5.0, 10.0, 15.0, 20.0};
         double barionic_density[num_densities];
-        
+
         for (int i = 0; i < num_densities; i++)
-            barionic_density[i] =  0.15 + 0.005 * (double)i;
+            barionic_density[i] =  0.1 + 0.05 * (double)i;
 
         printf("Mapping polynomial functions. This may take a while ...\n");
         
@@ -626,7 +626,7 @@ void RunTests()
                 
                 sprintf(filename, "tests/data/gap/data/ldens_gap_%d_%d.dat", i, l);
                 FILE * ldens_gap_file = fopen(filename, "w");
-                
+
                 if (gap_file == NULL || dens_gap_file == NULL){
                     printf("Could not open gap_file or dens_gap_file\n");
                     exit(EXIT_FAILURE);
@@ -646,30 +646,30 @@ void RunTests()
                         
                         fprintf(gap_file,
                                 "%20.15E\t%20.15E\t%20.15E\n",
-                                mass,
                                 renormalized_chemical_potential,
+								mass,
                                 gap);
                         
                         fprintf(dens_gap_file,
                                 "%20.15E\t%20.15E\t%20.15E\n",
-                                mass,
                                 renormalized_chemical_potential,
+								mass,
                                 dens_gap);
                         
-                        if (abs(gap) < tolerance_gap)
+                        if (fabs(gap) < tolerance_gap)
                             fprintf(lgap_file,
                                     "%20.15E\t%20.15E\n",
-                                    mass,
-                                    renormalized_chemical_potential);
-                        
-                        if (abs(dens_gap) < tolerance_dens)
+                                    renormalized_chemical_potential,
+									mass);
+
+						if (fabs(dens_gap) < tolerance_dens)
                             fprintf(ldens_gap_file,
                                     "%20.15E\t%20.15E\n",
-                                    mass,
-                                    renormalized_chemical_potential);
-                        
+                                    renormalized_chemical_potential,
+									mass);
+
                         renormalized_chemical_potential += renorm_chem_pot_step;
-                        
+
                         if ((100 * counter) % (mass_n_pts * renorm_chem_pot_n_pts) == 0){
                             printf("\r[T = %2.2f, barionic density = %2.3f] %d %%",
                                    temperature[i],
@@ -697,7 +697,7 @@ void RunTests()
     fprintf(log_file, "\n");
     
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
-    if (true)
+    if (false)
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");

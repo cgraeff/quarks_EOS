@@ -218,8 +218,8 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.temperature = 100.0; // (MeV)
     
     p.mass_and_renor_chem_pot_solution_max_iter = 4000;
-    p.mass_and_renor_chem_pot_solution_mass_guess = 200.0; // (MeV)
-    p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 400.0; //(MeV)
+    p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)
+    p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 200.0; //(MeV)
     p.mass_and_renorm_chem_pot_solution_abs_error = 1.0E-4;
     p.mass_and_renorm_chem_pot_solution_rel_error = 1.0E-4;
     

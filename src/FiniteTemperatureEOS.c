@@ -141,8 +141,8 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
                                                                               params->barionic_density);
     //   printf("gap: %20.15E \ndgap: %20.15E\n", zeroed_gap_eq, zeroed_bar_dens_eq);
 
-   	gsl_vector_set (f, 0, zeroed_gap_eq);
-   	gsl_vector_set (f, 1, zeroed_bar_dens_eq);
+   	gsl_vector_set(f, 0, zeroed_gap_eq);
+   	gsl_vector_set(f, 1, zeroed_bar_dens_eq);
     
     return GSL_SUCCESS;
 }
@@ -166,7 +166,7 @@ double ZeroedBarionicDensityEquationForFiniteDensity(double mass,
     
     double quarks_dens = NUM_COLORS * NUM_FLAVORS * integral / (pow(M_PI, 2.0));
     
-    return 3.0 * barionic_density  * pow(CONST_HBAR_C, 3.0) - quarks_dens;
+    return 3.0 * barionic_density - quarks_dens /  pow(CONST_HBAR_C, 3.0);
 }
 
 double FermiDiracDistributionFromDensityIntegral(double mass,
