@@ -182,6 +182,9 @@ double ThermodynamicPotential(double mass,
         third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
                      / (4.0 * parameters.G_V * CONST_HBAR_C);
     
+    // The sign on the third term below differs from M. Buballa, Physics Report 407 (2005) 205-376
+    // (and other references), but to reproduce the results of Fig. 2.8 (right) from the
+    // report, the sign must be positive.
     return first_term + second_term + third_term;
 }
 

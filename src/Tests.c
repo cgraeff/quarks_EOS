@@ -295,6 +295,11 @@ void RunTests()
                 input.chemical_potential = chemical_potential[i];
                 input.mass = m;
                 
+                // FIXME: there is something weird here. Maybe it's not just the fix bellow,
+                // maybe this line is not necessary. See what should happen when G_V = 0
+                // and act accordingly. Then, if G_V is not zero, find the root.
+                // Anyway, why the renormalized chemical potential would be equal to the
+                // chemical potential in each case?
                 double renormalized_chemical_potential = chemical_potential[i];
                 
                 if (parameters.G_V != 0.0){

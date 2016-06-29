@@ -17,9 +17,11 @@
 #include "Constants.h"
 #include "Tests.h"
 #include "ZeroTemperatureEOS.h"
+#include "FiniteTemperatureEOS.h"
 #include "AuxiliaryFunctions.h"
 
-int PerformCalculation();
+int SolveZeroTemperatureEOS();
+int SolveFiniteTemperatureEOS();
 
 int main(int argc, char * argv[])
 {
@@ -33,7 +35,17 @@ int main(int argc, char * argv[])
 	// otherwise, use default set
   	SetParametersSet(options.parameterization);
 
-    //    PerformCalculation();
+    if (parameters.temperature == 0){
+        SolveZeroTemperatureEOS();
+    }
+    else if (parameters.temperature > 0){
+        SolveFiniteTemperatureEOS();
+    }
+    else{
+        printf("Values of temperature must be non-negative.\n");
+        printf("(%f was provided).\n", parameters.temperature);
+        exit(EXIT_FAILURE);
+    }
     
     return 0;
 }
@@ -41,7 +53,7 @@ int main(int argc, char * argv[])
 /*  The EOS is solved in the function bellow. In this particular implementation, 
     the barionic density was chosen as the running parameter.
  */
-int PerformCalculation(){
+int SolveZeroTemperatureEOS(){
     
     // Print name of parametrization
     if (options.verbose)
@@ -53,7 +65,7 @@ int PerformCalculation(){
     gsl_vector * mass_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * scalar_density_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * chemical_potential_vector = gsl_vector_alloc(parameters.points_number);
-    gsl_vector * vacuum_thermodynamic_potential_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * renormalized_chemical_potential_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * thermodynamic_potential_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * pressure_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
@@ -107,23 +119,19 @@ int PerformCalculation(){
 
         // Determination of chemical potential
         double renormalized_chemical_potential = sqrt(pow(fermi_momentum, 2.0) + pow(mass, 2.0));
-        gsl_vector_set(chemical_potential_vector, i, renormalized_chemical_potential);
+        gsl_vector_set(renormalized_chemical_potential_vector, i, renormalized_chemical_potential);
 
-        double chemical_potential =
-	  			renormalized_chemical_potential
-                - 2.0 * parameters.G_V * NUM_FLAVORS * NUM_COLORS * pow(fermi_momentum, 3.0)
-                  / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
+        double chemical_potential =	renormalized_chemical_potential
+                                    - 2.0 * parameters.G_V * NUM_FLAVORS * NUM_COLORS * pow(fermi_momentum, 3.0)
+                                      / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
+        gsl_vector_set(chemical_potential_vector, i, chemical_potential);
 
-        double regularized_thermodynamic_potential =
-	  			- vacuum_thermodynamic_potential
-                + ThermodynamicPotential(mass,
-                                         fermi_momentum,
-                                         chemical_potential,
-                                         renormalized_chemical_potential);
+        double regularized_thermodynamic_potential = - vacuum_thermodynamic_potential
+                                                     + ThermodynamicPotential(mass,
+                                                                              fermi_momentum,
+                                                                              chemical_potential,
+                                                                              renormalized_chemical_potential);
 
-        gsl_vector_set(vacuum_thermodynamic_potential_vector,
-					   i,
-					   vacuum_thermodynamic_potential);
         gsl_vector_set(thermodynamic_potential_vector,
 					   i,
 					   regularized_thermodynamic_potential);
@@ -163,17 +171,17 @@ int PerformCalculation(){
                        barionic_density_vector,
                        scalar_density_vector);
     
+    WriteVectorsToFile("data/renormalized_chemical_potential.dat",
+                       "# barionic density, chemical potential \n",
+                       2,
+                       barionic_density_vector,
+                       renormalized_chemical_potential_vector);
+    
     WriteVectorsToFile("data/chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        chemical_potential_vector);
-    
-    WriteVectorsToFile("data/vacuum_thermodynamic_potential.dat",
-                       "# barionic density, vacuum thermodynamic potential \n",
-                       2,
-                       barionic_density_vector,
-                       vacuum_thermodynamic_potential_vector);
 
     WriteVectorsToFile("data/thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
@@ -213,6 +221,8 @@ int PerformCalculation(){
     gsl_vector_free(fermi_momentum_vector);
     gsl_vector_free(mass_vector);
     gsl_vector_free(scalar_density_vector);
+    gsl_vector_free(renormalized_chemical_potential_vector);
+    gsl_vector_free(chemical_potential_vector);
     gsl_vector_free(thermodynamic_potential_vector);
     gsl_vector_free(pressure_vector);
     gsl_vector_free(energy_density_vector);
@@ -220,5 +230,161 @@ int PerformCalculation(){
     if (options.verbose)
     	printf("Done!\n");
 
+    return 0;
+}
+
+int SolveFiniteTemperatureEOS(){
+    
+    // Print name of parametrization
+    if (options.verbose)
+        printf("Calculation performed with %s parameters set.\n", parameters.parameters_set_identifier);
+    
+    // Vectors to store results
+    gsl_vector * barionic_density_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * mass_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * chemical_potential_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * renormalized_chemical_potential_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * thermodynamic_potential_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * pressure_vector = gsl_vector_alloc(parameters.points_number);
+    gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
+    
+    // Vacuum mass determination
+    if (options.verbose)
+        printf("Determining the vacuum mass and bag constant ...\n");
+    
+    double vacuum_mass = VacuumMassDetermination();
+    
+    double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0, 0.0);
+    double bag_constant = ThermodynamicPotential(parameters.bare_mass, 0.0, 0.0, 0.0)
+    - vacuum_thermodynamic_potential;
+    
+    if (options.verbose){
+        printf("\tVacuum mass: %f\n", vacuum_mass);
+        printf("\tBag constant: %f\n", bag_constant);
+    }
+    
+    // Define the density step. We subtract 1 from the number of points to
+    // make sure that the last point corresponds to parameters.maximum_density
+    double barionic_density = parameters.minimum_density;
+    
+    double density_step = (parameters.maximum_density - parameters.minimum_density)
+    / (parameters.points_number - 1);
+    
+    if (options.verbose)
+        printf("Solving gap equation and equations of state ...\n");
+    
+    for (int i = 0; i < parameters.points_number; i++){
+        
+        barionic_density += density_step;
+        gsl_vector_set(barionic_density_vector, i, barionic_density);
+        if (options.verbose){
+            printf("\r\tBarionic density: %f", barionic_density);
+            fflush(stdout);
+        }
+        
+        // Solution of Gap Equation, determination of scalar density
+        double mass;
+        double renormalized_chemical_potential;
+        CalculateMassAndRenormalizedChemicalPotentialSimultaneously(barionic_density,
+                                                                    &mass,
+                                                                    &renormalized_chemical_potential);
+        gsl_vector_set(mass_vector, i, mass);
+        gsl_vector_set(renormalized_chemical_potential_vector, i, renormalized_chemical_potential);
+        
+        double chemical_potential =	renormalized_chemical_potential
+                                    + 2.0 * NUM_COLORS * parameters.G_V * CONST_HBAR_C * barionic_density;
+        
+        gsl_vector_set(chemical_potential_vector, i, chemical_potential);
+        
+        double thermodynamic_potential = ThermodynamicPotentialForFiniteTemperature(mass,
+                                                                                    chemical_potential,
+                                                                                    renormalized_chemical_potential);
+        double regularized_thermodynamic_potential = thermodynamic_potential - vacuum_thermodynamic_potential;
+        
+        // Just the regularized thermodynamic potential will be saved
+        // as it's the only one that is used in other calculations
+        gsl_vector_set(thermodynamic_potential_vector,
+                       i,
+                       regularized_thermodynamic_potential);
+        
+        // Determination of pressure
+        double pressure = Pressure(regularized_thermodynamic_potential);
+        gsl_vector_set(pressure_vector, i, pressure);
+        
+        // Determination of energy density
+        double energy_density = EnergyDensity(regularized_thermodynamic_potential,
+                                              chemical_potential,
+                                              barionic_density);
+        gsl_vector_set(energy_density_vector, i, energy_density);
+        
+    }
+    
+    // Write results
+    if (options.verbose)
+        printf("\n"                     // As print inside the loop does't use new
+               "Saving results ...\n"); // line, we need one before the message
+    
+    WriteVectorsToFile("data/mass.dat",
+                       "# barionic density, mass\n",
+                       2,
+                       barionic_density_vector,
+                       mass_vector);
+    
+    WriteVectorsToFile("data/renormalized_chemical_potential.dat",
+                       "# barionic density, chemical potential \n",
+                       2,
+                       barionic_density_vector,
+                       renormalized_chemical_potential_vector);
+    
+    WriteVectorsToFile("data/chemical_potential.dat",
+                       "# barionic density, chemical potential \n",
+                       2,
+                       barionic_density_vector,
+                       chemical_potential_vector);
+    
+    
+    WriteVectorsToFile("data/thermodynamic_potential.dat",
+                       "# barionic density, thermodynamic_potential \n",
+                       2,
+                       barionic_density_vector,
+                       thermodynamic_potential_vector);
+    
+    WriteVectorsToFile("data/pressure.dat",
+                       "# barionic density, pressure \n",
+                       2,
+                       barionic_density_vector,
+                       pressure_vector);
+    
+    WriteVectorsToFile("data/energy_density.dat",
+                       "# barionic density, scalar density \n",
+                       2,
+                       barionic_density_vector,
+                       energy_density_vector);
+    
+    gsl_vector * energy_density_per_particle_vector =
+    VectorNewVectorFromDivisionElementByElement(energy_density_vector,
+                                                barionic_density_vector);
+    WriteVectorsToFile("data/energy_density_per_particle.dat",
+                       "# barionic density, energy density per particle \n",
+                       2,
+                       barionic_density_vector,
+                       energy_density_per_particle_vector);
+    
+    WriteVectorsToFile("data/thermodynamic_potential_vs_mass.dat",
+                       "# mass, thermodynamic potential\n",
+                       2,
+                       mass_vector,
+                       thermodynamic_potential_vector);
+    
+    // Free memory associated with vectors
+    gsl_vector_free(barionic_density_vector);
+    gsl_vector_free(mass_vector);
+    gsl_vector_free(thermodynamic_potential_vector);
+    gsl_vector_free(pressure_vector);
+    gsl_vector_free(energy_density_vector);
+    
+    if (options.verbose)
+        printf("Done!\n");
+    
     return 0;
 }

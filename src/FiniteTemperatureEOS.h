@@ -19,6 +19,12 @@ typedef struct _fermi_dirac_distrib_integrand{
     double temperature;
 } fermi_dirac_distrib_integrand;
 
+typedef struct _therm_pot_free_gas_contrib_params{
+    double mass;
+    double temperature;
+    double renormalized_chemical_potential;
+} therm_pot_free_gas_contrib_params;
+
 double FermiDiracDistributionFromDensityIntegral(double mass,
                                                  double renormalized_chemical_potential);
 double FermiDiracDistributionIntegralFromGapEquation(double mass,
@@ -39,5 +45,23 @@ double FermiDiracDistributionForParticles(double energy,
 double FermiDiracDistributionForAntiparticles(double energy,
                                               double chemical_potential,
                                               double temperature);
+
+double ThermodynamicPotentialForFiniteTemperature(double mass,
+                                                  double chemical_potential,
+                                                  double renormalized_chemical_potential);
+
+double ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(double mass,
+                                                                     double renormalized_chemical_potential);
+
+double PressureForFiniteTemperature(double regularized_thermodynamic_potential);
+double EnergyForFiniteTemperature(double regularized_thermodynamic_potential,
+                                  double chemical_potential,
+                                  double barionic_density,
+                                  double temperature,
+                                  double entropy);
+
+double Entropy(double mass, double temperature, double renormalized_chemical_potential);
+double EntropyIntegrand(double momentum, void * parameters);
+
 
 #endif /* FiniteTemperatureEOS_h */

@@ -32,6 +32,12 @@ double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
 
 double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit);
 
+double ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(double mass,
+                                                                     double renormalized_chemical_potential);
+double ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand(double momentum, void * parameters);
+
+
+double g(double t, double e, double c);
 
 
 void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic_density,
@@ -119,27 +125,19 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
     gsl_vector_free (initial_guess);
 }
 
-//static int num_calls = 0;
-
 int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
                                          void * p,
                                          gsl_vector * f)
 {
-    //    num_calls++;
-    
-    //    printf("num_cals = %d\n", num_calls);
-    
     multi_dim_gap_eq_param * params = (multi_dim_gap_eq_param *)p;
     
    	const double mass = gsl_vector_get(x,0);
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
-    //        printf("\tmass = %f\n\tmu = %f\n", mass, renormalized_chemical_potential);
     
     double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
     double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteDensity(mass,
                                                                               renormalized_chemical_potential,
                                                                               params->barionic_density);
-    //   printf("gap: %20.15E \ndgap: %20.15E\n", zeroed_gap_eq, zeroed_bar_dens_eq);
 
    	gsl_vector_set(f, 0, zeroed_gap_eq);
    	gsl_vector_set(f, 1, zeroed_bar_dens_eq);
@@ -182,7 +180,6 @@ double FermiDiracDistributionFromDensityIntegral(double mass,
     F.params = &p;
 
   	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
-    //    printf("integral = %f\n", integral);
 
   	return integral;
 }
@@ -273,4 +270,113 @@ double FermiDiracDistributionForAntiparticles(double energy,
                                               double temperature)
 {
     return 1.0 / (1.0 + exp((energy + chemical_potential)/temperature));
+}
+
+double ThermodynamicPotentialForFiniteTemperature(double mass,
+                                                  double chemical_potential,
+                                                  double renormalized_chemical_potential)
+{
+    double first_term = ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(mass,
+                                                                                      renormalized_chemical_potential);
+    
+    double second_term = pow(mass - parameters.bare_mass, 2.0)
+    / (4.0 * parameters.G_S * CONST_HBAR_C);
+    
+    // If G_V == 0, we have to avoid a division by zero
+    double third_term = 0.0;
+    if (parameters.G_V != 0)
+        third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
+        / (4.0 * parameters.G_V * CONST_HBAR_C);
+    
+    // Trying + sign on third term like in T=0 case
+    return first_term + second_term + third_term;
+}
+
+double ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(double mass,
+                                                                     double renormalized_chemical_potential)
+{
+    therm_pot_free_gas_contrib_params p;
+    p.mass = mass;
+    p.renormalized_chemical_potential = renormalized_chemical_potential;
+    p.temperature = parameters.temperature;
+    
+    gsl_function F;
+    F.function = &ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand;
+    F.params = &p;
+    
+    double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+    
+    return - NUM_COLORS * NUM_FLAVORS * integral / pow(M_PI, 2.0);
+}
+
+double ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand(double momentum, void * parameters)
+{
+    therm_pot_free_gas_contrib_params * p = (therm_pot_free_gas_contrib_params *)parameters;
+    
+    double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+    
+    /* From docs:
+     If x is nearly zero, then the common expression log(1 + x) will not be able to produce accurate
+     results, as most (or all) of the information in x will be lost by addition.  Instead, use log1p(x) to
+     perform the same computation without undue loss of accuracy. */
+    double first_term = p->temperature * log1p(exp(-(energy - p->renormalized_chemical_potential)/p->temperature));
+    double second_term = p->temperature * log1p(exp(-(energy + p->renormalized_chemical_potential)/p->temperature));
+    
+    return pow(momentum, 2.0) * (energy + first_term + second_term);
+}
+
+typedef struct _entropy_integrand_parameters{
+    double mass;
+    double temperature;
+    double renormalized_chemical_potential;
+} entropy_integrand_parameters;
+
+double Entropy(double mass, double temperature, double renormalized_chemical_potential)
+{
+    entropy_integrand_parameters p;
+    p.mass = mass;
+    p.temperature = temperature;
+    p.renormalized_chemical_potential = renormalized_chemical_potential;
+    
+    gsl_function F;
+    F.function = &EntropyIntegrand;
+    F.params = &p;
+    
+    double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+    
+    return - NUM_COLORS * NUM_FLAVORS * integral / pow(M_PI, 2.0);
+}
+
+double g(double t, double e, double c)
+{
+    double a = - (e - c)/t;
+    return log1p(exp(a)) + a * exp(a) / (1.0 + exp(a));
+}
+
+double EntropyIntegrand(double momentum, void * parameters)
+{
+    entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
+    
+    double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+    
+    double first_term = g(p->temperature, energy, p->renormalized_chemical_potential);
+    double second_term = g(p->temperature, energy, -p->renormalized_chemical_potential);
+    
+    return pow(momentum, 2.0) * (first_term + second_term);
+}
+
+double PressureForFiniteTemperature(double regularized_thermodynamic_potential)
+{
+    return - regularized_thermodynamic_potential;
+}
+
+double EnergyForFiniteTemperature(double regularized_thermodynamic_potential,
+                                  double chemical_potential,
+                                  double barionic_density,
+                                  double temperature,
+                                  double entropy)
+{
+    return regularized_thermodynamic_potential
+            + temperature * entropy
+            + chemical_potential * NUM_COLORS * barionic_density;
 }
