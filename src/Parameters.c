@@ -199,20 +199,20 @@ Parameters NewCopyOfParametersSetFromTemplate()
     // and that may be a problem for root finding;
     p.gap_eq_solver_lower_bound = 1.0E-3;
     p.gap_eq_solver_upper_bound = 1000.0;  // MeV (about three times the nucleon mass)
-    p.gap_eq_solver_abs_error = 0.005;
+    p.gap_eq_solver_abs_error = 1.0E-5;
     p.gap_eq_solver_rel_error = 5.0E-5;
     p.gap_eq_solver_max_iterations = 2000;
 
     p.vac_mass_det_lower_bound = 1.0E-3;   // Low, but not zero. Same reason as above.
     p.vac_mass_det_upper_bound = 1000.0;   // Near the value of the nucleon mass.
-    p.vac_mass_det_abs_error = 0.005;
-    p.vac_mass_det_rel_error = 5.0E-5;
+    p.vac_mass_det_abs_error = 1.0E-5;
+    p.vac_mass_det_rel_error = 1.0E-5;
     p.vac_mass_det_max_iterations = 2000;
 
   	p.renormalized_chemical_potential_lower_bound = 1.0E-3;
     p.renormalized_chemical_potential_upper_bound = 1000.0;
-    p.renormalized_chemical_potential_abs_error = 0.005;
-    p.renormalized_chemical_potential_rel_error = 5.0E-5;
+    p.renormalized_chemical_potential_abs_error = 1.0E-5;
+    p.renormalized_chemical_potential_rel_error = 1.0E-5;
     p.renormalized_chemical_potential_max_iter = 2000;
     
     p.temperature = 0.0; // (MeV)
@@ -220,8 +220,8 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.mass_and_renor_chem_pot_solution_max_iter = 4000;
     p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)
     p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 400.0; //(MeV)
-    p.mass_and_renorm_chem_pot_solution_abs_error = 1.0E-4;
-    p.mass_and_renorm_chem_pot_solution_rel_error = 1.0E-4;
+    p.mass_and_renorm_chem_pot_solution_abs_error = 1.0E-5;
+    p.mass_and_renorm_chem_pot_solution_rel_error = 1.0E-5;
     
     p.fermi_dirac_integrals_max_interval_num = 8000;
     p.fermi_dirac_integrals_integration_key = GSL_INTEG_GAUSS61;

@@ -37,6 +37,9 @@ int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
                                                      int points_number,
                                                      double chemical_potential,
                                                      double mass);
+
+double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p);
+
 void RunTests()
 {
     FILE * log_file = fopen("tests/tests.log", "w");
@@ -809,7 +812,99 @@ void RunTests()
         gsl_vector_free(entropy_vector);
     }
     
+#pragma mark Reproduce Fig. 2.7 from Buballa Physics Reports
+    if (true){
+        SetParametersSet("BuballaR_2");
+        
+        int n_pts = 1000;
+        double temperature_min = 0.0;
+        double temperature_max = 300.0;
+        double temperature_step = (temperature_max - temperature_min) / (double)(n_pts - 1);
+        
+        gsl_vector * temperature_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
+        
+        double temperature = temperature_min;
+        for (int i = 0; i < n_pts; i++){
+            
+            // FIXME: change the program to allow temperature as a variable
+            // instead of as a parameter
+            parameters.temperature = temperature;
+            
+            // Prepare function to be passed to the root finding algorithm
+            gsl_function F;
+            F.function = &ZeroedGapEquationForFiniteTemperatureTest;
+            
+            double mass = UnidimensionalRootFinder(&F,
+                                                   0.0,
+                                                   500.0,
+                                                   1.0E-2,
+                                                   1.0E-2,
+                                                   1000);
+            
+            gsl_vector_set(temperature_vector, i, temperature);
+            gsl_vector_set(mass_vector, i, mass);
+            
+            temperature += temperature_step;
+        }
+        
+        WriteVectorsToFile("tests/data/mass_temperature.dat",
+                           "# Reproduce Fig. 2.7 from Buballa, Physics Reports bare_mass not zero\n"
+                           "# temperature, mass\n",
+                           2,
+                           temperature_vector,
+                           mass_vector);
+        
+        // Repeat for bare_mass = 0
+        parameters.bare_mass = 0;
+        
+        temperature = temperature_min;
+        for (int i = 0; i < n_pts; i++){
+            
+            // FIXME: change the program to allow temperature as a variable
+            // instead of as a parameter
+            parameters.temperature = temperature;
+            
+            // Prepare function to be passed to the root finding algorithm
+            gsl_function F;
+            F.function = &ZeroedGapEquationForFiniteTemperatureTest;
+
+            // This case will not have solutions beyond T = 220 MeV
+            double mass = 0;
+            
+            if (temperature < 220.0)
+                mass = UnidimensionalRootFinder(&F,
+                                                0.1,
+                                                500.0,
+                                                1.0E-7,
+                                                1.0E-7,
+                                                6000);
+
+            gsl_vector_set(temperature_vector, i, temperature);
+            gsl_vector_set(mass_vector, i, mass);
+            
+            temperature += temperature_step;
+        }
+        
+        WriteVectorsToFile("tests/data/mass_temperature_bare_mass_zero.dat",
+                           "# Reproduce Fig. 2.7 from Buballa, Physics Reports bare_mass = 0\n"
+                           "# temperature, mass\n",
+                           2,
+                           temperature_vector,
+                           mass_vector);
+        
+        gsl_vector_free(temperature_vector);
+        gsl_vector_free(mass_vector);
+    }
+    
     fclose(log_file);
+}
+
+double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p)
+{
+    // As the barionic_density is zero, so are the renormalized_chemical_potential
+    // and the chemical_potential
+    return ZeroedGapEquationForFiniteTemperature(mass, 0.0);
 }
 
 int WriteVacuumMassEquation(char * filename,
