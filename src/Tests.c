@@ -702,7 +702,7 @@ void RunTests()
     fprintf(log_file, "\n");
     
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
-    if (true)
+    if (false)
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
@@ -762,6 +762,51 @@ void RunTests()
         fprintf(log_file,
                 "\tCalculation of mass and renormalized chemical potential as function of barionic density "
                 "\tFiles:tests/data/mass_and_renorm_chem_pot_*.dat\n");
+    }
+    
+#pragma mark Entropy
+    if (true)
+    {
+        SetParametersSet("BuballaR_2");
+        
+        int n_pts = 1000;
+        
+        double temperature[4] = {1.0, 5.0, 10.0, 15.0};
+        double renormalized_chemical_potential[4] = {50.0, 100.0, 200.0, 350.0};
+        
+        double mass_min = 0.0;
+        double mass_max = 400.0;
+        double mass_step = (mass_max - mass_min) / (double)(n_pts - 1);
+        
+        gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * entropy_vector = gsl_vector_alloc(n_pts);
+        
+        for (int i = 0; i < 4; i++){
+            for (int j = 0; j < 4; j++){
+                
+                double mass = mass_min;
+                for (int k = 0; k < n_pts; k++){
+                    double entropy = Entropy(mass, temperature[i], renormalized_chemical_potential[j]);
+                
+                    gsl_vector_set(mass_vector, k, mass);
+                    gsl_vector_set(entropy_vector, k, entropy);
+                    
+                    mass += mass_step;
+                }
+                
+                char filename[256];
+                sprintf(filename, "tests/data/entropy_%d_%d.dat", i, j);
+                
+                WriteVectorsToFile(filename,
+                                   "# mass, entropy\n",
+                                   2,
+                                   mass_vector,
+                                   entropy_vector);
+            }
+        }
+        
+        gsl_vector_free(mass_vector);
+        gsl_vector_free(entropy_vector);
     }
     
     fclose(log_file);

@@ -19,11 +19,13 @@ typedef struct _parameters
     double minimum_density;     // (fm^-3)
     double maximum_density;     // (fm^-3)
     
+    // FIXME: this is for a test, take out
     // Parameters used when writing the zeroed gap equation
     double gap_minimum_mass;
     double gap_maximum_mass;
     double gap_points_number;
     
+    // FIXME: that is for T = 0 only
 /* Parameters for root finding in the solution of the Gap Equation, Vacuum Mass,
    and Renormalized Chemical Potential:
        - The root is assumed to be in the region bracketed by *_lower_bound and *_upper_bound;

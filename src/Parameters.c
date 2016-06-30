@@ -215,7 +215,7 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.renormalized_chemical_potential_rel_error = 5.0E-5;
     p.renormalized_chemical_potential_max_iter = 2000;
     
-    p.temperature = 100.0; // (MeV)
+    p.temperature = 0.0; // (MeV)
     
     p.mass_and_renor_chem_pot_solution_max_iter = 4000;
     p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)

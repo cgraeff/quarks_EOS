@@ -322,7 +322,7 @@ double ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand(do
     double first_term = p->temperature * log1p(exp(-(energy - p->renormalized_chemical_potential)/p->temperature));
     double second_term = p->temperature * log1p(exp(-(energy + p->renormalized_chemical_potential)/p->temperature));
     
-    return pow(momentum, 2.0) * (energy + first_term + second_term);
+    return pow(momentum, 2.0) * (energy + first_term + second_term) / pow(CONST_HBAR_C, 3.0);
 }
 
 typedef struct _entropy_integrand_parameters{
@@ -333,6 +333,8 @@ typedef struct _entropy_integrand_parameters{
 
 double Entropy(double mass, double temperature, double renormalized_chemical_potential)
 {
+    int interval_num = 1000;
+    
     entropy_integrand_parameters p;
     p.mass = mass;
     p.temperature = temperature;
@@ -342,9 +344,32 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
     F.function = &EntropyIntegrand;
     F.params = &p;
     
-    double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
+    gsl_integration_workspace * workspace =
+        gsl_integration_workspace_alloc(interval_num);
     
-    return - NUM_COLORS * NUM_FLAVORS * integral / pow(M_PI, 2.0);
+    double integral = 0;
+    double abserr;
+    double lower_limit = 0.0;
+    double upper_limit = parameters.cutoff;
+    double abs_error = 1.0E-3;
+    double rel_error = 1.0E-2;
+    int max_sub_interval = interval_num;
+    int integration_key = GSL_INTEG_GAUSS61;
+    
+    gsl_integration_qag(&F,
+                        lower_limit,
+                        upper_limit,
+                        abs_error,
+                        rel_error,
+                        max_sub_interval,
+                        integration_key,
+                        workspace,
+                        &integral,
+                        &abserr);
+    
+    gsl_integration_workspace_free(workspace);
+    
+    return - NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * integral / pow(M_PI, 2.0);
 }
 
 double g(double t, double e, double c)

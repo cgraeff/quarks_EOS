@@ -35,6 +35,10 @@ int main(int argc, char * argv[])
 	// otherwise, use default set
   	SetParametersSet(options.parameterization);
 
+    //FIXME: just testing, remove in the future
+    SetParametersSet("BuballaR_2");
+    parameters.temperature = 10.0;
+    
     if (parameters.temperature == 0){
         SolveZeroTemperatureEOS();
     }
@@ -46,7 +50,7 @@ int main(int argc, char * argv[])
         printf("(%f was provided).\n", parameters.temperature);
         exit(EXIT_FAILURE);
     }
-    
+
     return 0;
 }
 
@@ -255,8 +259,8 @@ int SolveFiniteTemperatureEOS(){
     double vacuum_mass = VacuumMassDetermination();
     
     double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0, 0.0);
-    double bag_constant = ThermodynamicPotential(parameters.bare_mass, 0.0, 0.0, 0.0)
-    - vacuum_thermodynamic_potential;
+    double bag_constant = ThermodynamicPotentialForFiniteTemperature(parameters.bare_mass, 0.0, 0.0)
+                          - vacuum_thermodynamic_potential;
     
     if (options.verbose){
         printf("\tVacuum mass: %f\n", vacuum_mass);
@@ -275,7 +279,7 @@ int SolveFiniteTemperatureEOS(){
     
     for (int i = 0; i < parameters.points_number; i++){
         
-        barionic_density += density_step;
+        barionic_density += density_step; // FIXME: this should be at the end of the loop
         gsl_vector_set(barionic_density_vector, i, barionic_density);
         if (options.verbose){
             printf("\r\tBarionic density: %f", barionic_density);
@@ -308,13 +312,17 @@ int SolveFiniteTemperatureEOS(){
                        regularized_thermodynamic_potential);
         
         // Determination of pressure
-        double pressure = Pressure(regularized_thermodynamic_potential);
+        double pressure = PressureForFiniteTemperature(regularized_thermodynamic_potential);
         gsl_vector_set(pressure_vector, i, pressure);
         
         // Determination of energy density
-        double energy_density = EnergyDensity(regularized_thermodynamic_potential,
-                                              chemical_potential,
-                                              barionic_density);
+        double entropy = Entropy(mass, parameters.temperature, renormalized_chemical_potential);
+        double energy_density = EnergyForFiniteTemperature(regularized_thermodynamic_potential,
+                                                           chemical_potential,
+                                                           barionic_density,
+                                                           parameters.temperature,
+                                                           entropy);
+        
         gsl_vector_set(energy_density_vector, i, energy_density);
         
     }
