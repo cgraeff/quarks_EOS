@@ -369,13 +369,32 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
     
     gsl_integration_workspace_free(workspace);
     
-    return - NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * integral / pow(M_PI, 2.0);
+    return NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * integral / pow(M_PI, 2.0);
 }
 
-double g(double t, double e, double c)
+double EntropyIntegrandFromDerivative(double momentum, void * parameters)
 {
-    double a = - (e - c)/t;
-    return log1p(exp(a)) + a * exp(a) / (1.0 + exp(a));
+    // This is the expression I obtained from - \partial \omega / \partial T
+    
+    entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
+    
+    double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+    
+    double fd_dist_part = FermiDiracDistributionForParticles(energy,
+                                                             p->renormalized_chemical_potential,
+                                                             p->temperature);
+    
+    double fd_dist_antipart = FermiDiracDistributionForAntiparticles(energy,
+                                                                     p->renormalized_chemical_potential,
+                                                                     p->temperature);
+    
+    double particles_term = - log1p(-fd_dist_part)
+                            + (energy - p->renormalized_chemical_potential) * fd_dist_part / p->temperature;
+    
+    double antiparticles_term = - log1p(-fd_dist_antipart)
+                                + (energy + p->renormalized_chemical_potential) * fd_dist_antipart / p->temperature;
+    
+    return pow(momentum, 2.0) * (particles_term + antiparticles_term);
 }
 
 double EntropyIntegrand(double momentum, void * parameters)
@@ -384,10 +403,21 @@ double EntropyIntegrand(double momentum, void * parameters)
     
     double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
     
-    double first_term = g(p->temperature, energy, p->renormalized_chemical_potential);
-    double second_term = g(p->temperature, energy, -p->renormalized_chemical_potential);
+    double fd_dist_part = FermiDiracDistributionForParticles(energy,
+                                                             p->renormalized_chemical_potential,
+                                                             p->temperature);
     
-    return pow(momentum, 2.0) * (first_term + second_term);
+    double fd_dist_antipart = FermiDiracDistributionForAntiparticles(energy,
+                                                                     p->renormalized_chemical_potential,
+                                                                     p->temperature);
+    
+    double particles_term = fd_dist_part * log(fd_dist_part)
+                            + (1.0 - fd_dist_part) * log1p(-fd_dist_part);
+    
+    double antiparticles_term = fd_dist_antipart * log(fd_dist_antipart)
+                                + (1.0 - fd_dist_antipart) * log1p(-fd_dist_antipart);
+    
+    return -pow(momentum, 2.0) * (particles_term + antiparticles_term);
 }
 
 double PressureForFiniteTemperature(double regularized_thermodynamic_potential)

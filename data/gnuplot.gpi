@@ -1,38 +1,52 @@
-set term png
+set term jpeg size 720, 540
 
+set xlabel "barionic density (1/fm^3)"
+
+set ylabel "energy per particle (MeV)"
 set out "graph/energy_density_per_particle.png"
 plot "energy_density_per_particle.dat" w l
 
+set ylabel "energy density (MeV)"
 set out "graph/energy_density.png"
 plot "energy_density.dat" w l
 
 #set out "graph/kinectic_energy.png"
 #plot "kinectic_energy.dat" w l
 
+set ylabel "mass (MeV)"
 set out "graph/mass.png"
 plot "mass.dat" w l
 
+set ylabel "pressure (MeV)"
 set out "graph/pressure.png"
 plot "pressure.dat" w l
 
+set ylabel "chemical potential (MeV)"
 set out "graph/chemical_potential.png"
 plot "chemical_potential.dat" w l
 
-set out "graph/scalar_density.png"
-plot "scalar_density.dat" w l
+#set ylabel "scalar density (1/fm^3)"
+#set out "graph/scalar_density.png"
+#plot "scalar_density.dat" w l
 
+set ylabel "thermodynamic potential (MeV)"
 set out "graph/thermodynamic_potential.png"
 plot "thermodynamic_potential.dat" w l
 
+set ylabel "vacuum mass (MeV)"
 set out "graph/vacuum_mass_equation.png"
 plot "vacuum_mass_equation.dat" w l
 
-set out "graph/fermi_momentum.png"
-plot "fermi_momentum.dat" w l
+#set ylabel "Fermi momentum (MeV)"
+#set out "graph/fermi_momentum.png"
+#plot "fermi_momentum.dat" w l
 
+#set ylabel "vacuum thermodynamic potential (MeV)"
+#set out "graph/vacuum_thermodynamic_potential.png"
+#plot "vacuum_thermodynamic_potential.dat" w l
+
+set ylabel "thermodynamic potential (MeV)"
+set xlabel "mass"
 set out "graph/thermodynamic_potential_vs_mass.png"
 plot "thermodynamic_potential_vs_mass.dat" w l
-
-set out "graph/vacuum_thermodynamic_potential.png"
-plot "vacuum_thermodynamic_potential.dat" w l
 
