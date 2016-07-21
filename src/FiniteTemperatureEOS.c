@@ -325,12 +325,6 @@ double ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand(do
     return pow(momentum, 2.0) * (energy + first_term + second_term) / pow(CONST_HBAR_C, 3.0);
 }
 
-typedef struct _entropy_integrand_parameters{
-    double mass;
-    double temperature;
-    double renormalized_chemical_potential;
-} entropy_integrand_parameters;
-
 double Entropy(double mass, double temperature, double renormalized_chemical_potential)
 {
     int interval_num = 1000;
@@ -351,8 +345,8 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
     double abserr;
     double lower_limit = 0.0;
     double upper_limit = parameters.cutoff;
-    double abs_error = 1.0E-3;
-    double rel_error = 1.0E-2;
+    double abs_error = 1.0E-1;
+    double rel_error = 1.0E-1;
     int max_sub_interval = interval_num;
     int integration_key = GSL_INTEG_GAUSS61;
     
@@ -372,6 +366,8 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
     return NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * integral / pow(M_PI, 2.0);
 }
 
+// FIXME: Remove once I'm sure the other version is working ok
+/*
 double EntropyIntegrandFromDerivative(double momentum, void * parameters)
 {
     // This is the expression I obtained from - \partial \omega / \partial T
@@ -397,7 +393,7 @@ double EntropyIntegrandFromDerivative(double momentum, void * parameters)
     return pow(momentum, 2.0) * (particles_term + antiparticles_term);
 }
 
-double EntropyIntegrand(double momentum, void * parameters)
+double EntropyIntegrandArt(double momentum, void * parameters)
 {
     entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
     
@@ -418,6 +414,25 @@ double EntropyIntegrand(double momentum, void * parameters)
                                 + (1.0 - fd_dist_antipart) * log1p(-fd_dist_antipart);
     
     return -pow(momentum, 2.0) * (particles_term + antiparticles_term);
+}
+*/
+
+double g(double t, double e, double c)
+{
+    double a = - (e - c)/t;
+    return log1p(exp(a)) - a * exp(a) / (1.0 + exp(a));
+}
+
+double EntropyIntegrand(double momentum, void * parameters)
+{
+    entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
+    
+    double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
+    
+    double first_term = g(p->temperature, energy, p->renormalized_chemical_potential);
+    double second_term = g(p->temperature, energy, -p->renormalized_chemical_potential);
+    
+    return pow(momentum, 2.0) * (first_term + second_term);
 }
 
 double PressureForFiniteTemperature(double regularized_thermodynamic_potential)

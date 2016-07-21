@@ -25,6 +25,12 @@ typedef struct _therm_pot_free_gas_contrib_params{
     double renormalized_chemical_potential;
 } therm_pot_free_gas_contrib_params;
 
+typedef struct _entropy_integrand_parameters{
+    double mass;
+    double temperature;
+    double renormalized_chemical_potential;
+} entropy_integrand_parameters;
+
 double FermiDiracDistributionFromDensityIntegral(double mass,
                                                  double renormalized_chemical_potential);
 double FermiDiracDistributionIntegralFromGapEquation(double mass,
@@ -62,6 +68,10 @@ double EnergyForFiniteTemperature(double regularized_thermodynamic_potential,
 
 double Entropy(double mass, double temperature, double renormalized_chemical_potential);
 double EntropyIntegrand(double momentum, void * parameters);
+
+// FIXME: Remove once I'm sure the other version works fine
+//double EntropyIntegrandFromDerivative(double momentum, void * parameters);
+//double EntropyIntegrandArt(double momentum, void * parameters);
 
 
 #endif /* FiniteTemperatureEOS_h */

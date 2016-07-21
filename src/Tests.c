@@ -768,6 +768,65 @@ void RunTests()
     }
     
 #pragma mark Entropy
+    if (false)
+    {
+        SetParametersSet("BuballaR_2");
+        
+        entropy_integrand_parameters par;
+        par.mass = 0;
+        par.renormalized_chemical_potential = 100;
+        par.temperature = 1;
+        
+        int n_pts = 1000;
+        double min_momentum = 0.0;
+        double max_momentum = parameters.cutoff;
+        double mom_step = (max_momentum - min_momentum) / (double)(n_pts - 1);
+        
+        // FIXME: Remove other methods of calculation once I'm sure the one adopted works fine
+        gsl_vector * momentum_vector = gsl_vector_alloc(n_pts);
+        gsl_vector * entropy_integrand_vector = gsl_vector_alloc(n_pts);
+//        gsl_vector * entropy_integrand_vector_deriv = gsl_vector_alloc(n_pts);
+//        gsl_vector * entropy_integrand_vector_art = gsl_vector_alloc(n_pts);
+
+        double p = 0;
+        for (int i = 0; i < n_pts; i++){
+            
+            double entropy_integrand = EntropyIntegrand(p, &par);
+//            double entropy_integrand_deriv = EntropyIntegrandFromDerivative(p, &par);
+//            double entropy_integrand_old_ver = EntropyIntegrandArt(p, &par);
+            
+            gsl_vector_set(momentum_vector, i, p);
+            gsl_vector_set(entropy_integrand_vector, i, entropy_integrand);
+//            gsl_vector_set(entropy_integrand_vector_deriv, i, entropy_integrand_deriv);
+//            gsl_vector_set(entropy_integrand_vector_old_ver, i, entropy_integrand_art);
+            
+            p += mom_step;
+        }
+        
+        WriteVectorsToFile("tests/data/entropy_integrand.dat",
+                           "# momentum, entropy integrand\n",
+                           2,
+                           momentum_vector,
+                           entropy_integrand_vector);
+        
+/*        WriteVectorsToFile("tests/data/entropy_integrand_deriv.dat",
+                           "# momentum, entropy integrand\n",
+                           2,
+                           momentum_vector,
+                           entropy_integrand_vector_deriv);
+        
+        WriteVectorsToFile("tests/data/entropy_integrand_art.dat",
+                           "# momentum, entropy integrand\n",
+                           2,
+                           momentum_vector,
+                           entropy_integrand_vector_art);
+  */
+        gsl_vector_free(momentum_vector);
+        gsl_vector_free(entropy_integrand_vector);
+//        gsl_vector_free(entropy_integrand_vector_deriv);
+//        gsl_vector_free(entropy_integrand_vector_art);
+    }
+    
     if (true)
     {
         SetParametersSet("BuballaR_2");
