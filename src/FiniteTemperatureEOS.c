@@ -12,6 +12,7 @@
 
 #include "Constants.h"
 #include "Parameters.h"
+#include "CommandlineOptions.h"
 
 #include "FiniteTemperatureEOS.h"
 
@@ -345,8 +346,8 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
     double abserr;
     double lower_limit = 0.0;
     double upper_limit = parameters.cutoff;
-    double abs_error = 1.0E-1;
-    double rel_error = 1.0E-1;
+    double abs_error = 1.0E-3;
+    double rel_error = 1.0E-3;
     int max_sub_interval = interval_num;
     int integration_key = GSL_INTEG_GAUSS61;
     
@@ -449,4 +450,157 @@ double EnergyForFiniteTemperature(double regularized_thermodynamic_potential,
     return regularized_thermodynamic_potential
             + temperature * entropy
             + chemical_potential * NUM_COLORS * barionic_density;
+}
+
+void MapFunction(double (*function)(double, double),
+                 double min_x,
+                 double max_x,
+                 int x_num_pts,
+                 double min_y,
+                 double max_y,
+                 int y_num_pts,
+                 double tolerance,
+                 gsl_vector * output_x,
+                 gsl_vector * output_y,
+                 int *num_points,
+                 bool show_progress)
+{
+    double x_step = (max_x - min_x) / (double)(x_num_pts - 1);
+    double y_step = (max_y - min_y) / (double)(y_num_pts - 2);
+    
+    int progress_counter = 0;
+    int pts_counter = 0;
+    double x = min_x;
+    double y = min_y;
+    
+    for (int i = 0; i < x_num_pts; i++) {
+        for (int j = 0; j < y_num_pts; j++){
+            
+            double f = function(x, y);
+            
+            if (fabs(f) <= tolerance){
+                gsl_vector_set(output_x, pts_counter, x);
+                gsl_vector_set(output_y, pts_counter, y);
+                pts_counter++;
+            }
+            
+            if (show_progress)
+                if ((100 * progress_counter) % (x_num_pts * y_num_pts) == 0){
+                    printf("\rMap %d %%", (100 * progress_counter) / (x_num_pts * y_num_pts));
+                    fflush(stdout);
+                }
+            
+            progress_counter++;
+            y += y_step;
+        }
+
+        x += x_step;
+    }
+    
+    *num_points = pts_counter;
+    return;
+}
+
+// We assume that both maps are made using the same grid
+// No steps are taken to verify the possibility of two intersections.
+// In this routine, we will sweep the common region of the x axis,
+// determining the point where the distance in the y axis between
+// points in both maps is minimal.
+// We take some steps to reduce multiple points with the same value of x to one point
+// with y given by the mean.
+// Once the point of minimal y distance is found, we use the previous one and the next one to
+// calculate two linear fits, one for each maps, and the determine the intersection of the fits
+void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
+                                gsl_vector * map1_y,
+                                int map1_num_points,
+                                gsl_vector * map2_x,
+                                gsl_vector * map2_y,
+                                int map2_num_points)
+{
+    // Determine common range in x axis and reindex
+    
+    double common_interval_start = fmax(gsl_vector_get(map1_x, 1),
+                                        gsl_vector_get(map2_x, 1));
+    double common_interval_ends = fmin(gsl_vector_get(map1_x, map1_num_points),
+                                       gsl_vector_get(map2_x, map2_num_points));
+    
+    gsl_vector * common_map1_x = gsl_vector_alloc(map1_num_points);
+    gsl_vector * common_map1_y = gsl_vector_alloc(map1_num_points);
+    
+    int common_pts_map1 = 0;
+    for (int i = 0; i < map1_num_points; i++){
+        double x = gsl_vector_get(map1_x, i);
+        if (x >= common_interval_start){
+            gsl_vector_set(common_map1_x, common_pts_map1, x);
+            gsl_vector_set(common_map1_y, common_pts_map1, gsl_vector_get(map1_y, i));
+            common_pts_map1++;
+        }
+        
+        if (x > common_interval_ends)
+            break;
+    }
+
+    gsl_vector * common_map2_x = gsl_vector_alloc(map2_num_points);
+    gsl_vector * common_map2_y = gsl_vector_alloc(map2_num_points);
+    
+    int common_pts_map2 = 0;
+    for (int i = 0; i < map2_num_points; i++){
+        double x = gsl_vector_get(map2_x, i);
+        if (x >= common_interval_start){
+            gsl_vector_set(common_map2_x, common_pts_map2, x);
+            gsl_vector_set(common_map2_y, common_pts_map2, gsl_vector_get(map2_y, i));
+            common_pts_map2++;
+        }
+        
+        if (x > common_interval_ends)
+            break;
+    }
+    
+    // Reduce multiple points
+    
+    int red_map1_count = 0;
+    gsl_vector * red_map1_x = gsl_vector_alloc(common_pts_map1);
+    gsl_vector * red_map1_y = gsl_vector_alloc(common_pts_map1);
+    
+    double x = gsl_vector_get(common_map1_x, 0);
+    double y_sum = gsl_vector_get(common_map1_y, 0);
+    int multiplicity = 1;
+    for (int i = 1; i < common_pts_map1; i++){
+        double x_i = gsl_vector_get(common_map1_x, i);
+        if (x_i == x){
+            y_sum += gsl_vector_get(common_map1_y, i);
+            multiplicity++;
+        }
+        else{
+            // x has changed, save mean y
+            gsl_vector_set(red_map1_x, red_map1_count, x);
+            gsl_vector_set(red_map1_y, red_map1_count, y_sum / (double)multiplicity);
+            red_map1_count++;
+            
+            // prepare next iteration
+            x = x_i;
+            y_sum = gsl_vector_get(common_map1_y, i);
+            multiplicity = 1;
+        }
+    }
+    // save last point
+    gsl_vector_set(red_map1_x, red_map1_count, x);
+    gsl_vector_set(red_map1_y, red_map1_count, y_sum / (double)multiplicity);
+    red_map1_count++;
+    
+
+    gsl_vector * red_map2_x = gsl_vector_alloc(common_pts_map2);
+    gsl_vector * red_map2_y = gsl_vector_alloc(common_pts_map2);
+
+    // reduzir os mapas: para todos os pontos em que x é o mesmo, fazer a média de y
+    // guardar os mapas reduzidos (que terão índices reduzidos tb)
+    
+    // varer em x (índice reduzido) e determinar para qual índice a diferença entre o
+    // y de cada mapa é o mínimo
+    
+    // usar os valores dos pontos associados aos índices anterior e posterior para
+    // traçar duas retas e determinar a interseção entre elas.
+    
+    // Retornar
+    // os valores de x e y para os quais ocorre a interseção.
 }

@@ -583,7 +583,7 @@ void RunTests()
 
     fprintf(log_file, "\n");
     
-#pragma mark Maps of Mass and Renormalized Chemical Potential Polynomial Equations
+#pragma mark Maps of Mass and Renormalized Chemical Potential Zeroed Equations
     
     if (false)
     { // Calculates zeroed gap and barionic densities equations so we can see both
