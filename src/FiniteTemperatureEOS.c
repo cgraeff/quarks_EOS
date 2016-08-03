@@ -510,6 +510,8 @@ void MapFunction(double (*function)(double, double),
 // with y given by the mean.
 // Once the point of minimal y distance is found, we use the previous one and the next one to
 // calculate two linear fits, one for each maps, and the determine the intersection of the fits
+//
+// Separar essas funções em um arquivo à parte
 void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
                                 gsl_vector * map1_y,
                                 int map1_num_points,
@@ -517,7 +519,10 @@ void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
                                 gsl_vector * map2_y,
                                 int map2_num_points)
 {
-    // Determine common range in x axis and reindex
+    //
+    // Determine common range in x axis and rebuild
+	// the index
+	//
     
     double common_interval_start = fmax(gsl_vector_get(map1_x, 1),
                                         gsl_vector_get(map2_x, 1));
@@ -540,6 +545,7 @@ void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
             break;
     }
 
+  // separar em função para não ficar repetido aí em baixo, é praticamente a mesma coisa
     gsl_vector * common_map2_x = gsl_vector_alloc(map2_num_points);
     gsl_vector * common_map2_y = gsl_vector_alloc(map2_num_points);
     
@@ -556,23 +562,35 @@ void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
             break;
     }
     
+    //
     // Reduce multiple points
-    
+    //
+
     int red_map1_count = 0;
     gsl_vector * red_map1_x = gsl_vector_alloc(common_pts_map1);
     gsl_vector * red_map1_y = gsl_vector_alloc(common_pts_map1);
     
+    // Loop looking for repeated values of x. The multiple points
+	// will be reduced to one by taking the mean of the various values for y.
+    // Use first point as a reference.
+
     double x = gsl_vector_get(common_map1_x, 0);
     double y_sum = gsl_vector_get(common_map1_y, 0);
     int multiplicity = 1;
+
     for (int i = 1; i < common_pts_map1; i++){
+
         double x_i = gsl_vector_get(common_map1_x, i);
+
+	  	// if the value of x is repeated, add the
+		// value of y and increase the multiplicity
         if (x_i == x){
             y_sum += gsl_vector_get(common_map1_y, i);
             multiplicity++;
         }
         else{
-            // x has changed, save mean y
+            // x has changed, save it and corresponding mean y,
+			// increase the number of reduced points
             gsl_vector_set(red_map1_x, red_map1_count, x);
             gsl_vector_set(red_map1_y, red_map1_count, y_sum / (double)multiplicity);
             red_map1_count++;
@@ -588,19 +606,41 @@ void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
     gsl_vector_set(red_map1_y, red_map1_count, y_sum / (double)multiplicity);
     red_map1_count++;
     
-
+  	// separa o acima em uma função e repetir para o segundo mapa
+    int red_map2_count = 0;
     gsl_vector * red_map2_x = gsl_vector_alloc(common_pts_map2);
     gsl_vector * red_map2_y = gsl_vector_alloc(common_pts_map2);
 
-    // reduzir os mapas: para todos os pontos em que x é o mesmo, fazer a média de y
-    // guardar os mapas reduzidos (que terão índices reduzidos tb)
-    
-    // varer em x (índice reduzido) e determinar para qual índice a diferença entre o
-    // y de cada mapa é o mínimo
+  	if (red_map1_count != red_map2_count){
+		printf("I expect the number of points to be equal on both maps"
+			   "as it should depend only in choice for the grid");
+	    abort();
+	}
+
+  	//
+	// Search for the value of x in which we have the least diference in
+	// the values for y
+	//
+
+    double y_diff = fabs(gsl_vector_get(red_map1_y, 0) - gsl_vector_get(red_map2_y, 0));
+    int least_y_diff_index = 0;
+
+	for (int i = 1; i < red_map1_count; i++){
+
+        double d = fabs(gsl_vector_get(red_map1_y, i) - gsl_vector_get(red_map2_y, i));
+
+        if (d < y_diff){
+
+          y_diff = d;
+          least_y_diff_index = i;
+        }
+	}
     
     // usar os valores dos pontos associados aos índices anterior e posterior para
     // traçar duas retas e determinar a interseção entre elas.
     
+    // descartar os vetores criados aqui
+
     // Retornar
     // os valores de x e y para os quais ocorre a interseção.
 }
