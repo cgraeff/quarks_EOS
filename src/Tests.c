@@ -587,7 +587,7 @@ void RunTests()
     
 #pragma mark Maps of Mass and Renormalized Chemical Potential Zeroed Equations
     
-    if (false)
+    if (true)
     { // Calculates zeroed gap and barionic densities equations so we can see both
       // and have an insight of what's going on
         SetParametersSet("BuballaR_2");
@@ -595,8 +595,8 @@ void RunTests()
         const int num_densities = 10;
         const int num_temperatures = 10;
 
-        const double barionic_density[10] = {0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.36, 0.4};
-        const double temperature[10] = {1.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0};
+        const double barionic_density[10] = {0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.4, 0.44};
+        const double temperature[10] = {1.0, 3.0, 7.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0};
 
         int mass_n_pts = 150;
         int renorm_chem_pot_n_pts = 150;
@@ -624,15 +624,13 @@ void RunTests()
 
             for (int j = 0; j < num_densities; j++){
 
-                // FIXME: How will I pass the barionic_density[j] for the second function?
-
                 MapFunction(&ZeroedGapEquationForFiniteTemperature,
-                            min_renormalized_chemical_potential,
-                            max_renormalized_chemical_potential,
-                            renorm_chem_pot_n_pts,
                             min_mass,
                             max_mass,
                             mass_n_pts,
+                            min_renormalized_chemical_potential,
+                            max_renormalized_chemical_potential,
+                            renorm_chem_pot_n_pts,
                             tolerance_gap,
                             NULL,
                             false,
@@ -641,12 +639,12 @@ void RunTests()
                             &map_gap_num_points);
 
                 MapFunction(&ZeroedBarionicDensityEquationForFiniteTemperature,
-                            min_renormalized_chemical_potential,
-                            max_renormalized_chemical_potential,
-                            renorm_chem_pot_n_pts,
                             min_mass,
                             max_mass,
                             mass_n_pts,
+                            min_renormalized_chemical_potential,
+                            max_renormalized_chemical_potential,
+                            renorm_chem_pot_n_pts,
                             tolerance_dens,
                             (void *)&(barionic_density[j]),
                             false,
@@ -667,21 +665,23 @@ void RunTests()
                                            &y_intersection);
 
                 char filename[256];
-                sprintf(filename, "tests/data/gap/data/gap_%d_%d.dat", i, j);
-                WriteVectorsToFile(filename,
-                                   "# Map of the region of zeroed gap equation that is near zero\n"
-                                   "# renormalized chemical potential, mass\n",
-                                   2,
-                                   map_gap_x,
-                                   map_gap_y);
+                sprintf(filename, "tests/data/gap/data/map_gap_%d_%d.dat", i, j);
+                WriteVectorsToFileUpToIndex(filename,
+                                            "# Map of the region of zeroed gap equation that is near zero\n"
+                                            "# mass, renormalized chemical potential\n",
+                                            map_gap_num_points,
+                                            2,
+                                            map_gap_x,
+                                            map_gap_y);
 
-                sprintf(filename, "tests/data/gap/data/dens_gap_%d_%d.dat", i, j);
-                WriteVectorsToFile(filename,
-                                   "# Map of the region of zeroed density gap equation that is near zero\n"
-                                   "# renormalized chemical potential, mass\n",
-                                   2,
-                                   map_gap_x,
-                                   map_gap_y);
+                sprintf(filename, "tests/data/gap/data/map_dens_%d_%d.dat", i, j);
+                WriteVectorsToFileUpToIndex(filename,
+                                            "# Map of the region of zeroed density gap equation that is near zero\n"
+                                            "# mass, renormalized chemical potential\n",
+                                            map_dens_num_points,
+                                            2,
+                                            map_dens_x,
+                                            map_dens_y);
 
                 sprintf(filename, "tests/data/gap/data/intersection_%d_%d.dat", i, j);
                 FILE * file = fopen(filename, "w");
@@ -872,7 +872,7 @@ void RunTests()
     }
     
 #pragma mark Reproduce Fig. 2.7 from Buballa Physics Reports
-    if (true){
+    if (false){
         SetParametersSet("BuballaR_2");
         
         int n_pts = 1000;

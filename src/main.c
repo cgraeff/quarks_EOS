@@ -30,6 +30,7 @@ int main(int argc, char * argv[])
 
   	if (!options.skip_tests)
   		RunTests();
+    abort();
     
   	// If option -p is used, set parameters set accordingly,
 	// otherwise, use default set

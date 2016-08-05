@@ -12,6 +12,57 @@
 
 #include "AuxiliaryFunctions.h"
 
+int WriteVectorsToFileUpToIndex(const char * filename, const char * header, int vector_index, int vectors_count, ...)
+{
+    FILE * output = fopen(filename, "w");
+    
+    if (NULL == output) {
+        printf("Could not open %s for writting.\n", filename);
+        perror("Reason");
+        exit(EXIT_FAILURE);
+    }
+    
+    fprintf(output, "%s", header);
+    
+    va_list arg_list;
+    va_start(arg_list, vectors_count);
+    
+    gsl_vector * vectors[vectors_count];
+    
+    for (int i = 0; i < vectors_count; i++){
+        gsl_vector * v = va_arg(arg_list, gsl_vector *);
+        vectors[i] = v;
+    }
+    
+    va_end(arg_list);
+    
+    if (vectors_count > 1)
+        for (int i = 0; i < vectors_count - 1; i++)
+            if ((vectors[i])->size != (vectors[i + 1])->size) {
+                
+                printf("ERROR: Vectors have different sizes.\n");
+                exit(EXIT_FAILURE);
+            }
+    
+    for (int i = 0; i < vector_index; i++) {
+        for (int j = 0; j < vectors_count; j++) {
+            
+            double x = gsl_vector_get(vectors[j], i);
+            
+            fprintf(output, "%20.15E", x);
+            
+            if (j != vectors_count - 1)
+                fprintf(output, "\t");
+        }
+        
+        fprintf(output, "\n");
+    }
+    
+    fclose(output);
+    
+    return 0;
+}
+
 int WriteVectorsToFile(const char * filename, const char * header, int vectors_count, ...)
 {
 	FILE * output = fopen(filename, "w");

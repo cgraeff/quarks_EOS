@@ -53,6 +53,17 @@ void MapFunction(double (*f)(double x, double y, void * params),
                  gsl_vector * map_y,
                  int * num_points);
 
+// Loop looking for repeated values of x. The multiple points
+// will be reduced to one by taking the mean of the various values for y.
+// The output (reduced_map_*) must be pre-allocated to the same size as
+// the input as it may be possible that there are no points with the same x.
+void ReduceMultiplicityOfMapPoints(gsl_vector * map_x,
+                                   gsl_vector * map_y,
+                                   int map_num_points,
+                                   gsl_vector * reduced_map_x,
+                                   gsl_vector * reduced_map_y,
+                                   int * reduced_map_num_points);
+
 // The following routine takes two maps and calculates an approximation
 // to the intersection of them.
 //
