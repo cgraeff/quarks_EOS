@@ -66,7 +66,7 @@ void LinearFitOfThreePoints(double x_1, double y_1,
  * External functions implementation
  */
 
-void MapFunction(double (*f)(double, double),
+void MapFunction(double (*f)(double x, double y, void * params),
                  double min_x,
                  double max_x,
                  int x_num_pts,
@@ -74,6 +74,7 @@ void MapFunction(double (*f)(double, double),
                  double max_y,
                  int y_num_pts,
                  double tolerance,
+                 void * params,
                  bool show_progress,
                  gsl_vector * map_x,
                  gsl_vector * map_y,
@@ -90,7 +91,7 @@ void MapFunction(double (*f)(double, double),
     for (int i = 0; i < x_num_pts; i++) {
         for (int j = 0; j < y_num_pts; j++){
 
-            double val = f(x, y);
+            double val = f(x, y, params);
 
             if (fabs(val) <= tolerance){
                 gsl_vector_set(map_x, pts_counter, x);

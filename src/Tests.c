@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_vector.h>
 
@@ -19,6 +20,7 @@
 #include "CommandlineOptions.h"
 #include "AuxiliaryFunctions.h"
 #include "Constants.h"
+#include "Maps.h"
 
 int WriteZeroedGapEquation(char * filename,
                            double minimum_mass,
@@ -518,7 +520,7 @@ void RunTests()
 
   	fprintf(log_file, "\n");
     
-#pragma mark Mass Polynomial Equation for Selected Temperatures
+#pragma mark Mass Gap Zeroed Equation for Selected Temperatures
     
     if (false)
 	{ // writes gap equation as function of mass for selected temperatures
@@ -590,163 +592,161 @@ void RunTests()
       // and have an insight of what's going on
         SetParametersSet("BuballaR_2");
 
+        const int num_densities = 10;
+        const int num_temperatures = 10;
+
+        const double barionic_density[10] = {0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.36, 0.4};
+        const double temperature[10] = {1.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0};
+
         int mass_n_pts = 150;
         int renorm_chem_pot_n_pts = 150;
-        
         double min_mass = 0.0;
         double max_mass = 600.0;
-        double mass_step = (max_mass - min_mass) / (mass_n_pts - 1);
-        
         double min_renormalized_chemical_potential = 0.0;
         double max_renormalized_chemical_potential = 600.0;
-        double renorm_chem_pot_step = (max_renormalized_chemical_potential - min_renormalized_chemical_potential)
-                                      / (renorm_chem_pot_n_pts - 1);
-        
+
         double tolerance_dens = 0.05;
         double tolerance_gap = 0.5;
-        const int num_densities = 30;
-        const int num_temperatures = 10;
-        const double temperature[10] = {1.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0};
-        double barionic_density[num_densities];
 
-        for (int i = 0; i < num_densities; i++)
-            barionic_density[i] =  0.05 + 0.01 * (double)i;
+        gsl_vector * map_gap_x = gsl_vector_alloc(mass_n_pts * renorm_chem_pot_n_pts);
+        gsl_vector * map_gap_y = gsl_vector_alloc(mass_n_pts * renorm_chem_pot_n_pts);
+        int map_gap_num_points;
 
-        printf("Mapping polynomial functions. This may take a while ...\n");
-        
+        gsl_vector * map_dens_x = gsl_vector_alloc(mass_n_pts * renorm_chem_pot_n_pts);
+        gsl_vector * map_dens_y = gsl_vector_alloc(mass_n_pts * renorm_chem_pot_n_pts);
+        int map_dens_num_points;
+
+        printf("Mapping zeroed functions. This may take a while ...\n");
+
         for (int i = 0; i < num_temperatures; i++){ // Temperature
-            
+
             parameters.temperature = temperature[i];
-            
-            for (int l = 0; l < num_densities; l++){
-                
-                double mass = min_mass;
-                
+
+            for (int j = 0; j < num_densities; j++){
+
+                // FIXME: How will I pass the barionic_density[j] for the second function?
+
+                MapFunction(&ZeroedGapEquationForFiniteTemperature,
+                            min_renormalized_chemical_potential,
+                            max_renormalized_chemical_potential,
+                            renorm_chem_pot_n_pts,
+                            min_mass,
+                            max_mass,
+                            mass_n_pts,
+                            tolerance_gap,
+                            NULL,
+                            false,
+                            map_gap_x,
+                            map_gap_y,
+                            &map_gap_num_points);
+
+                MapFunction(&ZeroedBarionicDensityEquationForFiniteTemperature,
+                            min_renormalized_chemical_potential,
+                            max_renormalized_chemical_potential,
+                            renorm_chem_pot_n_pts,
+                            min_mass,
+                            max_mass,
+                            mass_n_pts,
+                            tolerance_dens,
+                            (void *)&(barionic_density[j]),
+                            false,
+                            map_dens_x,
+                            map_dens_y,
+                            &map_dens_num_points);
+
+                double x_intersection;
+                double y_intersection;
+
+                IntersectionPointOfTwoMaps(map_gap_x,
+                                           map_gap_y,
+                                           map_gap_num_points,
+                                           map_dens_x,
+                                           map_dens_y,
+                                           map_dens_num_points,
+                                           &x_intersection,
+                                           &y_intersection);
+
                 char filename[256];
-                sprintf(filename, "tests/data/gap/data/gap_%d_%d.dat", i, l);
-                FILE * gap_file = fopen(filename, "w");
-                
-                sprintf(filename, "tests/data/gap/data/lgap_%d_%d.dat", i, l);
-                FILE * lgap_file = fopen(filename, "w");
+                sprintf(filename, "tests/data/gap/data/gap_%d_%d.dat", i, j);
+                WriteVectorsToFile(filename,
+                                   "# Map of the region of zeroed gap equation that is near zero\n"
+                                   "# renormalized chemical potential, mass\n",
+                                   2,
+                                   map_gap_x,
+                                   map_gap_y);
 
-                sprintf(filename, "tests/data/gap/data/dens_gap_%d_%d.dat", i, l);
-                FILE * dens_gap_file = fopen(filename, "w");
-                
-                sprintf(filename, "tests/data/gap/data/ldens_gap_%d_%d.dat", i, l);
-                FILE * ldens_gap_file = fopen(filename, "w");
+                sprintf(filename, "tests/data/gap/data/dens_gap_%d_%d.dat", i, j);
+                WriteVectorsToFile(filename,
+                                   "# Map of the region of zeroed density gap equation that is near zero\n"
+                                   "# renormalized chemical potential, mass\n",
+                                   2,
+                                   map_gap_x,
+                                   map_gap_y);
 
-                if (gap_file == NULL || dens_gap_file == NULL){
-                    printf("Could not open gap_file or dens_gap_file\n");
-                    exit(EXIT_FAILURE);
+                sprintf(filename, "tests/data/gap/data/intersection_%d_%d.dat", i, j);
+                FILE * file = fopen(filename, "w");
+                if (file == NULL){
+                    printf("Could not open %s for writting.\n", filename);
+                    abort();
                 }
-                    
-                int counter = 0;
-                for (int j = 0; j < mass_n_pts; j++) { // mass
-                    
-                    double renormalized_chemical_potential = min_renormalized_chemical_potential;
-                    
-                    for (int k = 0; k < renorm_chem_pot_n_pts; k++){ // renormalized chemical potential
-                        double gap = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
-                        
-                        double dens_gap = ZeroedBarionicDensityEquationForFiniteDensity(mass,
-                                                                                        renormalized_chemical_potential,
-                                                                                        barionic_density[l]);
-                        
-                        fprintf(gap_file,
-                                "%20.15E\t%20.15E\t%20.15E\n",
-                                renormalized_chemical_potential,
-								mass,
-                                gap);
-                        
-                        fprintf(dens_gap_file,
-                                "%20.15E\t%20.15E\t%20.15E\n",
-                                renormalized_chemical_potential,
-								mass,
-                                dens_gap);
-                        
-                        if (fabs(gap) < tolerance_gap)
-                            fprintf(lgap_file,
-                                    "%20.15E\t%20.15E\n",
-                                    renormalized_chemical_potential,
-									mass);
+                fprintf(file, "%20.15E\t%20.15E\n", x_intersection, y_intersection);
+                fclose(file);
 
-						if (fabs(dens_gap) < tolerance_dens)
-                            fprintf(ldens_gap_file,
-                                    "%20.15E\t%20.15E\n",
-                                    renormalized_chemical_potential,
-									mass);
-
-                        renormalized_chemical_potential += renorm_chem_pot_step;
-
-                        if ((100 * counter) % (mass_n_pts * renorm_chem_pot_n_pts) == 0){
-                            printf("\r[T = %2.2f, barionic density = %2.3f] %d %%",
-                                   temperature[i],
-                                   barionic_density[l],
-                                   (100 * counter) / (mass_n_pts * renorm_chem_pot_n_pts));
-                            fflush(stdout);
-                        }
-                        counter++;
-                    }
-                    
-                    mass += mass_step;
-                }
-                printf("\n");
-                
-                fclose(gap_file);
-                fclose(dens_gap_file);
-                fclose(lgap_file);
-                fclose(ldens_gap_file);
             }
-            
+
         }
 
+        gsl_vector_free(map_gap_x);
+        gsl_vector_free(map_gap_y);
+        gsl_vector_free(map_dens_x);
+        gsl_vector_free(map_dens_y);
     }
-    
+
     fprintf(log_file, "\n");
-    
+
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
     if (false)
     { // Prints mass and renormalized chemical potential calculation as function
       // of barionic density
         SetParametersSet("BuballaR_2");
-        
+
         int n_pts = 100;
-        
+
         double min_barionic_density = 0.1;
         double max_barionic_denstiy = 0.3;
         double step = (max_barionic_denstiy - min_barionic_density) / ((double)(n_pts - 1));
-        
+
         double temperature[4] = {10.0, 15.0, 20.0, 25.0};
-        
+
         gsl_vector * dens_vector = gsl_vector_alloc(n_pts);
         gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
         gsl_vector * renormalized_chemical_potential_vector = gsl_vector_alloc(n_pts);
-        
+
         for (int i = 0; i < 4; i++){
-            
+
             double dens = min_barionic_density;
             parameters.temperature = temperature[i];
-            
+
             double mass;
             double renormalized_chemical_potential;
-            
+
             for (int j = 0; j < n_pts; j++){
-                
+
                 CalculateMassAndRenormalizedChemicalPotentialSimultaneously(dens,
                                                                             &mass,
                                                                             &renormalized_chemical_potential);
-                
+
                 gsl_vector_set(dens_vector, j, dens);
                 gsl_vector_set(mass_vector, j, mass);
                 gsl_vector_set(renormalized_chemical_potential_vector, j, renormalized_chemical_potential);
-                
+
                 dens += step;
-                
+
             }
-            
+
             char filename[256];
             sprintf(filename, "tests/data/mass_and_renorm_chem_pot_T=%f.dat", temperature[i]);
-            
+
             WriteVectorsToFile(filename,
                                "# barionic density, mass, renormalized chemical potential\n",
                                3,
@@ -754,11 +754,11 @@ void RunTests()
                                mass_vector,
                                renormalized_chemical_potential_vector);
         }
-        
+
         gsl_vector_free(dens_vector);
         gsl_vector_free(mass_vector);
         gsl_vector_free(renormalized_chemical_potential_vector);
-        
+
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -963,7 +963,7 @@ double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p)
 {
     // As the barionic_density is zero, so are the renormalized_chemical_potential
     // and the chemical_potential
-    return ZeroedGapEquationForFiniteTemperature(mass, 0.0);
+    return ZeroedGapEquationForFiniteTemperature(mass, 0.0, NULL);
 }
 
 int WriteVacuumMassEquation(char * filename,

@@ -23,11 +23,12 @@
 // The following function takes another function and verifies whether its absolute return value is
 // less than a given tolerance, that is, whether |f(x,y)| <= tolerance is true
 // INPUT:
-//      double (*f)(double x, double y): a pointer to a function which takes two doubles and return a double
+//      double (*f)(double x, double y, void * params): a pointer to a function which takes two doubles and return a double
 //      min_*, max_*, *_num_pts: minimum and maximum values of each variable, as well as the number of points
 //                               in which the function will be probed in a given axis
 //      tolerance: the maximum value the function may return (in absolute numbers) for the point to be
 //                 registered
+//      params: parameters to be passed for the function
 //      show_progress: The execution of the map procedure may take a while if the map is too large
 //                     (too many points), or if the provided function takes too long to calculate.
 //                     In these ocasions, a percentual indicator may be shown to report progress.
@@ -38,7 +39,7 @@
 //             (x, y)_i = (gsl_vector_get(output_x, i), gsl_vector_get(output_y, i))
 //      num_points: returns the number of points that satisfies |f(x,y)| <= tolerance
 //
-void MapFunction(double (*f)(double, double),
+void MapFunction(double (*f)(double x, double y, void * params),
                  double min_x,
                  double max_x,
                  int x_num_pts,
@@ -46,6 +47,7 @@ void MapFunction(double (*f)(double, double),
                  double max_y,
                  int y_num_pts,
                  double tolerance,
+                 void * params,
                  bool show_progress,
                  gsl_vector * map_x,
                  gsl_vector * map_y,

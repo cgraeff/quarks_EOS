@@ -135,10 +135,10 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
    	const double mass = gsl_vector_get(x,0);
    	const double renormalized_chemical_potential = gsl_vector_get(x,1);
     
-    double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential);
-    double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteDensity(mass,
-                                                                              renormalized_chemical_potential,
-                                                                              params->barionic_density);
+    double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential, NULL);
+    double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteTemperature(mass,
+                                                                                  renormalized_chemical_potential,
+                                                                                  &(params->barionic_density));
 
    	gsl_vector_set(f, 0, zeroed_gap_eq);
    	gsl_vector_set(f, 1, zeroed_bar_dens_eq);
@@ -146,7 +146,7 @@ int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
     return GSL_SUCCESS;
 }
 
-double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_chemical_potential)
+double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_chemical_potential, void * params)
 {
     double integral = FermiDiracDistributionIntegralFromGapEquation(mass,
                                                                     renormalized_chemical_potential);
@@ -156,16 +156,17 @@ double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_ch
     return mass - parameters.bare_mass - constant * mass * integral;
 }
 
-double ZeroedBarionicDensityEquationForFiniteDensity(double mass,
-                                                     double renormalized_chemical_potential,
-                                                     double barionic_density)
+double ZeroedBarionicDensityEquationForFiniteTemperature(double mass,
+                                                         double renormalized_chemical_potential,
+                                                         void * barionic_density)
 {
+    double density = *((double *)barionic_density);
     double integral = FermiDiracDistributionFromDensityIntegral(mass,
                                                                 renormalized_chemical_potential);
     
     double quarks_dens = NUM_COLORS * NUM_FLAVORS * integral / (pow(M_PI, 2.0));
-    
-    return 3.0 * barionic_density - quarks_dens /  pow(CONST_HBAR_C, 3.0);
+
+    return 3.0 * density - quarks_dens /  pow(CONST_HBAR_C, 3.0);
 }
 
 double FermiDiracDistributionFromDensityIntegral(double mass,
@@ -452,195 +453,4 @@ double EnergyForFiniteTemperature(double regularized_thermodynamic_potential,
             + chemical_potential * NUM_COLORS * barionic_density;
 }
 
-void MapFunction(double (*function)(double, double),
-                 double min_x,
-                 double max_x,
-                 int x_num_pts,
-                 double min_y,
-                 double max_y,
-                 int y_num_pts,
-                 double tolerance,
-                 gsl_vector * output_x,
-                 gsl_vector * output_y,
-                 int *num_points,
-                 bool show_progress)
-{
-    double x_step = (max_x - min_x) / (double)(x_num_pts - 1);
-    double y_step = (max_y - min_y) / (double)(y_num_pts - 2);
-    
-    int progress_counter = 0;
-    int pts_counter = 0;
-    double x = min_x;
-    double y = min_y;
-    
-    for (int i = 0; i < x_num_pts; i++) {
-        for (int j = 0; j < y_num_pts; j++){
-            
-            double f = function(x, y);
-            
-            if (fabs(f) <= tolerance){
-                gsl_vector_set(output_x, pts_counter, x);
-                gsl_vector_set(output_y, pts_counter, y);
-                pts_counter++;
-            }
-            
-            if (show_progress)
-                if ((100 * progress_counter) % (x_num_pts * y_num_pts) == 0){
-                    printf("\rMap %d %%", (100 * progress_counter) / (x_num_pts * y_num_pts));
-                    fflush(stdout);
-                }
-            
-            progress_counter++;
-            y += y_step;
-        }
 
-        x += x_step;
-    }
-    
-    *num_points = pts_counter;
-    return;
-}
-
-// We assume that both maps are made using the same grid
-// No steps are taken to verify the possibility of two intersections.
-// In this routine, we will sweep the common region of the x axis,
-// determining the point where the distance in the y axis between
-// points in both maps is minimal.
-// We take some steps to reduce multiple points with the same value of x to one point
-// with y given by the mean.
-// Once the point of minimal y distance is found, we use the previous one and the next one to
-// calculate two linear fits, one for each maps, and the determine the intersection of the fits
-//
-// Separar essas funções em um arquivo à parte
-void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
-                                gsl_vector * map1_y,
-                                int map1_num_points,
-                                gsl_vector * map2_x,
-                                gsl_vector * map2_y,
-                                int map2_num_points)
-{
-    //
-    // Determine common range in x axis and rebuild
-	// the index
-	//
-    
-    double common_interval_start = fmax(gsl_vector_get(map1_x, 1),
-                                        gsl_vector_get(map2_x, 1));
-    double common_interval_ends = fmin(gsl_vector_get(map1_x, map1_num_points),
-                                       gsl_vector_get(map2_x, map2_num_points));
-    
-    gsl_vector * common_map1_x = gsl_vector_alloc(map1_num_points);
-    gsl_vector * common_map1_y = gsl_vector_alloc(map1_num_points);
-    
-    int common_pts_map1 = 0;
-    for (int i = 0; i < map1_num_points; i++){
-        double x = gsl_vector_get(map1_x, i);
-        if (x >= common_interval_start){
-            gsl_vector_set(common_map1_x, common_pts_map1, x);
-            gsl_vector_set(common_map1_y, common_pts_map1, gsl_vector_get(map1_y, i));
-            common_pts_map1++;
-        }
-        
-        if (x > common_interval_ends)
-            break;
-    }
-
-  // separar em função para não ficar repetido aí em baixo, é praticamente a mesma coisa
-    gsl_vector * common_map2_x = gsl_vector_alloc(map2_num_points);
-    gsl_vector * common_map2_y = gsl_vector_alloc(map2_num_points);
-    
-    int common_pts_map2 = 0;
-    for (int i = 0; i < map2_num_points; i++){
-        double x = gsl_vector_get(map2_x, i);
-        if (x >= common_interval_start){
-            gsl_vector_set(common_map2_x, common_pts_map2, x);
-            gsl_vector_set(common_map2_y, common_pts_map2, gsl_vector_get(map2_y, i));
-            common_pts_map2++;
-        }
-        
-        if (x > common_interval_ends)
-            break;
-    }
-    
-    //
-    // Reduce multiple points
-    //
-
-    int red_map1_count = 0;
-    gsl_vector * red_map1_x = gsl_vector_alloc(common_pts_map1);
-    gsl_vector * red_map1_y = gsl_vector_alloc(common_pts_map1);
-    
-    // Loop looking for repeated values of x. The multiple points
-	// will be reduced to one by taking the mean of the various values for y.
-    // Use first point as a reference.
-
-    double x = gsl_vector_get(common_map1_x, 0);
-    double y_sum = gsl_vector_get(common_map1_y, 0);
-    int multiplicity = 1;
-
-    for (int i = 1; i < common_pts_map1; i++){
-
-        double x_i = gsl_vector_get(common_map1_x, i);
-
-	  	// if the value of x is repeated, add the
-		// value of y and increase the multiplicity
-        if (x_i == x){
-            y_sum += gsl_vector_get(common_map1_y, i);
-            multiplicity++;
-        }
-        else{
-            // x has changed, save it and corresponding mean y,
-			// increase the number of reduced points
-            gsl_vector_set(red_map1_x, red_map1_count, x);
-            gsl_vector_set(red_map1_y, red_map1_count, y_sum / (double)multiplicity);
-            red_map1_count++;
-            
-            // prepare next iteration
-            x = x_i;
-            y_sum = gsl_vector_get(common_map1_y, i);
-            multiplicity = 1;
-        }
-    }
-    // save last point
-    gsl_vector_set(red_map1_x, red_map1_count, x);
-    gsl_vector_set(red_map1_y, red_map1_count, y_sum / (double)multiplicity);
-    red_map1_count++;
-    
-  	// separa o acima em uma função e repetir para o segundo mapa
-    int red_map2_count = 0;
-    gsl_vector * red_map2_x = gsl_vector_alloc(common_pts_map2);
-    gsl_vector * red_map2_y = gsl_vector_alloc(common_pts_map2);
-
-  	if (red_map1_count != red_map2_count){
-		printf("I expect the number of points to be equal on both maps"
-			   "as it should depend only in choice for the grid");
-	    abort();
-	}
-
-  	//
-	// Search for the value of x in which we have the least diference in
-	// the values for y
-	//
-
-    double y_diff = fabs(gsl_vector_get(red_map1_y, 0) - gsl_vector_get(red_map2_y, 0));
-    int least_y_diff_index = 0;
-
-	for (int i = 1; i < red_map1_count; i++){
-
-        double d = fabs(gsl_vector_get(red_map1_y, i) - gsl_vector_get(red_map2_y, i));
-
-        if (d < y_diff){
-
-          y_diff = d;
-          least_y_diff_index = i;
-        }
-	}
-    
-    // usar os valores dos pontos associados aos índices anterior e posterior para
-    // traçar duas retas e determinar a interseção entre elas.
-    
-    // descartar os vetores criados aqui
-
-    // Retornar
-    // os valores de x e y para os quais ocorre a interseção.
-}

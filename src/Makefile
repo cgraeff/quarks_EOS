@@ -1,7 +1,7 @@
 TARGET = eos
 LIBS = -lm -lgsl -lgslcblas
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -Wno-unknown-pragmas
 
 # Add path for gsl from Homebrew in OSX
 UNAME_S := $(shell uname -s)
