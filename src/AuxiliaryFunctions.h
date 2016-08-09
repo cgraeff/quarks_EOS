@@ -17,4 +17,11 @@ int WriteIndexedVectorsToFile(const char * filename, const char * header, int ve
 
 gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator, gsl_vector * denominator);
 
+// Simple function to open files and creating directories if necessary
+// it is tested only with paths with format:
+//      "this/is/a/path/to/my_file.txt"
+// and with no path at all:
+//      "my_file.txt"
+FILE * OpenFile(const char filename[]);
+
 #endif /* AuxiliaryFunctions_h */

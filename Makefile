@@ -1,13 +1,15 @@
 SHELL := /bin/bash # Use bash as shell
 
+.PHONY: all run graph tests tgraph clean
+
 all:
 	cd src; make
 run:
-	./eos $(ARGS)
+	./eos -d $(ARGS)
 graph:
 	for dir in `echo output/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
 tests:
-	./eos -t $(ARGS)
+	./eos -a $(ARGS)
 tgraph:
 	for dir in `echo tests/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
 clean:

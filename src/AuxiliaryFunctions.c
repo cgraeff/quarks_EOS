@@ -9,18 +9,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
+#include <sys/stat.h>
 
 #include "AuxiliaryFunctions.h"
 
 int WriteVectorsToFileUpToIndex(const char * filename, const char * header, int vector_index, int vectors_count, ...)
 {
-    FILE * output = fopen(filename, "w");
-    
-    if (NULL == output) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
+    FILE * output = OpenFile(filename);
     
     fprintf(output, "%s", header);
     
@@ -65,13 +61,7 @@ int WriteVectorsToFileUpToIndex(const char * filename, const char * header, int 
 
 int WriteVectorsToFile(const char * filename, const char * header, int vectors_count, ...)
 {
-	FILE * output = fopen(filename, "w");
-    
-    if (NULL == output) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
+    FILE * output = OpenFile(filename);
 	
 	fprintf(output, "%s", header);
 	
@@ -116,13 +106,7 @@ int WriteVectorsToFile(const char * filename, const char * header, int vectors_c
 
 int WriteIndexedVectorsToFile(const char * filename, const char * header, int vectors_count, ...)
 {
-	FILE * output = fopen(filename, "w");
-    
-    if (NULL == output) {
-        printf("Could not open %s for writting.\n", filename);
-        perror("Reason");
-        exit(EXIT_FAILURE);
-    }
+    FILE * output = OpenFile(filename);
 	
 	fprintf(output, "%s", header);
 	
@@ -180,4 +164,49 @@ gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator,
 	}
 
 	return v;
+}
+
+FILE * OpenFile(const char filename[])
+{
+    // If there is no slash, it means that
+    // the file must me in the current dir
+    char * last_slash = strrchr(filename, '/');
+    
+    if (last_slash == NULL){
+        FILE * file = fopen(filename, "w");
+        
+        if (NULL == file) {
+            printf("Could not open %s for writting.\n", filename);
+            perror("Reason");
+            exit(EXIT_FAILURE);
+        }
+        
+        return file;
+    }
+    
+    // Recursivelly create dirs in path
+    char tmp[256];
+    char *p = NULL;
+    
+    snprintf(tmp, sizeof(tmp),"%s", filename);
+
+    for(p = tmp + 1; *p; p++)
+        if(*p == '/') {
+            *p = 0;
+            struct stat st = {0};
+            if (stat(tmp, &st) == -1)
+                mkdir(tmp, S_IRWXU);
+            *p = '/';
+        }
+    
+    // Finally, open the file
+    FILE * file = fopen(filename, "w");
+    
+    if (NULL == file) {
+        printf("Could not open %s for writting.\n", filename);
+        perror("Reason");
+        exit(EXIT_FAILURE);
+    }
+    
+    return file;
 }

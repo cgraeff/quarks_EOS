@@ -16,7 +16,7 @@
 
 // Default values for options and flags that will be acessible
 // during the execution (specified in order of declaration).
-Options options = {true, false, false, NULL};
+Options options = {true, false, false, false, NULL, -1.0};
 
 int CommandlineOptionsParse(int argc, char * argv[])
 {
@@ -33,7 +33,7 @@ int CommandlineOptionsParse(int argc, char * argv[])
 	// the arguments after the first will be misinterpreted as unknown, or unclaimed.
 	// This particular implementation will stop if there are any unprocessed arguments.
 	
-	char * short_options = "p:lqsuh";
+	char * short_options = "p:t:lqdauh";
 
 	int opt;
 	while ((opt = getopt(argc, argv, short_options)) != -1){
@@ -43,21 +43,28 @@ int CommandlineOptionsParse(int argc, char * argv[])
 			case 'p':
 				options.parameterization = optarg;
 				break;
+            case 't':
+                options.temp = atof(optarg);
+                break;
 			case 'l':
 		  		options.list_available_parameterizations = true;
 		  		break;
 			case 'q':
 				options.verbose = false;
 				break;
-            case 's':
-                options.skip_tests = true;
+            case 'd':
+                options.dirs = true;
+                break;
+            case 'a':
+                options.dirs = true;
+                options.tests = true;
                 break;
 			case 'u':
-				CommandlineOptionsPrintUsage(argv[0]);
+				CommandlineOptionsPrintUsage();
 				exit(EXIT_SUCCESS);
 				break;
 			case 'h':
-				CommandlineOptionsPrintUsage(argv[0]);
+				CommandlineOptionsPrintUsage();
 				exit(EXIT_SUCCESS);
 				break;
 			case '?':
@@ -97,17 +104,22 @@ int CommandlineOptionsParse(int argc, char * argv[])
 	return 0;
 }
 
-void CommandlineOptionsPrintUsage(char * prog_name)
+void CommandlineOptionsPrintUsage()
 {
-	printf("Usage: %s [options]\n", prog_name);
+    printf("This code calculates the Equations of State for quarks following\n"
+           "M. Buballa, NJL-model analysis of dense quark matter, Physics\n"
+           "Reports 407 (2005) 205-376.\n\n");
+	printf("Usage: eos [options]\n");
 	printf("Options:\n"
-		   "\t-p: Chooses a builtin parameterization.\n"
-		   "\t-l: Lists availeable builtin parameterizations.\n"
-		   "\t-f: Chooses a parameterization file.\n"
-		   "\t-t: Saves a template parameterization file in current dir.\n"
-		   "\t-q: Supress information (may be useful in scripts).\n"
-		   "\t-u: Prints this message.\n"
-		   "\t-h: Same as -u.\n");
+		   "\t-p par: Chooses a builtin parameterization;\n"
+           "\t-t temp: Chooses a temperature;\n"
+		   "\t-l: Lists available builtin parameterizations;\n"
+           "\t-q: quiet (supress information written to standard out);"
+		   "\t-d: write results using a dir structure;\n"
+		   "\t-a: run tests. Automatically sets -d;\n"
+		   "\t-u: Prints this message;\n"
+		   "\t-h: Same as -u;\n\n");
+    printf("The source code is available at github.com/cgraeff/quarks_EOS\n");
 	
 	return;
 }

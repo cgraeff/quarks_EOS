@@ -232,3 +232,56 @@ Parameters NewCopyOfParametersSetFromTemplate()
   	return p;
 }
 
+void PrintParametersToFile(FILE * file)
+{
+    fprintf(file, "\n--- PARAMETERS ---\n");
+    fprintf(file, "parameters_set_origin = %s\n", parameters.parameters_set_origin);
+    fprintf(file, "parameters_set_identifier = %s\n\n", parameters.parameters_set_identifier);
+    
+    fprintf(file, "G_S = %f\n", parameters.G_S);
+    fprintf(file, "G_V = %f\n", parameters.G_V);
+    fprintf(file, "cutoff = %f\n", parameters.cutoff);
+    fprintf(file, "bare_mass = %f\n", parameters.bare_mass);
+    fprintf(file, "temperature = %f\n\n", parameters.temperature);
+    
+    fprintf(file, "points_number = %d\n", parameters.points_number);
+    fprintf(file, "minimum_density = %f\n", parameters.minimum_density);
+    fprintf(file, "maximum_density = %f\n\n", parameters.maximum_density);
+    
+    fprintf(file, "gap_minimum_mass = %f\n", parameters.gap_minimum_mass);
+    fprintf(file, "gap_maximum_mass = %f\n", parameters.gap_maximum_mass);
+    fprintf(file, "gap_points_number = %f\n\n", parameters.gap_points_number);
+    
+    fprintf(file, "gap_eq_solver_max_iterations = %d\n", parameters.gap_eq_solver_max_iterations);
+    fprintf(file, "gap_eq_solver_lower_bound = %f\n", parameters.gap_eq_solver_lower_bound);
+    fprintf(file, "gap_eq_solver_upper_bound = %f\n", parameters.gap_eq_solver_upper_bound);
+    fprintf(file, "gap_eq_solver_abs_error = %f\n", parameters.gap_eq_solver_abs_error);
+    fprintf(file, "gap_eq_solver_rel_error = %f\n\n", parameters.gap_eq_solver_rel_error);
+    
+    fprintf(file, "vac_mass_det_max_iterations = %d\n", parameters.vac_mass_det_max_iterations);
+    fprintf(file, "vac_mass_det_lower_bound = %f\n", parameters.vac_mass_det_lower_bound);
+    fprintf(file, "vac_mass_det_upper_bound = %f\n", parameters.vac_mass_det_upper_bound);
+    fprintf(file, "vac_mass_det_abs_error = %f\n", parameters.vac_mass_det_abs_error);
+    fprintf(file, "vac_mass_det_rel_error = %f\n\n", parameters.vac_mass_det_rel_error);
+    
+    fprintf(file, "renormalized_chemical_potential_max_iter = %d\n", parameters.renormalized_chemical_potential_max_iter);
+    fprintf(file, "renormalized_chemical_potential_lower_bound = %f\n", parameters.renormalized_chemical_potential_lower_bound);
+    fprintf(file, "renormalized_chemical_potential_upper_bound = %f\n", parameters.renormalized_chemical_potential_upper_bound);
+    fprintf(file, "renormalized_chemical_potential_abs_error = %f\n", parameters.renormalized_chemical_potential_abs_error);
+    fprintf(file, "renormalized_chemical_potential_rel_error = %f\n\n", parameters.renormalized_chemical_potential_rel_error);
+    
+    fprintf(file, "mass_and_renor_chem_pot_solution_max_iter = %d\n", parameters.mass_and_renor_chem_pot_solution_max_iter);
+    fprintf(file, "mass_and_renor_chem_pot_solution_mass_guess = %f\n", parameters.mass_and_renor_chem_pot_solution_mass_guess);
+    fprintf(file, "mass_and_renor_chem_pot_solution_renor_chem_pot_guess = %f\n", parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess);
+    fprintf(file, "mass_and_renorm_chem_pot_solution_abs_error = %f\n", parameters.mass_and_renorm_chem_pot_solution_abs_error);
+    fprintf(file, "mass_and_renorm_chem_pot_solution_rel_error = %f\n\n", parameters.mass_and_renorm_chem_pot_solution_rel_error);
+    
+    fprintf(file, "fermi_dirac_integrals_max_interval_num = %d\n", parameters.fermi_dirac_integrals_max_interval_num);
+    fprintf(file, "fermi_dirac_integrals_integration_key = %d\n", parameters.fermi_dirac_integrals_integration_key);
+    fprintf(file, "fermi_dirac_integrals_max_sub_interval = %d\n", parameters.fermi_dirac_integrals_max_sub_interval);
+    fprintf(file, "fermi_dirac_integrals_abs_error = %f\n", parameters.fermi_dirac_integrals_abs_error);
+    fprintf(file, "fermi_dirac_integrals_rel_error = %f\n\n", parameters.fermi_dirac_integrals_rel_error);
+    
+
+}
+

@@ -87,4 +87,6 @@ extern Parameters parameters;
 void ParametersSetup(void);
 void SetParametersSet(char * parameters_set_identifier);
 
+void PrintParametersToFile(FILE * file);
+
 #endif /* Parameters_h */
