@@ -1,0 +1,14 @@
+do for [i=0:3]{
+	input_file = sprintf("data/mass_and_renorm_chem_pot_%d.dat", i)
+	output_file_png = sprintf("graph/mass_and_renorm_chem_pot_%d.png", i)
+	output_file_tex = sprintf("graph/mass_and_renorm_chem_pot_%d.tex", i)
+
+	set term png
+	set out output_file_png
+
+	plot input_file w l
+
+	set term tikz size 14cm, 9cm
+	set out output_file_tex
+	replot
+}

@@ -1,0 +1,24 @@
+do for [i=0:3] {
+	do for [j=0:3] {
+		
+		file0 = sprintf('data/FD_%d_%d_0.dat', i, j)
+		file1 = sprintf('data/FD_%d_%d_1.dat', i, j)
+		file2 = sprintf('data/FD_%d_%d_2.dat', i, j)
+		file3 = sprintf('data/FD_%d_%d_3.dat', i, j)
+
+		outfile_png = sprintf('graph/FD_T_%d_mu_%d.png', i, j)
+		outfile_tex = sprintf('graph/FD_T_%d_mu_%d.tex', i, j)
+
+		set term png
+		set out outfile_png
+
+		plot file0 u 1:2 w l, "" u 1:2 w l dt 1, \
+		     file1 u 1:2 w l, "" u 1:2 w l dt 1, \
+     		 file2 u 1:2 w l, "" u 1:2 w l dt 1, \
+     		 file3 u 1:2 w l, "" u 1:2 w l dt 1
+
+		set term tikz size 14cm, 9cm
+		set out outfile_tex
+		replot
+	}
+}

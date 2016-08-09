@@ -1,0 +1,16 @@
+do for [i=0:3]{
+	do for [j=0:3]{
+		input_file = sprintf("data/zeroed_gap_eq_%d_%d.dat", i, j)
+		output_file_png = sprintf("graph/zeroed_gap_eq_%d_%d.png", i, j)
+		output_file_tex = sprintf("graph/zeroed_gap_eq_%d_%d.tex", i, j)
+
+		set term png
+		set out output_file_png
+		plot input_file w l
+
+		set term tikz size 14cm, 9cm
+		set out output_file_tex
+		replot
+	}
+}
+

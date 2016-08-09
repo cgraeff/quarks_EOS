@@ -1,0 +1,9 @@
+set term png
+
+set out 'graph/mass_at_zero_dens_as_func_temp.png'
+plot "data/mass_temperature.dat" w l notitle, \
+	 "data/mass_temperature_bare_mass_zero.dat" w l
+
+set term tikz size 14cm, 9cm
+set out 'graph/mass_at_zero_dens_as_func_temp.tex'
+replot

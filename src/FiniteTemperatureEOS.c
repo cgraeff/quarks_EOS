@@ -369,10 +369,9 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
 }
 
 // FIXME: Remove once I'm sure the other version is working ok
-/*
 double EntropyIntegrandFromDerivative(double momentum, void * parameters)
 {
-    // This is the expression I obtained from - \partial \omega / \partial T
+    // This is the expression I obtained from $- \partial \omega / \partial T$
     
     entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
     
@@ -417,7 +416,7 @@ double EntropyIntegrandArt(double momentum, void * parameters)
     
     return -pow(momentum, 2.0) * (particles_term + antiparticles_term);
 }
-*/
+
 
 double g(double t, double e, double c)
 {

@@ -14,3 +14,5 @@
     * The chemical potential to be used in this equation is not the renormalized one. Since `G_V` is taken to be zero, this should not be a problem for now, but may be in the future, when `G_V` is not zero. (`mu_R = mu - 2 * G_V * barionic_density`
 
 * Fix thermodynamic potential calculation
+
+* Change the program to allow temperature as a variable instead of as a parameter

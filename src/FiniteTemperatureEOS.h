@@ -72,8 +72,8 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
 double EntropyIntegrand(double momentum, void * parameters);
 
 // FIXME: Remove once I'm sure the other version works fine
-//double EntropyIntegrandFromDerivative(double momentum, void * parameters);
-//double EntropyIntegrandArt(double momentum, void * parameters);
+double EntropyIntegrandFromDerivative(double momentum, void * parameters);
+double EntropyIntegrandArt(double momentum, void * parameters);
 
 
 

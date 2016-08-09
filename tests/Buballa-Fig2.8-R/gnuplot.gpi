@@ -1,0 +1,12 @@
+set term png
+
+set yrange[-20:10]
+set out "graph/Fig2.8R_BuballaR.png"
+plot "data/Fig2.8R_BuballaR_0.dat" w l, \
+	 "data/Fig2.8R_BuballaR_1.dat" w l, \
+	 "data/Fig2.8R_BuballaR_2.dat" w l, \
+	 "data/Fig2.8R_BuballaR_3.dat" w l
+
+set term tikz size 14cm, 9cm
+set out "graph/Fig2.8R_BuballaR.tex"
+replot

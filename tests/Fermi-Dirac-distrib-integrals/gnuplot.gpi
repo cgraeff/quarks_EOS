@@ -1,0 +1,45 @@
+
+do for [i=0:3]{
+
+	file0 = sprintf("data/fermi_dirac_distribution_from_density_integral_%d_0.dat", i)
+	file1 = sprintf("data/fermi_dirac_distribution_from_density_integral_%d_1.dat", i)
+	file2 = sprintf("data/fermi_dirac_distribution_from_density_integral_%d_2.dat", i)
+	file3 = sprintf("data/fermi_dirac_distribution_from_density_integral_%d_3.dat", i)
+
+	outfile_png = sprintf("graph/fermi_dirac_distribution_from_density_integral_%d.png", i)
+	outfile_tex = sprintf("graph/fermi_dirac_distribution_from_density_integral_%d.tex", i)
+
+	set term png
+	set out outfile_png
+	plot file0 w l, \
+		 file1 w l, \
+		 file2 w l, \
+		 file3 w l
+
+	set term tikz size 14cm, 9cm
+	set out outfile_tex
+	replot
+}
+
+do for [i=0:3]{
+
+	file0 = sprintf("data/fermi_dirac_distribution_from_gap_eq_integral_%d_0.dat", i)
+	file1 = sprintf("data/fermi_dirac_distribution_from_gap_eq_integral_%d_1.dat", i)
+	file2 = sprintf("data/fermi_dirac_distribution_from_gap_eq_integral_%d_2.dat", i)
+	file3 = sprintf("data/fermi_dirac_distribution_from_gap_eq_integral_%d_3.dat", i)
+
+	outfile_png = sprintf("graph/fermi_dirac_distribution_from_gap_eq_integral_%d.png", i)
+	outfile_tex = sprintf("graph/fermi_dirac_distribution_from_gap_eq_integral_%d.tex", i)
+
+	set term png
+	set out outfile_png
+	plot file0 w l, \
+		 file1 w l, \
+		 file2 w l, \
+		 file3 w l
+
+	set term tikz size 14cm, 9cm
+	set out outfile_tex
+	replot
+}
+

@@ -1,0 +1,7 @@
+set term png
+set out "graph/vacuum_mass_equation.png"
+plot "data/vacuum_mass_equation.dat" w l, \
+	 0 notitle
+set term tikz size 14cm, 9cm
+set out "graph/vacuum_mass_equation.tex"
+replot
