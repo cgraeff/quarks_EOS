@@ -1,0 +1,35 @@
+set xlabel "barionic density (1/fm^3)"
+
+set ylabel "mass (MeV)"
+set term png
+set out "graph/mass.png"
+plot "data/mass.dat" w l
+set term tikz size 14cm, 9cm
+set out "graph/mass.tex"
+replot
+
+set ylabel "chemical potential (MeV)"
+set term png
+set out "graph/chemical_potential.png"
+plot "data/chemical_potential.dat" w l
+set term tikz size 14cm, 9cm
+set out "graph/chemical_potential.tex"
+replot
+
+set ylabel "thermodynamic potential (MeV)"
+set term png
+set out "graph/thermodynamic_potential.png"
+plot "data/thermodynamic_potential.dat" w l
+set term tikz size 14cm, 9cm
+set out "graph/thermodynamic_potential.tex"
+replot
+
+set ylabel "thermodynamic potential (MeV)"
+set xlabel "mass"
+set term png
+set out "graph/thermodynamic_potential_vs_mass.png"
+plot "data/thermodynamic_potential_vs_mass.dat" w l
+set term tikz size 14cm, 9cm
+set out "graph/thermodynamic_potential_vs_mass.tex"
+replot
+

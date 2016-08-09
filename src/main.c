@@ -30,8 +30,7 @@ int main(int argc, char * argv[])
 
   	if (!options.skip_tests)
   		RunTests();
-    abort();
-    
+
   	// If option -p is used, set parameters set accordingly,
 	// otherwise, use default set
   	SetParametersSet(options.parameterization);
@@ -158,49 +157,49 @@ int SolveZeroTemperatureEOS(){
         printf("\n"                     // As print inside the loop does't use new
                "Saving results ...\n"); // line, we need one before the message
 
-    WriteVectorsToFile("data/mass.dat",
+    WriteVectorsToFile("output/IR/data/mass.dat",
                        "# barionic density, mass\n",
                        2,
                        barionic_density_vector,
                        mass_vector);
     
-    WriteVectorsToFile("data/fermi_momentum.dat",
+    WriteVectorsToFile("output/IR/data/fermi_momentum.dat",
                        "# barionic density, fermi momentum\n",
                        2,
                        barionic_density_vector,
                        fermi_momentum_vector);
     
-    WriteVectorsToFile("data/scalar_density.dat",
+    WriteVectorsToFile("output/IR/data/scalar_density.dat",
                        "# barionic density, scalar density \n",
                        2,
                        barionic_density_vector,
                        scalar_density_vector);
     
-    WriteVectorsToFile("data/renormalized_chemical_potential.dat",
+    WriteVectorsToFile("output/IR/data/renormalized_chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        renormalized_chemical_potential_vector);
     
-    WriteVectorsToFile("data/chemical_potential.dat",
+    WriteVectorsToFile("output/IR/data/chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        chemical_potential_vector);
 
-    WriteVectorsToFile("data/thermodynamic_potential.dat",
+    WriteVectorsToFile("output/IR/data/thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
                        2,
                        barionic_density_vector,
                        thermodynamic_potential_vector);
 
-    WriteVectorsToFile("data/pressure.dat",
+    WriteVectorsToFile("output/EOS/data/pressure.dat",
                        "# barionic density, pressure \n",
                        2,
                        barionic_density_vector,
                        pressure_vector);
 
-    WriteVectorsToFile("data/energy_density.dat",
+    WriteVectorsToFile("output/EOS/data/energy_density.dat",
                        "# barionic density, scalar density \n",
                        2,
                        barionic_density_vector,
@@ -209,13 +208,13 @@ int SolveZeroTemperatureEOS(){
     gsl_vector * energy_density_per_particle_vector =
 		VectorNewVectorFromDivisionElementByElement(energy_density_vector,
 													barionic_density_vector);
-    WriteVectorsToFile("data/energy_density_per_particle.dat",
+    WriteVectorsToFile("output/EOS/data/energy_density_per_particle.dat",
                        "# barionic density, energy density per particle \n",
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
     
-    WriteVectorsToFile("data/thermodynamic_potential_vs_mass.dat",
+    WriteVectorsToFile("output/IR/data/thermodynamic_potential_vs_mass.dat",
                        "# mass, thermodynamic potential\n",
                        2,
                        mass_vector,
@@ -333,38 +332,38 @@ int SolveFiniteTemperatureEOS(){
         printf("\n"                     // As print inside the loop does't use new
                "Saving results ...\n"); // line, we need one before the message
     
-    WriteVectorsToFile("data/mass.dat",
+    WriteVectorsToFile("output/IR/data/mass.dat",
                        "# barionic density, mass\n",
                        2,
                        barionic_density_vector,
                        mass_vector);
     
-    WriteVectorsToFile("data/renormalized_chemical_potential.dat",
+    WriteVectorsToFile("output/IR/data/renormalized_chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        renormalized_chemical_potential_vector);
     
-    WriteVectorsToFile("data/chemical_potential.dat",
+    WriteVectorsToFile("output/IR/data/chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        chemical_potential_vector);
     
     
-    WriteVectorsToFile("data/thermodynamic_potential.dat",
+    WriteVectorsToFile("output/IR/data/thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
                        2,
                        barionic_density_vector,
                        thermodynamic_potential_vector);
     
-    WriteVectorsToFile("data/pressure.dat",
+    WriteVectorsToFile("output/EOS/data/pressure.dat",
                        "# barionic density, pressure \n",
                        2,
                        barionic_density_vector,
                        pressure_vector);
     
-    WriteVectorsToFile("data/energy_density.dat",
+    WriteVectorsToFile("output/EOS/data/energy_density.dat",
                        "# barionic density, scalar density \n",
                        2,
                        barionic_density_vector,
@@ -373,13 +372,13 @@ int SolveFiniteTemperatureEOS(){
     gsl_vector * energy_density_per_particle_vector =
     VectorNewVectorFromDivisionElementByElement(energy_density_vector,
                                                 barionic_density_vector);
-    WriteVectorsToFile("data/energy_density_per_particle.dat",
+    WriteVectorsToFile("output/EOS/data/energy_density_per_particle.dat",
                        "# barionic density, energy density per particle \n",
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
     
-    WriteVectorsToFile("data/thermodynamic_potential_vs_mass.dat",
+    WriteVectorsToFile("output/IR/data/thermodynamic_potential_vs_mass.dat",
                        "# mass, thermodynamic potential\n",
                        2,
                        mass_vector,

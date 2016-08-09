@@ -5,8 +5,11 @@ all:
 run:
 	./eos $(ARGS)
 graph:
-	for dir in `ls tests`; do cd "tests/$$dir" && gnuplot gnuplot.gpi && cd ../..; done
-	for dir in `ls output`; do cd "tests/$$dir" && gnuplot gnuplot.gpi && cd ../..; done
+	for dir in `echo output/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
+tests:
+	./eos -t $(ARGS)
+tgraph:
+	for dir in `echo tests/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
 clean:
 	-rm -f eos
 	cd src; make clean
