@@ -4,3 +4,6 @@
 *.swp
 quarks_eos/
 eos
+*.tex
+*.dat
+*.png
