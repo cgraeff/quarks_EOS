@@ -19,9 +19,10 @@
 // Chosen parameter set (globally accessible)
 Parameters parameters;
 static Parameters parameters_sets_list[256] = {0};
-static int parameters_sets_list_index = 0;
+static int parameters_sets_list_count = 0;
 
 Parameters NewCopyOfParametersSetFromTemplate();
+void AppendParametersSetToList(Parameters a_set);
 
 void ParametersSetup(void)
 {
@@ -52,10 +53,8 @@ void ParametersSetup(void)
     p.G_S = 2.14 * pow(CONST_HBAR_C / p.cutoff, 2.0);
     p.G_V = 0.0;
 
-  	// Append to list of parameterizations
-  	parameters_sets_list[parameters_sets_list_index] = p;
-  	parameters_sets_list_index ++;
-
+  	AppendParametersSetToList(p);
+    
   	////
 
   	p = NewCopyOfParametersSetFromTemplate();
@@ -68,9 +67,7 @@ void ParametersSetup(void)
     p.G_S = 2.45 * pow(CONST_HBAR_C / p.cutoff, 2.0);
     p.G_V = 0.0;
 
-  	// Append to list of parameterizations
-  	parameters_sets_list[parameters_sets_list_index] = p;
-  	parameters_sets_list_index ++;
+  	AppendParametersSetToList(p);
 
   	////
 
@@ -84,9 +81,7 @@ void ParametersSetup(void)
     p.G_S = 2.84 * pow(CONST_HBAR_C / p.cutoff, 2.0);
     p.G_V = 0.0;
 
-  	// Append to list of parameterizations
-  	parameters_sets_list[parameters_sets_list_index] = p;
-  	parameters_sets_list_index ++;
+  	AppendParametersSetToList(p);
 
 	////
 
@@ -100,9 +95,7 @@ void ParametersSetup(void)
     p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
     p.G_V = 0.0;
 
-  	// Append to list of parameterizations
-  	parameters_sets_list[parameters_sets_list_index] = p;
-  	parameters_sets_list_index ++;
+  	AppendParametersSetToList(p);
 
   	////
 
@@ -116,15 +109,13 @@ void ParametersSetup(void)
     p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
     p.G_V = p.G_S;
 
-  	// Append to list of parameterizations
-  	parameters_sets_list[parameters_sets_list_index] = p;
-  	parameters_sets_list_index ++;
+  	AppendParametersSetToList(p);
 
   	// END DECLARATION OF PARAMETERS SETS
     
     // Verify that the set identifiers are unique
-    for (int i = 0; i < parameters_sets_list_index; i++){
-        for (int j = 0; j < parameters_sets_list_index; j++){
+    for (int i = 0; i < parameters_sets_list_count; i++){
+        for (int j = 0; j < parameters_sets_list_count; j++){
             
             if (i == j)
                 continue;
@@ -140,7 +131,7 @@ void ParametersSetup(void)
 
   	// If asked to, print parameters sets and exit
   	if (options.list_available_parameterizations){
-		for (int i = 0; i < parameters_sets_list_index; i++){
+		for (int i = 0; i < parameters_sets_list_count; i++){
 		  	printf("Parameters set %s\n"
 				   "\tOrigin: %s\n",
 				   parameters_sets_list[i].parameters_set_identifier,
@@ -148,6 +139,12 @@ void ParametersSetup(void)
 		}
 		exit(EXIT_SUCCESS);
 	}
+    
+    // If there isn't at least one set, exit
+    if (parameters_sets_list_count == 0){
+        printf("There are not parameters set declared. Declare at least one set.\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void SetParametersSet(char * parameters_set_identifier)
@@ -158,7 +155,7 @@ void SetParametersSet(char * parameters_set_identifier)
         return;
     }
         
-    for (int i = 0; i < parameters_sets_list_index; i++){
+    for (int i = 0; i < parameters_sets_list_count; i++){
           
         Parameters p = parameters_sets_list[i];
                           
@@ -230,6 +227,13 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.fermi_dirac_integrals_rel_error = 1.0E-12;
 
   	return p;
+}
+
+void AppendParametersSetToList(Parameters a_set)
+{
+    // Append to list of parameterizations
+    parameters_sets_list[parameters_sets_list_count] = a_set;
+    parameters_sets_list_count++;
 }
 
 void PrintParametersToFile(FILE * file)
