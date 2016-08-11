@@ -41,7 +41,7 @@ To choose a parameters set, the function `SetParametersSet()` must be used. This
 
 Once set using `SetParametersSet()`, use `parameters.a_parameter` to access the parameters values, where `a_parameter` is one of the parameters declared in the struct in `Parameters.h`.
 
-### Commanline options
+### Commandline options
 
 The commandline options set in `CommandlineOptions.*` are globally available using `options.an_option`.
 
