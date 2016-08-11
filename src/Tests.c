@@ -895,6 +895,10 @@ void RunTests()
         FILE * log_file = OpenFile("tests/transient/run.log");
         
         fprintf(log_file, "Verifies the best routine to calculate entropy.\n");
+        fprintf(log_file,
+                "mass = {50.0, 100.0, 200.0, 300.0, 400.0, 500.0};\n"
+                "renormalized chemical potential = {50.0, 100.0, 200.0, 300.0, 400.0, 500.0};\n"
+                "temperature = {1.0, 5.0, 7.0, 10.0, 20.0, 35.0};\n");
         PrintParametersToFile(log_file);
         
         fclose(log_file);
