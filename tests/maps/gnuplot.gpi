@@ -18,7 +18,7 @@ do for [i=0:9] {
 		set term png
 		set output outfile_png
 
-		plot map_dens_infile, map_gap_infile, intersection pt 5 lc black
+		plot map_dens_infile notitle, map_gap_infile notitle, intersection pt 5 lc black notitle
 
 		set term tikz size 14cm, 9cm
 		set out outfile_tex
