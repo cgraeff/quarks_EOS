@@ -44,6 +44,7 @@ double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p);
 
 void RunTests()
 {
+    printf("Running tests ...\n");
     
 #pragma mark Vacuum Mass Zeroed Equation
 

@@ -70,7 +70,6 @@ int SolveZeroTemperatureEOS(){
     
     // Vectors to store results
     gsl_vector * barionic_density_vector = gsl_vector_alloc(parameters.points_number);
-    gsl_vector * fermi_momentum_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * mass_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * scalar_density_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * chemical_potential_vector = gsl_vector_alloc(parameters.points_number);
@@ -79,7 +78,10 @@ int SolveZeroTemperatureEOS(){
     gsl_vector * pressure_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
     
-    // Vacuum mass determination
+    /*
+     * Vacuum mass determination
+     */
+    
     if (options.verbose)
         printf("Determining the vacuum mass and bag constant ...\n");
     
@@ -94,6 +96,10 @@ int SolveZeroTemperatureEOS(){
         printf("\tBag constant: %f\n", bag_constant);
     }
 
+    /*
+     * Main loop (on barionic density)
+     */
+    
 	// Define the density step. We subtract 1 from the number of points to
 	// make sure that the last point corresponds to parameters.maximum_density
     double barionic_density = parameters.minimum_density;
@@ -101,12 +107,13 @@ int SolveZeroTemperatureEOS(){
     double density_step = (parameters.maximum_density - parameters.minimum_density)
   						  / (parameters.points_number - 1);
 
-	if (options.verbose)
+    if (options.verbose)
 		printf("Solving gap equation and equations of state ...\n");
 
     for (int i = 0; i < parameters.points_number; i++){
 
-        barionic_density += density_step;
+        barionic_density += density_step; // FIXME: this should be at the end of the iteration
+        
         gsl_vector_set(barionic_density_vector, i, barionic_density);
         if (options.verbose){
             printf("\r\tBarionic density: %f", barionic_density);
@@ -114,10 +121,7 @@ int SolveZeroTemperatureEOS(){
         }
 
         // Determination of Fermi momentum
-        double fermi_momentum = CONST_HBAR_C
-	  							* pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS,
-									  1.0 / 3.0);
-        gsl_vector_set(fermi_momentum_vector, i, fermi_momentum);
+        double fermi_momentum = CONST_HBAR_C * pow(3.0 * pow(M_PI, 2.0) * barionic_density / NUM_FLAVORS, 1.0 / 3.0);
 
         // Solution of Gap Equation, determination of scalar density
 		double mass = GapEquationSolver(fermi_momentum);
@@ -156,11 +160,17 @@ int SolveZeroTemperatureEOS(){
         gsl_vector_set(energy_density_vector, i, energy_density);
         
     }
-    
-    // Write results
     if (options.verbose)
-        printf("\n"                     // As print inside the loop does't use new
-               "Saving results ...\n"); // line, we need one before the message
+        printf("\n"); // As print inside the loop does't use new line, we need one now
+    
+    gsl_vector * energy_density_per_particle_vector = VectorNewVectorFromDivisionElementByElement(energy_density_vector,
+                                                                                                  barionic_density_vector);
+    /*
+     * Save results
+     */
+    
+    if (options.verbose)
+        printf("Saving results ...\n");
 
     char filepath[512];
     char path[256];
@@ -239,7 +249,7 @@ int SolveZeroTemperatureEOS(){
     strcat(filepath, "energy_density.dat");
     
     WriteVectorsToFile(filepath,
-                       "# barionic density, scalar density \n",
+                       "# barionic density, energy density \n",
                        2,
                        barionic_density_vector,
                        energy_density_vector);
@@ -247,20 +257,18 @@ int SolveZeroTemperatureEOS(){
     strcpy(filepath, path);
     strcat(filepath, "energy_density_per_particle.dat");
     
-    gsl_vector * energy_density_per_particle_vector =
-		VectorNewVectorFromDivisionElementByElement(energy_density_vector,
-													barionic_density_vector);
     WriteVectorsToFile(filepath,
                        "# barionic density, energy density per particle \n",
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
     
-
+    /*
+     * Clean up
+     */
     
     // Free memory associated with vectors
     gsl_vector_free(barionic_density_vector);
-    gsl_vector_free(fermi_momentum_vector);
     gsl_vector_free(mass_vector);
     gsl_vector_free(scalar_density_vector);
     gsl_vector_free(renormalized_chemical_potential_vector);
@@ -268,6 +276,7 @@ int SolveZeroTemperatureEOS(){
     gsl_vector_free(thermodynamic_potential_vector);
     gsl_vector_free(pressure_vector);
     gsl_vector_free(energy_density_vector);
+    
     
     if (options.verbose)
     	printf("Done!\n");
@@ -290,7 +299,10 @@ int SolveFiniteTemperatureEOS(){
     gsl_vector * pressure_vector = gsl_vector_alloc(parameters.points_number);
     gsl_vector * energy_density_vector = gsl_vector_alloc(parameters.points_number);
     
-    // Vacuum mass determination
+    /*
+     * Vacuum mass determination
+     */
+    
     if (options.verbose)
         printf("Determining the vacuum mass and bag constant ...\n");
     
@@ -306,6 +318,10 @@ int SolveFiniteTemperatureEOS(){
         printf("\tTemperature: %f\n", parameters.temperature);
     }
     
+    /*
+     * Main loop (on barionic density)
+     */
+    
     // Define the density step. We subtract 1 from the number of points to
     // make sure that the last point corresponds to parameters.maximum_density
     double barionic_density = parameters.minimum_density;
@@ -318,8 +334,10 @@ int SolveFiniteTemperatureEOS(){
     
     for (int i = 0; i < parameters.points_number; i++){
         
-        barionic_density += density_step; // FIXME: this should be at the end of the loop
+        barionic_density += density_step; // FIXME: this should be at the end of the iteration
+        
         gsl_vector_set(barionic_density_vector, i, barionic_density);
+        
         if (options.verbose){
             printf("\r\tBarionic density: %f", barionic_density);
             fflush(stdout);
@@ -365,11 +383,18 @@ int SolveFiniteTemperatureEOS(){
         gsl_vector_set(energy_density_vector, i, energy_density);
         
     }
-    
-    // Write results
     if (options.verbose)
-        printf("\n"                     // As print inside the loop does't use new
-               "Saving results ...\n"); // line, we need one before the message
+        printf("\n"); // As print inside the loop doesn't use new line, we need one now
+
+    // Calculate energy per particle
+    gsl_vector * energy_density_per_particle_vector = VectorNewVectorFromDivisionElementByElement(energy_density_vector,
+                                                                                                  barionic_density_vector);
+    /*
+     * Save results
+     */
+
+    if (options.verbose)
+        printf("Saving results ...\n");
     
     char filepath[512];
     char path[256];
@@ -447,9 +472,6 @@ int SolveFiniteTemperatureEOS(){
     strcpy(filepath, path);
     strcat(filepath, "energy_density_per_particle.dat");
     
-    gsl_vector * energy_density_per_particle_vector =
-    VectorNewVectorFromDivisionElementByElement(energy_density_vector,
-                                                barionic_density_vector);
     WriteVectorsToFile(filepath,
                        "# barionic density, energy density per particle \n",
                        2,
@@ -457,12 +479,18 @@ int SolveFiniteTemperatureEOS(){
                        energy_density_per_particle_vector);
     
     
+    /*
+     * Clean up
+     */
+    
     // Free memory associated with vectors
     gsl_vector_free(barionic_density_vector);
     gsl_vector_free(mass_vector);
     gsl_vector_free(thermodynamic_potential_vector);
     gsl_vector_free(pressure_vector);
     gsl_vector_free(energy_density_vector);
+    gsl_vector_free(energy_density_per_particle_vector);
+    
     
     if (options.verbose)
         printf("Done!\n");
