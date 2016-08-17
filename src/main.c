@@ -37,9 +37,6 @@ int main(int argc, char * argv[])
   	// If option -p is used, set parameters set accordingly,
 	// otherwise, use default set
   	SetParametersSet(options.parameterization);
-
-    //FIXME: just testing, remove in the future
-    SetParametersSet("BuballaR_2");
     
     // If the temperature was chosen using
     // commandline options, use it
