@@ -1,9 +1,8 @@
 *.dat
 .DS_Store
+qeos
 *.o
 *.swp
-quarks_eos/
-eos
 *.tex
 *.dat
 *.png
