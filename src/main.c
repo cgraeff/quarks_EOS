@@ -172,101 +172,72 @@ int SolveZeroTemperatureEOS(){
     if (options.verbose)
         printf("Saving results ...\n");
 
-    char filepath[512];
-    char path[256];
-    path[0] = 0;
-    
     if (options.dirs)
-        strcpy(path, "output/IR/data/");
-    
-    strcpy(filepath, path);
-    strcat(filepath, "mass.dat");
-        
-    WriteVectorsToFile(filepath,
+        SetFilePath("output/IR/data/");
+
+    WriteVectorsToFile("mass.dat",
                        "# barionic density, mass\n",
                        2,
                        barionic_density_vector,
                        mass_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "scalar_density.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("scalar_density.dat",
                        "# barionic density, scalar density \n",
                        2,
                        barionic_density_vector,
                        scalar_density_vector);
     
-    strcpy(filepath, path);
-    strcat(filepath, "renormalized_chemical_potential.dat");
-    
-    WriteVectorsToFile(filepath,
+    WriteVectorsToFile("renormalized_chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        renormalized_chemical_potential_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "chemical_potential.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        chemical_potential_vector);
 
-    strcpy(filepath, path);
-    strcat(filepath, "thermodynamic_potential.dat");
-    
-    WriteVectorsToFile(filepath,
+    WriteVectorsToFile("thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
                        2,
                        barionic_density_vector,
                        thermodynamic_potential_vector);
     
-    strcpy(filepath, path);
-    strcat(filepath, "thermodynamic_potential_vs_mass.dat");
-    
-    WriteVectorsToFile(filepath,
+    WriteVectorsToFile("thermodynamic_potential_vs_mass.dat",
                        "# mass, thermodynamic potential\n",
                        2,
                        mass_vector,
                        thermodynamic_potential_vector);
 
     if (options.dirs)
-        strcpy(path, "output/EOS/data/");
+        SetFilePath("output/EOS/data/");
     
-    strcpy(filepath, path);
-    strcat(filepath, "pressure.dat");
-    
-    WriteVectorsToFile(filepath,
+    WriteVectorsToFile("pressure.dat",
                        "# barionic density, pressure \n",
                        2,
                        barionic_density_vector,
                        pressure_vector);
 
-    strcpy(filepath, path);
-    strcat(filepath, "energy_density.dat");
-    
-    WriteVectorsToFile(filepath,
+    WriteVectorsToFile("energy_density.dat",
                        "# barionic density, energy density \n",
                        2,
                        barionic_density_vector,
                        energy_density_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "energy_density_per_particle.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("energy_density_per_particle.dat",
                        "# barionic density, energy density per particle \n",
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
     
+    SetFilePath(NULL);
+
     /*
      * Clean up
      */
-    
+
     // Free memory associated with vectors
     gsl_vector_free(barionic_density_vector);
     gsl_vector_free(mass_vector);
@@ -276,8 +247,8 @@ int SolveZeroTemperatureEOS(){
     gsl_vector_free(thermodynamic_potential_vector);
     gsl_vector_free(pressure_vector);
     gsl_vector_free(energy_density_vector);
-    
-    
+
+
     if (options.verbose)
     	printf("Done!\n");
 
@@ -285,7 +256,7 @@ int SolveZeroTemperatureEOS(){
 }
 
 int SolveFiniteTemperatureEOS(){
-    
+
     // Print name of parametrization
     if (options.verbose)
         printf("Calculation performed with %s parameters set.\n", parameters.parameters_set_identifier);
@@ -396,93 +367,66 @@ int SolveFiniteTemperatureEOS(){
     if (options.verbose)
         printf("Saving results ...\n");
     
-    char filepath[512];
-    char path[256];
-    path[0] = 0;
-    
     if (options.dirs)
-        strcpy(path, "output/IR/data/");
-    
-    strcpy(filepath, path);
-    strcat(filepath, "mass.dat");
-    
-    WriteVectorsToFile(filepath,
+        SetFilePath("output/IR/data/");
+
+    WriteVectorsToFile("mass.dat",
                        "# barionic density, mass\n",
                        2,
                        barionic_density_vector,
                        mass_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "renormalized_chemical_potential.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("renormalized_chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        renormalized_chemical_potential_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "chemical_potential.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("chemical_potential.dat",
                        "# barionic density, chemical potential \n",
                        2,
                        barionic_density_vector,
                        chemical_potential_vector);
     
-    strcpy(filepath, path);
-    strcat(filepath, "thermodynamic_potential.dat");
-    
-    WriteVectorsToFile(filepath,
+    WriteVectorsToFile("thermodynamic_potential.dat",
                        "# barionic density, thermodynamic_potential \n",
                        2,
                        barionic_density_vector,
                        thermodynamic_potential_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "thermodynamic_potential_vs_mass.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("thermodynamic_potential_vs_mass.dat",
                        "# mass, thermodynamic potential\n",
                        2,
                        mass_vector,
                        thermodynamic_potential_vector);
     
     if (options.dirs)
-        strcpy(path, "output/EOS/data/");
-    
-    strcpy(filepath, path);
-    strcat(filepath, "pressure.dat");
-    
-    WriteVectorsToFile(filepath,
+        SetFilePath("output/EOS/data/");
+
+    WriteVectorsToFile("pressure.dat",
                        "# barionic density, pressure \n",
                        2,
                        barionic_density_vector,
                        pressure_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "energy_density.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("energy_density.dat",
                        "# barionic density, energy density \n",
                        2,
                        barionic_density_vector,
                        energy_density_vector);
-    
-    strcpy(filepath, path);
-    strcat(filepath, "energy_density_per_particle.dat");
-    
-    WriteVectorsToFile(filepath,
+
+    WriteVectorsToFile("energy_density_per_particle.dat",
                        "# barionic density, energy density per particle \n",
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
-    
-    
+
+    SetFilePath(NULL);
+
     /*
      * Clean up
      */
-    
+
     // Free memory associated with vectors
     gsl_vector_free(barionic_density_vector);
     gsl_vector_free(mass_vector);
@@ -490,8 +434,8 @@ int SolveFiniteTemperatureEOS(){
     gsl_vector_free(pressure_vector);
     gsl_vector_free(energy_density_vector);
     gsl_vector_free(energy_density_per_particle_vector);
-    
-    
+
+
     if (options.verbose)
         printf("Done!\n");
     

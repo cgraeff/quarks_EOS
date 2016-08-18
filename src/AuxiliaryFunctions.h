@@ -34,6 +34,8 @@ gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator,
 //      a/path/to/dir
 //      a/path/to/dir/
 //
+// After using a path prefix, set it to NULL so any following code that
+// expects an 'empty' path can work as expected.
 void SetFilePath(const char path[]);
 FILE * OpenFile(const char filename[]);
 

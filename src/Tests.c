@@ -51,12 +51,13 @@ void RunTests()
     if (true)
     {
         printf("\tVacuum Mass Zeroed Equation\n");
+        SetFilePath("tests/vacuum-mass-equation/data/");
         
         SetParametersSet(options.parameterization);
-    
-        WriteVacuumMassEquation("tests/vacuum-mass-equation/data/vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
 
-        WriteZeroedRenormalizedChemicalPotentialEquation("tests/vacuum-mass-equation/data/zeroed_renorm_chemical_pot_equation.dat",
+        WriteVacuumMassEquation("vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
+
+        WriteZeroedRenormalizedChemicalPotentialEquation("zeroed_renorm_chemical_pot_equation.dat",
                                                          0.0,
                                                          1000.0,
                                                          1000,
@@ -72,7 +73,7 @@ void RunTests()
                                     * pow(3.0 * pow(M_PI, 2.0) * barionic_density[i] / NUM_FLAVORS,
                                           1.0 / 3.0);
             char filename[256];
-            sprintf(filename, "tests/vacuum-mass-equation/data/zeroed_gap_equation_%d.dat", i);
+            sprintf(filename, "zeroed_gap_equation_%d.dat", i);
             WriteZeroedGapEquation(filename,
                                    0.0,
                                    1000.0,
@@ -80,7 +81,8 @@ void RunTests()
                                    fermi_momentum);
         }
         
-        FILE * log_file = OpenFile("tests/vacuum-mass-equation/run.log");
+        SetFilePath("tests/vacuum-mass-equation/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file,
 				"The following tests were executed for %s parameterization:\n",
@@ -93,6 +95,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611
@@ -102,6 +106,7 @@ void RunTests()
     if (true)
     {
         printf("\tReproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611\n");
+        SetFilePath("tests/Buballa-Fig1-R/data/");
         
         SetParametersSet("Buballa_2");
         
@@ -144,7 +149,7 @@ void RunTests()
             }
 
             char filename[256];
-            sprintf(filename, "tests/Buballa-Fig1-R/data/Fig1_Buballa_%d.dat", i);
+            sprintf(filename, "Fig1_Buballa_%d.dat", i);
             
             WriteVectorsToFile(filename,
                                "# mass, thermodynamic potential\n",
@@ -153,7 +158,8 @@ void RunTests()
                                output);
         }
         
-        FILE * log_file = OpenFile("tests/Buballa-Fig1-R/run.log");
+        SetFilePath("tests/Buballa-Fig1-R/");
+        FILE * log_file = OpenFile("run.log");
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -166,6 +172,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports
@@ -175,6 +183,9 @@ void RunTests()
     if (true)
     {
         printf("\tReproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports\n");
+
+        SetFilePath("tests/Buballa-Fig2.8-L/data/");
+
         SetParametersSet("BuballaR_2");
         
         // In the reference, the bare mass was zero for this test
@@ -189,7 +200,7 @@ void RunTests()
         for (int i = 0; i < 4; i++){
             
             char filename_1[256];
-            sprintf(filename_1, "tests/Buballa-Fig2.8-L/data/ZeroedRenormalizedChemPotEquation_BR2L_%d.dat", i);
+            sprintf(filename_1, "ZeroedRenormalizedChemPotEquation_BR2L_%d.dat", i);
             WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], 0.0);
 
             double minimum_mass = 0.0;
@@ -224,7 +235,7 @@ void RunTests()
             }
             
             char filename[256];
-            sprintf(filename, "tests/Buballa-Fig2.8-L/data/Fig2.8L_BuballaR_%d.dat", i);
+            sprintf(filename, "Fig2.8L_BuballaR_%d.dat", i);
             
             WriteVectorsToFile(filename,
                                "# mass, thermodynamic potential\n",
@@ -234,7 +245,8 @@ void RunTests()
   
         }
         
-        FILE * log_file = OpenFile("tests/Buballa-Fig2.8-L/run.log");
+        SetFilePath("tests/Buballa-Fig2.8-L/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
@@ -247,6 +259,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports
@@ -256,6 +270,7 @@ void RunTests()
     if (true)
     {
         printf("\tReproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports\n");
+        SetFilePath("tests/Buballa-Fig2.8-R/data/");
         
         SetParametersSet("BuballaR_2_GV");
         
@@ -269,7 +284,7 @@ void RunTests()
         for (int i = 0; i < 4; i++){
             for (int j = 0; j < 4; j++){
                 char filename_1[256];
-                sprintf(filename_1, "tests/Buballa-Fig2.8-R/data/ZeroedRenormalizedChemPotEquation_BR2R_%d_%d.dat", i, j);
+                sprintf(filename_1, "ZeroedRenormalizedChemPotEquation_BR2R_%d_%d.dat", i, j);
                 WriteZeroedRenormalizedChemicalPotentialEquation(filename_1,
 																 0,
 																 1000,
@@ -352,7 +367,7 @@ void RunTests()
             }
             
             char filename[256];
-            sprintf(filename, "tests/Buballa-Fig2.8-R/data/Fig2.8R_BuballaR_%d.dat", i);
+            sprintf(filename, "Fig2.8R_BuballaR_%d.dat", i);
             
             WriteVectorsToFile(filename,
                                "# mass, thermodynamic potential\n",
@@ -360,7 +375,7 @@ void RunTests()
                                mass_vector,
                                output);
             
-            sprintf(filename, "tests/Buballa-Fig2.8-R/data/renormalized_chemical_potential_%d.dat", i);
+            sprintf(filename, "renormalized_chemical_potential_%d.dat", i);
             WriteVectorsToFile(filename,
                                "#mass, renormalized_chemical_potential\n",
                                2,
@@ -373,7 +388,8 @@ void RunTests()
  
         }
         
-        FILE * log_file = OpenFile("tests/Buballa-Fig2.8-R/run.log");
+        SetFilePath("tests/Buballa-Fig2.8-R/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
@@ -391,6 +407,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Fermi-Dirac Distributions
@@ -400,6 +418,7 @@ void RunTests()
     if (true)
     {
         printf("\tFermi-Dirac Distributions\n");
+        SetFilePath("tests/Fermi-Dirac-distributions/data/");
         
         int n_pts = 1000;
         
@@ -436,7 +455,7 @@ void RunTests()
                     }
                     
                     char filename[256];
-                    sprintf(filename, "tests/Fermi-Dirac-distributions/data/FD_%d_%d_%d.dat", i, j, k);
+                    sprintf(filename, "FD_%d_%d_%d.dat", i, j, k);
                     
                     WriteVectorsToFile(filename,
                                        "# momentum, Fermi-Dirac distribution for particles, = for antiparticles\n",
@@ -452,7 +471,8 @@ void RunTests()
         gsl_vector_free(fp_vector);
         gsl_vector_free(fa_vector);
         
-        FILE * log_file = OpenFile("tests/Fermi-Dirac-distributions/run.log");
+        SetFilePath("tests/Fermi-Dirac-distributions/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file,
                 "Prints Fermi-Dirac distributions for selected values of temperature\n"
@@ -462,6 +482,7 @@ void RunTests()
         
         fclose(log_file);
         
+        SetFilePath(NULL);
     }
     
 #pragma mark Fermi-Dirac Distribution Integrals
@@ -470,6 +491,7 @@ void RunTests()
     if (true)
     {
         printf("\tFermi-Dirac Distribution Integrals\n");
+        SetFilePath("tests/Fermi-Dirac-distrib-integrals/data/");
         
         SetParametersSet("BuballaR_2");
         
@@ -509,7 +531,7 @@ void RunTests()
                 
                 char filename[256];
                 sprintf(filename,
-                        "tests/Fermi-Dirac-distrib-integrals/data/fermi_dirac_distribution_from_density_integral_%d_%d.dat",
+                        "fermi_dirac_distribution_from_density_integral_%d_%d.dat",
                         i,
                         j);
                 
@@ -520,7 +542,7 @@ void RunTests()
                                    fermi_dirac_int_1);
                 
                 sprintf(filename,
-                        "tests/Fermi-Dirac-distrib-integrals/data/fermi_dirac_distribution_from_gap_eq_integral_%d_%d.dat",
+                        "fermi_dirac_distribution_from_gap_eq_integral_%d_%d.dat",
                         i,
                         j);
                 
@@ -536,7 +558,9 @@ void RunTests()
         gsl_vector_free(fermi_dirac_int_1);
         gsl_vector_free(fermi_dirac_int_2);
         
-        FILE * log_file = OpenFile("tests/Fermi-Dirac-distrib-integrals/run.log");
+        SetFilePath("tests/Fermi-Dirac-distrib-integrals/");
+
+        FILE * log_file = OpenFile("run.log");
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -546,6 +570,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Mass Gap Zeroed Equation for Selected Temperatures
@@ -556,6 +582,7 @@ void RunTests()
     if (true)
 	{
         printf("\tMass Gap Zeroed Equation for Selected Temperatures\n");
+        SetFilePath("tests/zeroed-gap-equation/data/");
         
 	  	SetParametersSet("BuballaR_2");
 
@@ -591,10 +618,7 @@ void RunTests()
 				}
 
 				char filename[256];
-			  	sprintf(filename,
-						"tests/zeroed-gap-equation/data/zeroed_gap_eq_%d_%d.dat",
-						i,
-						j);
+			  	sprintf(filename, "zeroed_gap_eq_%d_%d.dat", i,	j);
 
 				WriteVectorsToFile(filename,
 								   "# mass, zeroed gap equation\n",
@@ -607,7 +631,8 @@ void RunTests()
 	  	gsl_vector_free(m_vector);
 	  	gsl_vector_free(zeroed_gap_vector);
 
-        FILE * log_file = OpenFile("tests/zeroed-gap-equation/run.log");
+        SetFilePath("tests/zeroed-gap-equation/");
+        FILE * log_file = OpenFile("run.log");
         
 		fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
@@ -618,6 +643,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
 	}
     
 #pragma mark Maps of Mass and Renormalized Chemical Potential Zeroed Equations
@@ -627,6 +654,7 @@ void RunTests()
     if (true)
     {
         printf("\tMaps of Mass and Renormalized Chemical Potential Zeroed Equations\n");
+        SetFilePath("tests/maps/data/");
         
         SetParametersSet("BuballaR_2");
 
@@ -701,7 +729,7 @@ void RunTests()
                                            &y_intersection);
 
                 char filename[256];
-                sprintf(filename, "tests/maps/data/map_gap_%d_%d.dat", i, j);
+                sprintf(filename, "map_gap_%d_%d.dat", i, j);
                 WriteVectorsToFileUpToIndex(filename,
                                             "# Map of the region of zeroed gap equation that is near zero\n"
                                             "# mass, renormalized chemical potential\n",
@@ -710,7 +738,7 @@ void RunTests()
                                             map_gap_x,
                                             map_gap_y);
 
-                sprintf(filename, "tests/maps/data/map_dens_%d_%d.dat", i, j);
+                sprintf(filename, "map_dens_%d_%d.dat", i, j);
                 WriteVectorsToFileUpToIndex(filename,
                                             "# Map of the region of zeroed density gap equation that is near zero\n"
                                             "# mass, renormalized chemical potential\n",
@@ -719,7 +747,7 @@ void RunTests()
                                             map_dens_x,
                                             map_dens_y);
 
-                sprintf(filename, "tests/maps/data/intersection_%d_%d.dat", i, j);
+                sprintf(filename, "intersection_%d_%d.dat", i, j);
                 FILE * file = OpenFile(filename);
                 fprintf(file, "%20.15E\t%20.15E\n", x_intersection, y_intersection);
                 fclose(file);
@@ -733,7 +761,8 @@ void RunTests()
         gsl_vector_free(map_dens_x);
         gsl_vector_free(map_dens_y);
 
-        FILE * log_file = OpenFile("tests/maps/run.log");
+        SetFilePath("tests/maps/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file,
                 "Calculates zeroed gap and barionic densities equations so we can see both\n"
@@ -741,6 +770,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
 
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
@@ -750,6 +781,7 @@ void RunTests()
     if (true)
     {
         printf("\tMass and Renormalized Chemical Potential for Finite Temperature\n");
+        SetFilePath("tests/mass-renorm-chem-pot/data/");
         
         SetParametersSet("BuballaR_2");
 
@@ -788,7 +820,7 @@ void RunTests()
             }
 
             char filename[256];
-            sprintf(filename, "tests/mass-renorm-chem-pot/data/mass_and_renorm_chem_pot_%d.dat", i);
+            sprintf(filename, "mass_and_renorm_chem_pot_%d.dat", i);
 
             WriteVectorsToFile(filename,
                                "# barionic density, mass, renormalized chemical potential\n",
@@ -802,7 +834,8 @@ void RunTests()
         gsl_vector_free(mass_vector);
         gsl_vector_free(renormalized_chemical_potential_vector);
 
-        FILE * log_file = OpenFile("tests/mass-renorm-chem-pot/run.log");
+        SetFilePath("tests/mass-renorm-chem-pot/");
+        FILE * log_file = OpenFile("run.log");
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -812,12 +845,15 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Entropy calculation methods (transient)
     if (true)
     {
         printf("\tEntropy calculation methods\n");
+        SetFilePath("tests/transient/data/");
         
         SetParametersSet("BuballaR_2");
         
@@ -860,7 +896,7 @@ void RunTests()
                     }
                     
                     char filename[256];
-                    sprintf(filename, "tests/transient/data/entropy_integrand_%d_%d_%d.dat", i, j, k);
+                    sprintf(filename, "entropy_integrand_%d_%d_%d.dat", i, j, k);
                     
                     WriteVectorsToFile(filename,
                                        "# momentum, entropy integrand\n",
@@ -868,7 +904,7 @@ void RunTests()
                                        momentum_vector,
                                        entropy_integrand_vector);
 
-                    sprintf(filename, "tests/transient/data/entropy_integrand_deriv_%d_%d_%d.dat", i, j, k);
+                    sprintf(filename, "entropy_integrand_deriv_%d_%d_%d.dat", i, j, k);
 
                     WriteVectorsToFile(filename,
                                        "# momentum, entropy integrand\n",
@@ -876,7 +912,7 @@ void RunTests()
                                        momentum_vector,
                                        entropy_integrand_vector_deriv);
                     
-                    sprintf(filename, "tests/transient/data/entropy_integrand_art_%d_%d_%d.dat", i, j, k);
+                    sprintf(filename, "entropy_integrand_art_%d_%d_%d.dat", i, j, k);
 
                     WriteVectorsToFile(filename,
                                        "# momentum, entropy integrand\n",
@@ -893,7 +929,8 @@ void RunTests()
         gsl_vector_free(entropy_integrand_vector_deriv);
         gsl_vector_free(entropy_integrand_vector_art);
         
-        FILE * log_file = OpenFile("tests/transient/run.log");
+        SetFilePath("tests/transient/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file, "Verifies the best routine to calculate entropy.\n");
         fprintf(log_file,
@@ -903,6 +940,8 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Entropy
@@ -913,6 +952,7 @@ void RunTests()
     if (true)
     {
         printf("\tEntropy\n");
+        SetFilePath("tests/entropy/data/");
         
         SetParametersSet("BuballaR_2");
         
@@ -942,7 +982,7 @@ void RunTests()
                 }
                 
                 char filename[256];
-                sprintf(filename, "tests/entropy/data/entropy_%d_%d.dat", i, j);
+                sprintf(filename, "entropy_%d_%d.dat", i, j);
                 
                 WriteVectorsToFile(filename,
                                    "# mass, entropy\n",
@@ -955,7 +995,8 @@ void RunTests()
         gsl_vector_free(mass_vector);
         gsl_vector_free(entropy_vector);
         
-        FILE * log_file = OpenFile("tests/entropy/run.log");
+        SetFilePath("tests/entropy/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file,
                 "The entropy only depends on the kinectic term, so it does\n"
@@ -966,12 +1007,15 @@ void RunTests()
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
 #pragma mark Reproduce Fig. 2.7 from Buballa Physics Reports
     if (true)
     {
         printf("\tReproduce Fig. 2.7 from Buballa Physics Reports\n");
+        SetFilePath("tests/Buballa-Fig2.7/data/");
         
         SetParametersSet("BuballaR_2");
         
@@ -1005,7 +1049,7 @@ void RunTests()
             temperature += temperature_step;
         }
         
-        WriteVectorsToFile("tests/Buballa-Fig2.7/data/mass_temperature.dat",
+        WriteVectorsToFile("mass_temperature.dat",
                            "# Reproduce Fig. 2.7 from Buballa, Physics Reports bare_mass not zero\n"
                            "# temperature, mass\n",
                            2,
@@ -1043,7 +1087,7 @@ void RunTests()
             temperature += temperature_step;
         }
         
-        WriteVectorsToFile("tests/Buballa-Fig2.7/data/mass_temperature_bare_mass_zero.dat",
+        WriteVectorsToFile("mass_temperature_bare_mass_zero.dat",
                            "# Reproduce Fig. 2.7 from Buballa, Physics Reports bare_mass = 0\n"
                            "# temperature, mass\n",
                            2,
@@ -1053,13 +1097,16 @@ void RunTests()
         gsl_vector_free(temperature_vector);
         gsl_vector_free(mass_vector);
         
-        FILE * log_file = OpenFile("tests/Buballa-Fig2.7/run.log");
+        SetFilePath("tests/Buballa-Fig2.7/");
+        FILE * log_file = OpenFile("run.log");
         
         fprintf(log_file, "Reproduce Fig. 2.7 from Buballa Physics Reports\n");
         
         PrintParametersToFile(log_file);
         
         fclose(log_file);
+
+        SetFilePath(NULL);
     }
     
     printf("done\n");
