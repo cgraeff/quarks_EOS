@@ -7,7 +7,7 @@ This code calculates the Equations of State for quarks according the SU(2) versi
 
 ## Requisites
 
-To build and run this code `make`, a C compiler and the GSL (GNU Scientific Library) must be installed on the system. The location of GSL headers and libraries is assumed to be `/usr/local/include` and `/usr/local/lib` on Mac OS (this is the default if GSL is installed from Homebrew). On Linux it should just work.
+To build and run this code `make`, a C compiler (default is `gcc`) and the GSL (GNU Scientific Library) must be installed on the system. The location of GSL headers and libraries is assumed to be `/usr/local/include` and `/usr/local/lib` on Mac OS (this is the default if GSL is installed from Homebrew). On Linux it should just work.
 
 ## Build and run instructions
 
