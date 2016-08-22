@@ -1,6 +1,9 @@
 SHELL := /bin/bash # Use bash as shell
 TARGET = qeos
 
+# List set for multirun
+MULTIRUN_SETS = Buballa_1 Buballa_2 Buballa_3 BuballaR_2 BuballaR_2_GV
+
 .PHONY: all run graph tests tgraph clean
 
 all:
@@ -8,7 +11,29 @@ all:
 run:
 	./$(TARGET) -d $(ARGS)
 graph:
-	for dir in `echo output/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
+	cd output; \
+	for dir in `echo */`; do \
+		cd "$$dir"; \
+		gnuplot gnuplot.gpi; \
+		cd ..; \
+	done
+multirun:
+	for key in $(MULTIRUN_SETS); do \
+		./$(TARGET) -d -p "$$key"; \
+		if [ -d multioutput/"$$key" ]; then rm -r multioutput/"$$key"; fi; \
+		cp -r output multioutput/"$$key"; \
+	done
+mgraph:
+	for dir in $(MULTIRUN_SETS); do \
+		cd "multioutput/$$dir"; \
+		for subdir in `echo */`; do \
+			cd "$$subdir"; \
+			gnuplot gnuplot.gpi; \
+			cd ..; \
+		done; \
+		cd ../..; \
+	done; \
+	cd multioutput; gnuplot gnuplot.gpi
 tests:
 	./$(TARGET) -a $(ARGS)
 tgraph:
@@ -16,11 +41,8 @@ tgraph:
 clean:
 	-rm -f $(TARGET)
 	cd src; make clean
-	find output -name "*.dat" -type f -delete
-	find output -name "*.log" -type f -delete
-	find output -name "*.png" -type f -delete
-	find output -name "*.tex" -type f -delete
-	find tests -name "*.dat" -type f -delete
-	find tests -name "*.log" -type f -delete
-	find tests -name "*.png" -type f -delete
-	find tests -name "*.tex" -type f -delete
+	find . -name "*.dat" -type f -delete
+	find . -name "*.log" -type f -delete
+	find . -name "*.png" -type f -delete
+	find . -name "*.tex" -type f -delete
+	cd multioutput; rm -rf $(MULTIRUN_SETS)
