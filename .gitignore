@@ -1,6 +1,6 @@
 *.dat
 .DS_Store
-qeos
+qeos_xcode/
 *.o
 *.swp
 *.tex
