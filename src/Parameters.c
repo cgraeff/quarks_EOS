@@ -186,7 +186,7 @@ Parameters NewCopyOfParametersSetFromTemplate()
 
   	p.points_number = 1000;
     p.minimum_density = 0.01;
-    p.maximum_density = 0.2625;
+    p.maximum_density = 3.0;
 
     p.gap_minimum_mass = 0.0;
     p.gap_maximum_mass = 1000.0;

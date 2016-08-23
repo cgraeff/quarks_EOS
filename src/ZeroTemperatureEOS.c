@@ -15,7 +15,6 @@
 #include "ZeroTemperatureEOS.h"
 
 double F0(double mass, double momentum);
-double F2(double mass, double momentum);
 double F_E(double mass, double momentum);
 
 
@@ -30,6 +29,14 @@ double UnidimensionalRootFinder(gsl_function * F,
     const gsl_root_fsolver_type * T	= gsl_root_fsolver_bisection;
 
     gsl_root_fsolver * s = gsl_root_fsolver_alloc(T);
+    
+    // Test if the limits straddle the root
+    // If they don't, we will assume that
+    // the mass = 0 root was found
+    if (GSL_SIGN(GSL_FN_EVAL(F, lower_bound))
+        == GSL_SIGN(GSL_FN_EVAL(F, upper_bound)))
+        return 0;
+    
 	gsl_root_fsolver_set(s, F, lower_bound, upper_bound);
 	
     // Iterate the algorithm until
@@ -142,6 +149,9 @@ double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
 
 double ScalarDensity(double mass, double fermi_momentum)
 {
+    if (mass == 0)
+        return 0;
+
 	return NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0))
            * (F0(mass, fermi_momentum) - F0(mass, parameters.cutoff));
 }
@@ -151,15 +161,6 @@ double F0(double mass, double momentum)
 	double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
 	
 	return (1.0 / 2.0) * (momentum * E - pow(mass, 2.0) * log((momentum + E) / mass));
-}
-
-
-double F2(double mass, double momentum)
-{
-    double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
-    
-    return (1.0 / 8.0) * (-3.0 * pow(mass, 2.0) * momentum + 2.0 * pow(momentum, 3.0)) * E
-    + (3.0 / 8.0) * pow(mass, 4.0) * log((momentum + E) / mass);
 }
 
 double ThermodynamicPotential(double mass,
@@ -190,6 +191,9 @@ double ThermodynamicPotential(double mass,
 
 double F_E(double mass, double momentum)
 {
+    if (mass == 0)
+        return pow(momentum, 4.0) / 4.0;
+
     double E = sqrt(pow(mass, 2.0) + pow(momentum, 2.0));
     
     return (momentum * pow(E, 3.0)

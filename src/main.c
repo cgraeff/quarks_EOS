@@ -111,8 +111,6 @@ int SolveZeroTemperatureEOS(){
 		printf("Solving gap equation and equations of state ...\n");
 
     for (int i = 0; i < parameters.points_number; i++){
-
-        barionic_density += density_step; // FIXME: this should be at the end of the iteration
         
         gsl_vector_set(barionic_density_vector, i, barionic_density);
         if (options.verbose){
@@ -159,6 +157,7 @@ int SolveZeroTemperatureEOS(){
 											  barionic_density);
         gsl_vector_set(energy_density_vector, i, energy_density);
         
+        barionic_density += density_step;
     }
     if (options.verbose)
         printf("\n"); // As print inside the loop does't use new line, we need one now
@@ -305,8 +304,6 @@ int SolveFiniteTemperatureEOS(){
     
     for (int i = 0; i < parameters.points_number; i++){
         
-        barionic_density += density_step; // FIXME: this should be at the end of the iteration
-        
         gsl_vector_set(barionic_density_vector, i, barionic_density);
         
         if (options.verbose){
@@ -353,6 +350,7 @@ int SolveFiniteTemperatureEOS(){
         
         gsl_vector_set(energy_density_vector, i, energy_density);
         
+        barionic_density += density_step;
     }
     if (options.verbose)
         printf("\n"); // As print inside the loop doesn't use new line, we need one now
