@@ -1,6 +1,6 @@
 # Quarks EOS
 
-This code calculates the Equations of State for quarks according the SU(2)
+This program calculates the Equations of State for quarks according the SU(2)
 version of the NJL model. As references we use (Buballa 1996) and (Buballa 2005).
 
 1. **(Buballa 1996)** Michael Buballa, *The problem of matter stability in the
@@ -10,10 +10,19 @@ version of the NJL model. As references we use (Buballa 1996) and (Buballa 2005)
    Physics Reports, Volume 407, Issues 4–6, February 2005, Pages 205-376, ISSN
    0370-1573, [DOI](http://dx.doi.org/10.1016/j.physrep.2004.11.004)
 
+## Obtaining this program
+The latest version of this code is available at [github.com/cgraeff/quarks_EOS](https://github.com/cgraeff/quarks_EOS).
+A copy can be easily obtained if your system have `git` installed, just issue the following
+command in a terminal:
+```
+git clone https://github.com/cgraeff/quarks_EOS.git
+```
+
 ## Requisites
 
 To build and run this code `make`, a C compiler (default is `gcc`) and the
-GSL (GNU Scientific Library) must be installed on the system.
+GSL (GNU Scientific Library) must be installed on the system. For plotting
+graphics, `gnuplot` is also required.
 
 On Linux the installation varies from distribution to distribution, but generally
 there are two packages, one for regular use and one for developing.
@@ -26,7 +35,7 @@ installed from Homebrew. To change, edit the variables at `src/Makefile`.
 ## Build and run instructions
 
 Basic build (generate `qeos`executable):
-* Build with `make` in the top dir;
+* Build with `make` in the root dir;
 
 Running:
 * When executed, `qeos` will calculate the equations of state with the
@@ -41,18 +50,39 @@ Running:
  * `-u`: prints usage;
  * `-h`: also prints usage;
 
-For easier running and testing, the following commands are provided:
+For easier running and testing, the following commands are provided (all to be issued at the root dir):
 * Run with `make run` (implies `-d`);
 * Remove product files with `make clean`;
 * Arguments may be passed with `make ARGS="-p Set" run`, where `-p Set`
   stand for example arguments;
+* Run for many parameters sets at once using `make multirun` or `make ARGS="-t 10" multirun`,
+  where `-t 10` stands for example arguments. The sets must be listed in the `MULTIRUN_SETS`
+  variable in the `Makefile` at the root dir;
 * Run tests with `make tests` (it is a shortcut to `make ARGS="-a" run` with
   the default parameterization);
 
-When running on the default tree (that is, on the cloned dir), the
+When running on the default tree (that is, on the cloned or downloaded dir), the
 results can be plotted with
-* Plot results with `make graph`
+* Plot results with `make graph`;
+* Plot results for multirun with `make mgraph`. This also plots the `multioutput/gnuplot.gpi`
+  which may access files for multiple parameters sets and is useful for making plots comparing
+  results for different sets;
 * Plot tests with `make tgraph`;
+
+Two files for each plot will be created, a `png` file and a `tex` file. The second
+is a version created using the `tiks` terminal for `gnuplot` and can be used
+directly into `(pdf)latex`. The advantage is a much cleaner plot and proper
+`latex` equations and text in labels.
+
+## Known limitations
+* The solution is known to crash at high values of barionic density due to
+  problems in the two dimensional root finder ("matrix is singular", "approximation to 
+  Jacobian has collapsed"). This is probably due to a specially difficult region
+  for the gap equation in the mass vs renormalized chemical potential plane.
+  	* For `BuballaR_2` set with a temperature of 10 MeV, the max value of barionic
+	  density before the calculation crashes is about 1.78 fm^{-3}
+	* For `Buballa_1` also with a temperature of 10 MeV, the max barionic density is
+	  about 2.4 fm^{-3}.
 
 ## Code structure
 
