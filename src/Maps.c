@@ -154,6 +154,15 @@ void IntersectionPointOfTwoMaps(gsl_vector * map1_x,
     // linear fits. If there are too few points and the intersection is near a bend,
     // increasing the number of points may produce worse results.
 
+    // At first or last point, we can't use linear regression method, use closest
+    if (map1_closest_index == 0 || map1_closest_index + 1 == red_map1_num_points
+        || map2_closest_index == 0 || map2_closest_index + 1 == red_map2_num_points){
+
+        *x_intersection_return = gsl_vector_get(map1_x, map1_closest_index);
+        *y_intersection_return = gsl_vector_get(map1_y, map1_closest_index);
+        return;
+    }
+    
     double A_1;
     double B_1;
 
