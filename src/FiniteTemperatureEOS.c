@@ -13,7 +13,6 @@
 #include "Constants.h"
 #include "Parameters.h"
 #include "CommandlineOptions.h"
-
 #include "FiniteTemperatureEOS.h"
 
 #define ROOT_FINDER_DIMENSION_2 2
@@ -45,6 +44,7 @@ void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic
                                                                  double * return_mass,
                                                                  double * return_renormalized_chemical_potential)
 {
+    // Polish root to required precision
     multi_dim_gap_eq_param p;
     p.barionic_density = barionic_density;
     
@@ -61,6 +61,12 @@ void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic
                              parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess,
                              &x,
                              &y);
+    
+    // Save root as guess for next interaction
+    // (this minimizes odds of "solver stuck" and
+    // greatly improve performance)
+    parameters.mass_and_renor_chem_pot_solution_mass_guess = x;
+    parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = y;
     
     *return_mass = x;
     *return_renormalized_chemical_potential = y;
@@ -80,7 +86,7 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
     gsl_vector_set(initial_guess, 0, x_initial_guess);
     gsl_vector_set(initial_guess, 1, y_initial_guess);
     
-    const gsl_multiroot_fsolver_type * solver_type = gsl_multiroot_fsolver_hybrids;
+    const gsl_multiroot_fsolver_type * solver_type = gsl_multiroot_fsolver_broyden;
     gsl_multiroot_fsolver * solver = gsl_multiroot_fsolver_alloc(solver_type,
                                                                  ROOT_FINDER_DIMENSION_2);
     
