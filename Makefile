@@ -7,26 +7,36 @@ MULTIRUN_SETS = Buballa_1 Buballa_2 Buballa_3 BuballaR_2 BuballaR_2_GV
 .PHONY: all run graph tests tgraph clean
 
 all:
-	cd src; make
+	@echo "[Compiling...]"
+	@cd src; make
+	@echo "[done.]"
 run:
-	./$(TARGET) -d $(ARGS)
+	@./$(TARGET) -d $(ARGS)
 graph:
-	cd output; \
+	@echo "[Plotting...]"
+	@cd output; \
 	for dir in `echo */`; do \
+		echo "> $$dir"; \
 		cd "$$dir"; \
 		gnuplot gnuplot.gpi; \
 		cd ..; \
 	done
+	@echo "[done.]"
 multirun:
-	for key in $(MULTIRUN_SETS); do \
+	@echo "[Running for multiple parameterizations...]"
+	@for key in $(MULTIRUN_SETS); do \
 		./$(TARGET) -d -p "$$key" $(ARGS); \
 		if [ -d multioutput/"$$key" ]; then rm -r multioutput/"$$key"; fi; \
 		cp -r output multioutput/"$$key"; \
 	done
+	@echo "[done.]"
 mgraph:
-	for dir in $(MULTIRUN_SETS); do \
+	@echo "[Plotting for multiple parameterizations...]"
+	@for dir in $(MULTIRUN_SETS); do \
+		echo "$$dir"; \
 		cd "multioutput/$$dir"; \
 		for subdir in `echo */`; do \
+			echo "> $$subdir"; \
 			cd "$$subdir"; \
 			gnuplot gnuplot.gpi; \
 			cd ..; \
@@ -34,15 +44,22 @@ mgraph:
 		cd ../..; \
 	done; \
 	cd multioutput; gnuplot gnuplot.gpi
+	@echo "[done.]"
 tests:
-	./$(TARGET) -a $(ARGS)
+	@echo "[Running tests...]"
+	@./$(TARGET) -a $(ARGS)
+	@echo "[done.]"
 tgraph:
-	for dir in `echo tests/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
+	@echo "[Plotting tests...]"
+	@for dir in `echo tests/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
+	@echo "[done.]"
 clean:
-	-rm -f $(TARGET)
-	cd src; make clean
-	find . -name "*.dat" -type f -delete
-	find . -name "*.log" -type f -delete
-	find . -name "*.png" -type f -delete
-	find . -name "*.tex" -type f -delete
-	cd multioutput; rm -rf $(MULTIRUN_SETS)
+	@echo "[Cleaning...]"
+	@-rm -f $(TARGET)
+	@cd src; make clean
+	@find . -name "*.dat" -type f -delete
+	@find . -name "*.log" -type f -delete
+	@find . -name "*.png" -type f -delete
+	@find . -name "*.tex" -type f -delete
+	@cd multioutput; rm -rf $(MULTIRUN_SETS)
+	@echo "[done.]"
