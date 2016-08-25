@@ -211,6 +211,45 @@ int SolveZeroTemperatureEOS(){
                        thermodynamic_potential_vector);
 
     if (options.dirs)
+        SetFilePath("output/Rep_Tsue/data");
+
+    WriteVectorsToFile("mass_renorm_chem_pot.dat",
+                       "# mass, renormalized chemical potential \n",
+                       2,
+                       mass_vector,
+                       renormalized_chemical_potential_vector);
+
+    WriteVectorsToFile("mass_chem_pot.dat",
+                       "# mass, chemical potential \n",
+                       2,
+                       mass_vector,
+                       chemical_potential_vector);
+
+    WriteVectorsToFile("pressure_renorm_chem_pot.dat",
+                       "# renormalized chemical potential, pressure\n",
+                       2,
+                       renormalized_chemical_potential_vector,
+                       pressure_vector);
+
+    WriteVectorsToFile("pressure_chem_pot.dat",
+                       "# chemical potential, pressure\n",
+                       2,
+                       chemical_potential_vector,
+                       pressure_vector);
+
+    WriteVectorsToFile("barionic_dens_renorm_chemical_potential.dat",
+                       "# barionic density, renormalized chemical potential \n",
+                       2,
+                       barionic_density_vector,
+                       renormalized_chemical_potential_vector);
+
+    WriteVectorsToFile("barionic_dens_chemical_potential.dat",
+                       "# barionic density, chemical potential \n",
+                       2,
+                       barionic_density_vector,
+                       chemical_potential_vector);
+
+    if (options.dirs)
         SetFilePath("output/EOS/data/");
     
     WriteVectorsToFile("pressure.dat",
