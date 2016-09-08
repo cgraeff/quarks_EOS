@@ -86,7 +86,7 @@ void TwodimensionalRootFinder(gsl_multiroot_function * f,
     gsl_vector_set(initial_guess, 0, x_initial_guess);
     gsl_vector_set(initial_guess, 1, y_initial_guess);
     
-    const gsl_multiroot_fsolver_type * solver_type = gsl_multiroot_fsolver_broyden;
+    const gsl_multiroot_fsolver_type * solver_type = gsl_multiroot_fsolver_hybrids;
     gsl_multiroot_fsolver * solver = gsl_multiroot_fsolver_alloc(solver_type,
                                                                  ROOT_FINDER_DIMENSION_2);
     

@@ -21,7 +21,7 @@ replot
 # Reprodution of Fig. 2 of arXiv:1003.2843v1
 set xlabel '$\mu_R$ (MeV)'
 set ylabel '$m$ (MeV)'
-set xrange[300:380]
+#set xrange[300:380]
 set term png
 set out "graph/mass_renorm_chem_pot.png"
 plot "data/mass_renorm_chem_pot.dat" u 2:1 w l notitle
@@ -41,7 +41,7 @@ replot
 # Reprodution of Fig. 4 of arXiv:1003.2843v1
 set xlabel '$\mu_R$ (MeV)'
 set ylabel '$p (\rm{MeV}/\rm{fm}^{3})$'
-set xrange[300:380]
+#set xrange[300:380]
 set term png
 set out "graph/pressure_renorm_chem_pot.png"
 plot "data/pressure_renorm_chem_pot.dat" w l notitle
