@@ -16,7 +16,7 @@ graph:
 	@echo "[Plotting...]"
 	@cd output; \
 	for dir in `echo */`; do \
-		echo "> $$dir"; \
+		echo "$$dir"; \
 		cd "$$dir"; \
 		gnuplot gnuplot.gpi; \
 		cd ..; \
@@ -36,7 +36,6 @@ mgraph:
 		echo "$$dir"; \
 		cd "multioutput/$$dir"; \
 		for subdir in `echo */`; do \
-			echo "> $$subdir"; \
 			cd "$$subdir"; \
 			gnuplot gnuplot.gpi; \
 			cd ..; \
@@ -50,8 +49,14 @@ tests:
 	@./$(TARGET) -a $(ARGS)
 	@echo "[done.]"
 tgraph:
-	@echo "[Plotting tests...]"
-	@for dir in `echo tests/*/`; do cd "$$dir" && gnuplot gnuplot.gpi && cd ../..; done
+	@echo "[Plotting tests ...]"
+	@cd tests/ ; \
+	for dir in `echo */`; do \
+		cd "$$dir"; \
+		echo "$$dir"; \
+		gnuplot gnuplot.gpi; \
+		cd ../; \
+	done;
 	@echo "[done.]"
 clean:
 	@echo "[Cleaning...]"
