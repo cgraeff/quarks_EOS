@@ -33,10 +33,10 @@ double UnidimensionalRootFinder(gsl_function * F,
     // Test if the limits straddle the root
     // If they don't, we will assume that
     // the mass = 0 root was found
-    if (GSL_SIGN(GSL_FN_EVAL(F, lower_bound))
-        == GSL_SIGN(GSL_FN_EVAL(F, upper_bound)))
+    if (GSL_SIGN(GSL_FN_EVAL(F, lower_bound)) == GSL_SIGN(GSL_FN_EVAL(F, upper_bound))){
         return 0;
-    
+    }
+
 	gsl_root_fsolver_set(s, F, lower_bound, upper_bound);
 	
     // Iterate the algorithm until
@@ -149,8 +149,9 @@ double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
 
 double ScalarDensity(double mass, double fermi_momentum)
 {
-    if (mass == 0)
+    if (mass == 0){
         return 0;
+    }
 
 	return NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0))
            * (F0(mass, fermi_momentum) - F0(mass, parameters.cutoff));
