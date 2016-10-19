@@ -111,6 +111,91 @@ void ParametersSetup(void)
 
   	AppendParametersSetToList(p);
 
+    ////
+    
+    p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "BuballaR_2_GV_0.25";
+    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
+    p.bare_mass = 5.6;                                             // MeV
+    p.cutoff = 587.9;                                              // MeV
+    
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
+    p.G_V = 0.25 * p.G_S;
+    
+    AppendParametersSetToList(p);
+    
+    ////
+    
+    p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "BuballaR_2_GV_0.35";
+    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
+    p.bare_mass = 5.6;                                             // MeV
+    p.cutoff = 587.9;                                              // MeV
+    
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
+    p.G_V = 0.35 * p.G_S;
+    
+    AppendParametersSetToList(p);
+    
+    
+    ////
+    
+    p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "BuballaR_2_GV_0.45";
+    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
+    p.bare_mass = 5.6;                                             // MeV
+    p.cutoff = 587.9;                                              // MeV
+    
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
+    p.G_V = 0.45 * p.G_S;
+    
+    AppendParametersSetToList(p);
+    
+    ////
+    
+    p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "BuballaR_2_GV_0.55";
+    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
+    p.bare_mass = 5.6;                                             // MeV
+    p.cutoff = 587.9;                                              // MeV
+    
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
+    p.G_V = 0.55 * p.G_S;
+    
+    AppendParametersSetToList(p);
+    
+    ////
+    
+    p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "BuballaR_2_GV_0.65";
+    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
+    p.bare_mass = 5.6;                                             // MeV
+    p.cutoff = 587.9;                                              // MeV
+    
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
+    p.G_V = 0.65 * p.G_S;
+    
+    AppendParametersSetToList(p);
+    
+    ////
+    
+    p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "BuballaR_2_GV_0.75";
+    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
+    p.bare_mass = 5.6;                                             // MeV
+    p.cutoff = 587.9;                                              // MeV
+    
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
+    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
+    p.G_V = 0.75 * p.G_S;
+    
+    AppendParametersSetToList(p);
+    
   	// END DECLARATION OF PARAMETERS SETS
     
     // Verify that the set identifiers are unique
