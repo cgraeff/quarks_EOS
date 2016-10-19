@@ -315,37 +315,35 @@ void RunTests()
             renorm_chem_pot_equation_input input;
             F.function = &ZeroedRenormalizedChemicalPotentialEquation;
             F.params = &input;
+     
+            /*
+             * Determine the renormalized chemical potential by root-finding
+             * for each value of mass
+             */
             
             double m = 0;
             
             for (int j = 0; j < points_number; j++) {
                 
+                double renormalized_chemical_potential;
+
                 // Prepare input for ZeroedRenormalizedChemicalPotentialEquation
                 input.chemical_potential = chemical_potential[i];
                 input.mass = m;
                 
-                // FIXME: there is something weird here. Maybe it's not just the fix bellow,
-                // maybe this line is not necessary. See what should happen when G_V = 0
-                // and act accordingly. Then, if G_V is not zero, find the root.
-                // Anyway, why the renormalized chemical potential would be equal to the
-                // chemical potential in each case?
-                double renormalized_chemical_potential = chemical_potential[i];
-                
-                if (parameters.G_V != 0.0){
- 
-                    // If chemical potential is zero, the solution is zero
-                    if (chemical_potential[i] == 0){
-                        renormalized_chemical_potential = 0; // FIXME: this is not necessary
-                    }
-                    else{
-                        renormalized_chemical_potential =
-                            UnidimensionalRootFinder(&F,
-                                                     parameters.renormalized_chemical_potential_lower_bound,
-                                                     parameters.renormalized_chemical_potential_upper_bound,
-                                                     parameters.renormalized_chemical_potential_abs_error,
-                                                     parameters.renormalized_chemical_potential_rel_error,
-                                                     parameters.renormalized_chemical_potential_max_iter);
-                    }
+                // If the chemical potential is zero, the solution is zero.
+                // Otherwise it needs to be calculated
+                if (chemical_potential[i] == 0){
+                    renormalized_chemical_potential = 0;
+                }
+                else{
+                    renormalized_chemical_potential =
+                        UnidimensionalRootFinder(&F,
+                                                 parameters.renormalized_chemical_potential_lower_bound,
+                                                 parameters.renormalized_chemical_potential_upper_bound,
+                                                 parameters.renormalized_chemical_potential_abs_error,
+                                                 parameters.renormalized_chemical_potential_rel_error,
+                                                 parameters.renormalized_chemical_potential_max_iter);
                 }
                 
                 gsl_vector_set(renormalized_chemical_potential_vector, j, renormalized_chemical_potential);
