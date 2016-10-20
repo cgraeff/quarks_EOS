@@ -154,8 +154,8 @@ void SolveMultiRoots(double  barionic_density,
         F.params = &p;
         
         // Set root bounds observing the mappings
-        double lower_bound = parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound;
-        double upper_bound = parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound;
+        double lower_bound = sqrt(parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound);
+        double upper_bound = sqrt(parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound);
         
         // As we are left with just one variable and one equation to solve,
         // now an one-dimensional algorithm may be employed. Otherwise,
@@ -170,9 +170,8 @@ void SolveMultiRoots(double  barionic_density,
                                               parameters.mass_and_renor_chem_pot_solution_rel_error,
                                               parameters.mass_and_renor_chem_pot_solution_max_iter,
                                               &return_result);
-        
         if (status != 0){
-            printf("Something is wrong with the rootfinding.\n");
+            printf("\nBounds do not straddle root.\n");
             abort();
         }
         
@@ -227,7 +226,7 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
     
    	const double mass = pow(gsl_vector_get(x, 0), 2.0);
    	const double renormalized_chemical_potential = pow(gsl_vector_get(x,1), 2.0);
-    
+
     double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential, NULL);
     double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteTemperature(mass,
                                                                                   renormalized_chemical_potential,
