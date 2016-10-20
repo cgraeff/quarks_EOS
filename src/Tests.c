@@ -21,6 +21,7 @@
 #include "AuxiliaryFunctions.h"
 #include "Constants.h"
 #include "Maps.h"
+#include "RootFinding.h"
 
 int WriteZeroedGapEquation(char * filename,
                            double minimum_mass,
@@ -337,13 +338,15 @@ void RunTests()
                     renormalized_chemical_potential = 0;
                 }
                 else{
-                    renormalized_chemical_potential =
-                        UnidimensionalRootFinder(&F,
-                                                 parameters.renormalized_chemical_potential_lower_bound,
-                                                 parameters.renormalized_chemical_potential_upper_bound,
-                                                 parameters.renormalized_chemical_potential_abs_error,
-                                                 parameters.renormalized_chemical_potential_rel_error,
-                                                 parameters.renormalized_chemical_potential_max_iter);
+                    int status = UnidimensionalRootFinder(&F,
+                                                          parameters.renormalized_chemical_potential_lower_bound,
+                                                          parameters.renormalized_chemical_potential_upper_bound,
+                                                          parameters.renormalized_chemical_potential_abs_error,
+                                                          parameters.renormalized_chemical_potential_rel_error,
+                                                          parameters.renormalized_chemical_potential_max_iter,
+                                                          &renormalized_chemical_potential);
+                    if (status == -1)
+                        renormalized_chemical_potential = 0;
                 }
                 
                 gsl_vector_set(renormalized_chemical_potential_vector, j, renormalized_chemical_potential);
@@ -805,9 +808,9 @@ void RunTests()
 
             for (int j = 0; j < n_pts; j++){
 
-                CalculateMassAndRenormalizedChemicalPotentialSimultaneously(dens,
-                                                                            &mass,
-                                                                            &renormalized_chemical_potential);
+                SolveMultiRoots(dens,
+                               &mass,
+                               &renormalized_chemical_potential);
 
                 gsl_vector_set(dens_vector, j, dens);
                 gsl_vector_set(mass_vector, j, mass);
@@ -1034,12 +1037,16 @@ void RunTests()
             gsl_function F;
             F.function = &ZeroedGapEquationForFiniteTemperatureTest;
             
-            double mass = UnidimensionalRootFinder(&F,
-                                                   0.0,
-                                                   500.0,
-                                                   1.0E-7,
-                                                   1.0E-7,
-                                                   1000);
+            double mass;
+            int status = UnidimensionalRootFinder(&F,
+                                                  0.0,
+                                                  500.0,
+                                                  1.0E-7,
+                                                  1.0E-7,
+                                                  1000,
+                                                  &mass);
+            if (status == -1)
+                mass = 0;
             
             gsl_vector_set(temperature_vector, i, temperature);
             gsl_vector_set(mass_vector, i, mass);
@@ -1071,13 +1078,17 @@ void RunTests()
             // This case will not have solutions beyond T = 220 MeV
             double mass = 0;
             
-            if (temperature < 220.0)
-                mass = UnidimensionalRootFinder(&F,
-                                                0.1,
-                                                500.0,
-                                                1.0E-7,
-                                                1.0E-7,
-                                                6000);
+            if (temperature < 220.0){
+                int status = UnidimensionalRootFinder(&F,
+                                                      0.1,
+                                                      500.0,
+                                                      1.0E-7,
+                                                      1.0E-7,
+                                                      6000,
+                                                      &mass);
+                if (status == -1)
+                    mass = 0;
+            }
 
             gsl_vector_set(temperature_vector, i, temperature);
             gsl_vector_set(mass_vector, i, mass);

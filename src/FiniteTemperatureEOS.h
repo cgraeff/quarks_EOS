@@ -35,9 +35,9 @@ double FermiDiracDistributionFromDensityIntegral(double mass,
                                                  double renormalized_chemical_potential);
 double FermiDiracDistributionIntegralFromGapEquation(double mass,
                                                      double renormalized_chemical_potential);
-void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic_density,
-                                                                 double * return_mass,
-                                                                 double * return_renormalized_chemical_potential);
+void SolveMultiRoots(double  barionic_density,
+                     double *return_mass,
+                     double *return_renorm_chem_pot);
 
 double ZeroedGapEquationForFiniteTemperature(double mass,
                                              double renormalized_chemical_potential,

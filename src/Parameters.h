@@ -9,6 +9,8 @@
 #ifndef Parameters_h
 #define Parameters_h
 
+#include <stdbool.h>
+
 typedef struct _parameters
 {
     char * parameters_set_identifier;
@@ -64,8 +66,12 @@ typedef struct _parameters
     int mass_and_renor_chem_pot_solution_max_iter;
     double mass_and_renor_chem_pot_solution_mass_guess; // (MeV)
     double mass_and_renor_chem_pot_solution_renor_chem_pot_guess; //(MeV)
-    double mass_and_renorm_chem_pot_solution_abs_error;
-    double mass_and_renorm_chem_pot_solution_rel_error;
+    double mass_and_renor_chem_pot_solution_abs_error;
+    double mass_and_renor_chem_pot_solution_rel_error;
+    double mass_and_renor_chem_pot_solution_zero_mass_tolerance;
+    double mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound;
+    double mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound;
+    bool mass_and_renor_chem_pot_solution_use_last_solution_as_guess;
     
     int fermi_dirac_integrals_max_interval_num;
     int fermi_dirac_integrals_integration_key;

@@ -13,63 +13,11 @@
 #include "Parameters.h"
 #include "Constants.h"
 #include "ZeroTemperatureEOS.h"
+#include "RootFinding.h"
 
 double F0(double mass, double momentum);
 double F_E(double mass, double momentum);
 
-
-double UnidimensionalRootFinder(gsl_function * F,
-								double lower_bound,
-								double upper_bound,
-								double abs_error,
-								double rel_error,
-								int max_iter)
-{
-    // Setup root finding solver. Maybe this would be better: gsl_root_fsolver_brent
-    const gsl_root_fsolver_type * T	= gsl_root_fsolver_bisection;
-
-    gsl_root_fsolver * s = gsl_root_fsolver_alloc(T);
-    
-    // Test if the limits straddle the root
-    // If they don't, we will assume that
-    // the mass = 0 root was found
-    if (GSL_SIGN(GSL_FN_EVAL(F, lower_bound)) == GSL_SIGN(GSL_FN_EVAL(F, upper_bound))){
-        return 0;
-    }
-
-	gsl_root_fsolver_set(s, F, lower_bound, upper_bound);
-	
-    // Iterate the algorithm until
-    // |x_lower - x_upper| < const_abs_error_gap_eq_solving
-	// 						 + const_rel_error_gap_eq_solving * MIN(|x_upper|, |x_lower|)
-    // or i = gap_eq_solver_max_iterations
-	int i = 0;
-	double x_lower;
-	double x_upper;
-	do{
-		i++;
-		
-		int status = gsl_root_fsolver_iterate(s);
-		
-		if (status != GSL_SUCCESS){
-			printf("ERROR: No solution to the gap equation was found!\n");
-			exit(EXIT_FAILURE);
-		}
-		
-		x_lower = gsl_root_fsolver_x_lower(s);
-		x_upper = gsl_root_fsolver_x_upper(s);
-	} while(GSL_CONTINUE == gsl_root_test_interval(x_lower,
-												   x_upper,
-												   abs_error,
-												   rel_error)
-			&& i <=  max_iter);
-
-	double result = gsl_root_fsolver_root(s);
-
-	void gsl_root_fsolver_free(gsl_root_fsolver * S);
-		
-	return result;
-}
 
 double GapEquationSolver(double fermi_momentum)
 {
@@ -82,12 +30,17 @@ double GapEquationSolver(double fermi_momentum)
     F.function = &ZeroedGapEquation;
     F.params = &input;
     
-    double root = UnidimensionalRootFinder(&F,
-                                           parameters.gap_eq_solver_lower_bound,
-                                           parameters.gap_eq_solver_upper_bound,
-                                           parameters.gap_eq_solver_abs_error,
-                                           parameters.gap_eq_solver_rel_error,
-                                           parameters.gap_eq_solver_max_iterations);
+    double root;
+    int status = UnidimensionalRootFinder(&F,
+                                          parameters.gap_eq_solver_lower_bound,
+                                          parameters.gap_eq_solver_upper_bound,
+                                          parameters.gap_eq_solver_abs_error,
+                                          parameters.gap_eq_solver_rel_error,
+                                          parameters.gap_eq_solver_max_iterations,
+                                          &root);
+    if (status == -1){
+        return 0;
+    }
     
     return root;
 }
@@ -110,12 +63,18 @@ double VacuumMassDetermination()
     gsl_function F;
     F.function = &VacuumMassEquation;
     
-    double root = UnidimensionalRootFinder(&F,
-                                           parameters.vac_mass_det_lower_bound,
-                                           parameters.vac_mass_det_upper_bound,
-                                           parameters.vac_mass_det_abs_error,
-                                           parameters.vac_mass_det_rel_error,
-                                           parameters.vac_mass_det_max_iterations);
+    double root;
+    int status = UnidimensionalRootFinder(&F,
+                                          parameters.vac_mass_det_lower_bound,
+                                          parameters.vac_mass_det_upper_bound,
+                                          parameters.vac_mass_det_abs_error,
+                                          parameters.vac_mass_det_rel_error,
+                                          parameters.vac_mass_det_max_iterations,
+                                          &root);
+    
+    if (status == -1){
+        return 0;
+    }
     
     return root;
 }

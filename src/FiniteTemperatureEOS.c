@@ -14,17 +14,18 @@
 #include "Parameters.h"
 #include "CommandlineOptions.h"
 #include "FiniteTemperatureEOS.h"
+#include "RootFinding.h"
 
-#define ROOT_FINDER_DIMENSION_2 2
+typedef struct _multi_dim_root_params{
+    double barionic_density;
+} multi_dim_root_params;
 
-int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
-                                                       void * p,
-                                                       gsl_vector * f);
-void TwodimensionalRootFinder(gsl_multiroot_function * f,
-                              double x_initial_guess,
-                              double y_initial_guess,
-                              double * return_x,
-                              double * return_y);
+int MultiDimensionalRootFinderHelperFunction(const gsl_vector *x,
+                                             void             *p,
+                                             gsl_vector       *return_values);
+
+double ZeroMassSpecialCaseHelperFunction(double x,
+                                         void  *par);
 
 double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void * parameters);
 double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
@@ -39,115 +40,201 @@ double ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand(do
 
 double g(double t, double e, double c);
 
+/*  Solution for gap equation, beta equilibrium and charge neutrality:
+ *  Prototype:
+ *          void SolveMultiRoots(double  barionic_density,
+ *                              double *return_mass,
+ *                              double *return_proton_fraction);
+ *
+ *  Purpose:
+ *      This function will take parameters like initial guess, erros, tolerance
+ *      and call the rootfinding functions in a proper way. It exists to handle
+ *      mappings (see below) and to handle the special case of mass = 0 (also
+ *      below). It will return the mass which solves the gap function and the
+ *      proton fraction for which the beta equilibrium is respected.
+ *
+ *  Mappings:
+ *      The variables for the root finding are assumed to cover the range
+ *      (-\infty, +\infty), but that is not the case for the variables
+ *      that we are trying to solve. Here both the mass $m$ and the renormalized
+ *      chemical potential are such that
+ *          $m \in [0, +\infty)$,
+ *          $\mu_R \in [0, +\infty)$.
+ *      To solve that, we use the mappings:
+ *          $m = x^2$,
+ *          $\mu_R = y^2$.
+ *      The initial guesses must be transformed by inverting the relations
+ *      above.
+ *
+ *  Zero mass special case:
+ *      The zero mass case is important as most calculations will be
+ *      performed at this particular case, which due to characteristics
+ *      of the multidimensional root-finding algorithm, may be problematic to
+ *      solve (it works most of the time, but sometimes calculations result in NaNs).
+ *      This is due to problems in the calculation of derivatives of
+ *      the function with respect to mass which arise from low variability
+ *      of the function near zero mass.
+ *
+ *      This case, however is not the one reached at the start of calculations.
+ *      In addition to that, once it is reached, all subsequent calculations are
+ *      performed at approximatelly zero mass.
+ *
+ *      We take these characteristics into account and do the zero mass case
+ *      with a special path, where we just assume mass = 0 (this effectivelly
+ *      reduces the dimension of the system). This will avoid
+ *      any calculation of potentially problematic derivatives. The special
+ *      path is triggered by the condition
+ *          mass < mass_tolerance
+ *      which must be true. The tolerance should be adjusted in the setup of
+ *      parameters.
+ */
 
-void CalculateMassAndRenormalizedChemicalPotentialSimultaneously(double barionic_density,
-                                                                 double * return_mass,
-                                                                 double * return_renormalized_chemical_potential)
+void SolveMultiRoots(double  barionic_density,
+                     double *return_mass,
+                     double *return_renorm_chem_pot)
 {
-    // Polish root to required precision
-    multi_dim_gap_eq_param p;
+    // Set dimension (number of equations|variables to solve|find)
+    const int dimension = 2;
+    
+    // Set up parameters to be passed to helper function
+    multi_dim_root_params p;
     p.barionic_density = barionic_density;
     
-    gsl_multiroot_function f;
-    f.f = &ZeroedGapAndBarionicDensityEquations;
-    f.n = ROOT_FINDER_DIMENSION_2;
-    f.params = (void *)&p;
-    
-    double x;
-    double y;
-    
-    TwodimensionalRootFinder(&f,
-                             parameters.mass_and_renor_chem_pot_solution_mass_guess,
-                             parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess,
-                             &x,
-                             &y);
-    
-    // Save root as guess for next interaction
-    // (this minimizes odds of "solver stuck" and
-    // greatly improve performance)
-    parameters.mass_and_renor_chem_pot_solution_mass_guess = x;
-    parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = y;
-    
-    *return_mass = x;
-    *return_renormalized_chemical_potential = y;
-}
-
-void TwodimensionalRootFinder(gsl_multiroot_function * f,
-                              double x_initial_guess,
-                              double y_initial_guess,
-                              double * return_x,
-                              double * return_y)
-{
-    int status;
-    size_t iter = 0;
-    
-    gsl_vector * initial_guess = gsl_vector_alloc(ROOT_FINDER_DIMENSION_2);
-    
-    gsl_vector_set(initial_guess, 0, x_initial_guess);
-    gsl_vector_set(initial_guess, 1, y_initial_guess);
-    
-    const gsl_multiroot_fsolver_type * solver_type = gsl_multiroot_fsolver_hybrids;
-    gsl_multiroot_fsolver * solver = gsl_multiroot_fsolver_alloc(solver_type,
-                                                                 ROOT_FINDER_DIMENSION_2);
-    
-    gsl_multiroot_fsolver_set(solver, f, initial_guess);
-    
-    do {
-        iter++;
-        status = gsl_multiroot_fsolver_iterate(solver);
+    // Check for zero mass special case. As mass != 0 is the
+    // case that appears first, it is implemented first.
+    if (parameters.mass_and_renor_chem_pot_solution_mass_guess >
+        parameters.mass_and_renor_chem_pot_solution_zero_mass_tolerance){
         
-        if (status == GSL_EBADFUNC){
-            printf("TwodimensionalRootFinder: Error: Infinity or division by zero.\n");
-            abort();
-        }
-        else if (status == GSL_ENOPROG){
-            printf("TwodimensionalRootFinder: Error: Solver is stuck. Try a different initial guess.\n");
+        gsl_multiroot_function f;
+        f.f = &MultiDimensionalRootFinderHelperFunction;
+        f.n = dimension;
+        f.params = (void *)&p;
+        
+        gsl_vector * initial_guess = gsl_vector_alloc(dimension);
+        gsl_vector * return_results = gsl_vector_alloc(dimension);
+        
+        gsl_vector_set(initial_guess, 0, sqrt(parameters.mass_and_renor_chem_pot_solution_mass_guess));
+        gsl_vector_set(initial_guess, 1, sqrt(parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess));
+        
+        int status = MultidimensionalRootFinder(dimension,
+                                                &f,
+                                                initial_guess,
+                                                parameters.mass_and_renor_chem_pot_solution_abs_error,
+                                                parameters.mass_and_renor_chem_pot_solution_rel_error,
+                                                parameters.mass_and_renor_chem_pot_solution_max_iter,
+                                                return_results);
+        
+        if (status != 0){
+            printf("Something is wrong with the rootfinding.\n");
             abort();
         }
         
-        // Check if the root is good enough:
-        // tests for the convergence of the sequence by comparing the last step dx with the
-        // absolute error epsabs and relative error epsrel to the current position x. The test
-        // returns GSL_SUCCESS if the following condition is achieved,
-        //
-        // |dx_i| < epsabs + epsrel |x_i|
+        // Save results in return variables,
+        // taking care of the mappinps
+        *return_mass = pow(gsl_vector_get(return_results, 0), 2.0);
+        *return_renorm_chem_pot = pow(gsl_vector_get(return_results, 1), 2.0);
         
-        gsl_vector * x = gsl_multiroot_fsolver_root(solver); // current root
-        gsl_vector * dx = gsl_multiroot_fsolver_dx(solver); // last step
+        // Free vectors
+        gsl_vector_free(initial_guess);
+        gsl_vector_free(return_results);
         
-        status = gsl_multiroot_test_delta(dx,
-                                          x,
-                                          parameters.mass_and_renorm_chem_pot_solution_abs_error,
-                                          parameters.mass_and_renorm_chem_pot_solution_rel_error);
+        // Save solution as guess for next iteration
+        if (parameters.mass_and_renor_chem_pot_solution_use_last_solution_as_guess == true){
+            parameters.mass_and_renor_chem_pot_solution_mass_guess = *return_mass;
+            parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = *return_renorm_chem_pot;
+        }
         
-    } while (status == GSL_CONTINUE
-             && iter < parameters.mass_and_renor_chem_pot_solution_max_iter);
-    
-    gsl_vector * solution = gsl_multiroot_fsolver_root(solver);
-    
-    *return_x = gsl_vector_get(solution, 0);
-    *return_y = gsl_vector_get(solution, 1);
-    
-    gsl_multiroot_fsolver_free(solver);
-    gsl_vector_free (initial_guess);
+        return;
+        
+    }
+    else{ // Handle special case: Zero mass case
+        
+        gsl_function F;
+        F.function = &ZeroMassSpecialCaseHelperFunction;
+        F.params = &p;
+        
+        // Set root bounds observing the mappings
+        double lower_bound = parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound;
+        double upper_bound = parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound;
+        
+        // As we are left with just one variable and one equation to solve,
+        // now an one-dimensional algorithm may be employed. Otherwise,
+        // the dimension ought to be decreased by one an the multidimensional
+        // employed again.
+        double return_result;
+        
+        int status = UnidimensionalRootFinder(&F,
+                                              lower_bound,
+                                              upper_bound,
+                                              parameters.mass_and_renor_chem_pot_solution_abs_error,
+                                              parameters.mass_and_renor_chem_pot_solution_rel_error,
+                                              parameters.mass_and_renor_chem_pot_solution_max_iter,
+                                              &return_result);
+        
+        if (status != 0){
+            printf("Something is wrong with the rootfinding.\n");
+            abort();
+        }
+        
+        // Save results in return variables,
+        // taking care of the mappings
+        *return_mass = 0.0;
+        *return_renorm_chem_pot = pow(return_result, 2.0);
+        return;
+    }
 }
 
-int ZeroedGapAndBarionicDensityEquations(const gsl_vector * x,
-                                         void * p,
-                                         gsl_vector * f)
+double ZeroMassSpecialCaseHelperFunction(double  x,
+                                         void   *par)
 {
-    multi_dim_gap_eq_param * params = (multi_dim_gap_eq_param *)p;
+    const int dimension = 2;
     
-   	const double mass = gsl_vector_get(x,0);
-   	const double renormalized_chemical_potential = gsl_vector_get(x,1);
+    gsl_vector * input_values = gsl_vector_alloc(dimension);
+    gsl_vector * return_values = gsl_vector_alloc(dimension);
+    
+    // Set mass = 0, which is our special case
+    gsl_vector_set(input_values, 0, 0);
+    
+    // Pass value selected by the root finding routine
+    gsl_vector_set(input_values, 1, x);
+    
+    MultiDimensionalRootFinderHelperFunction(input_values, par, return_values);
+    
+    double return_value = gsl_vector_get(return_values, 1);
+    
+    gsl_vector_free(input_values);
+    gsl_vector_free(return_values);
+    
+    return return_value;
+}
+
+int MultiDimensionalRootFinderHelperFunction(const gsl_vector   *x,
+                                             void               *p,
+                                             gsl_vector         *return_values)
+{
+    multi_dim_root_params * params = (multi_dim_root_params *)p;
+    double barionic_density = params->barionic_density;
+    
+    // Mappings:
+    //      The variables for the root finding are assumed to cover the range
+    //      (-\infty, +\infty), but that is not the case for the variables
+    //      that we are trying to solve.
+    //      To solve that, we use the mappings:
+    //          $m = x^2$
+    //          $\mu_R = y^2$
+    //      The initial guesses must be transformed by inverting the relations
+    //      above
+    
+   	const double mass = pow(gsl_vector_get(x, 0), 2.0);
+   	const double renormalized_chemical_potential = pow(gsl_vector_get(x,1), 2.0);
     
     double zeroed_gap_eq = ZeroedGapEquationForFiniteTemperature(mass, renormalized_chemical_potential, NULL);
     double zeroed_bar_dens_eq = ZeroedBarionicDensityEquationForFiniteTemperature(mass,
                                                                                   renormalized_chemical_potential,
-                                                                                  &(params->barionic_density));
-
-   	gsl_vector_set(f, 0, zeroed_gap_eq);
-   	gsl_vector_set(f, 1, zeroed_bar_dens_eq);
+                                                                                  (void *)&barionic_density);
+    
+   	gsl_vector_set(return_values, 0, zeroed_gap_eq);
+   	gsl_vector_set(return_values, 1, zeroed_bar_dens_eq);
     
     return GSL_SUCCESS;
 }

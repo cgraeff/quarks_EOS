@@ -271,7 +271,7 @@ Parameters NewCopyOfParametersSetFromTemplate()
 
   	p.points_number = 1000;
     p.minimum_density = 1.0E-3;
-    p.maximum_density = 1.78;
+    p.maximum_density = 10.0;
 
     p.gap_minimum_mass = 0.0;
     p.gap_maximum_mass = 1000.0;
@@ -306,8 +306,12 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.mass_and_renor_chem_pot_solution_max_iter = 4000;
     p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)
     p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 400.0; //(MeV)
-    p.mass_and_renorm_chem_pot_solution_abs_error = 1.0E-5;
-    p.mass_and_renorm_chem_pot_solution_rel_error = 1.0E-5;
+    p.mass_and_renor_chem_pot_solution_abs_error = 1.0E-5;
+    p.mass_and_renor_chem_pot_solution_rel_error = 1.0E-5;
+    p.mass_and_renor_chem_pot_solution_zero_mass_tolerance = 0.1;
+    p.mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound = 0.0;
+    p.mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound = 3000;
+    p.mass_and_renor_chem_pot_solution_use_last_solution_as_guess = true;
     
     p.fermi_dirac_integrals_max_interval_num = 8000;
     p.fermi_dirac_integrals_integration_key = GSL_INTEG_GAUSS61;
@@ -366,8 +370,8 @@ void PrintParametersToFile(FILE * file)
     fprintf(file, "mass_and_renor_chem_pot_solution_max_iter = %d\n", parameters.mass_and_renor_chem_pot_solution_max_iter);
     fprintf(file, "mass_and_renor_chem_pot_solution_mass_guess = %f\n", parameters.mass_and_renor_chem_pot_solution_mass_guess);
     fprintf(file, "mass_and_renor_chem_pot_solution_renor_chem_pot_guess = %f\n", parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess);
-    fprintf(file, "mass_and_renorm_chem_pot_solution_abs_error = %f\n", parameters.mass_and_renorm_chem_pot_solution_abs_error);
-    fprintf(file, "mass_and_renorm_chem_pot_solution_rel_error = %f\n\n", parameters.mass_and_renorm_chem_pot_solution_rel_error);
+    fprintf(file, "mass_and_renorm_chem_pot_solution_abs_error = %f\n", parameters.mass_and_renor_chem_pot_solution_abs_error);
+    fprintf(file, "mass_and_renorm_chem_pot_solution_rel_error = %f\n\n", parameters.mass_and_renor_chem_pot_solution_rel_error);
     
     fprintf(file, "fermi_dirac_integrals_max_interval_num = %d\n", parameters.fermi_dirac_integrals_max_interval_num);
     fprintf(file, "fermi_dirac_integrals_integration_key = %d\n", parameters.fermi_dirac_integrals_integration_key);

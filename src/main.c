@@ -353,9 +353,9 @@ int SolveFiniteTemperatureEOS(){
         // Solution of Gap Equation, determination of scalar density
         double mass;
         double renormalized_chemical_potential;
-        CalculateMassAndRenormalizedChemicalPotentialSimultaneously(barionic_density,
-                                                                    &mass,
-                                                                    &renormalized_chemical_potential);
+        SolveMultiRoots(barionic_density,
+                        &mass,
+                        &renormalized_chemical_potential);
         gsl_vector_set(mass_vector, i, mass);
         gsl_vector_set(renormalized_chemical_potential_vector, i, renormalized_chemical_potential);
         

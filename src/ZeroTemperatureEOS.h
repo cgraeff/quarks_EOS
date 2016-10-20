@@ -18,12 +18,6 @@ typedef struct _renorm_chem_pot_equation_input{
     double mass;
 } renorm_chem_pot_equation_input;
 
-double UnidimensionalRootFinder(gsl_function * F,
-								double lower_bound,
-								double upper_bound,
-								double abs_error,
-								double rel_error,
-								int max_iter);
 double GapEquationSolver();
 double ZeroedGapEquation(double mass, void * input);
 
