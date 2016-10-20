@@ -45,11 +45,9 @@ double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p);
 
 void RunTests()
 {
-    printf("Running tests ...\n");
-    
 #pragma mark Vacuum Mass Zeroed Equation
 
-    if (true)
+    if (false)
     {
         printf("\tVacuum Mass Zeroed Equation\n");
         SetFilePath("tests/vacuum-mass-equation/data/");
@@ -104,7 +102,7 @@ void RunTests()
     
     // Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408
     // (the figure uses parameters of Set II from the article)
-    if (true)
+    if (false)
     {
         printf("\tReproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611\n");
         SetFilePath("tests/Buballa-Fig1-R/data/");
@@ -181,7 +179,7 @@ void RunTests()
 
     // Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = 0)
-    if (true)
+    if (false)
     {
         printf("\tReproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports\n");
 
@@ -268,7 +266,7 @@ void RunTests()
     
     // Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = G_S)
-    if (true)
+    if (false)
     {
         printf("\tReproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports\n");
         SetFilePath("tests/Buballa-Fig2.8-R/data/");
@@ -416,7 +414,7 @@ void RunTests()
     
     // Prints Fermi-Dirac distributions for selected values of temperature
     // and chemical potential as function of momentum
-    if (true)
+    if (false)
     {
         printf("\tFermi-Dirac Distributions\n");
         SetFilePath("tests/Fermi-Dirac-distributions/data/");
@@ -489,7 +487,7 @@ void RunTests()
 #pragma mark Fermi-Dirac Distribution Integrals
     
     // Tests integration of Fermi-Dirac distributions
-    if (true)
+    if (false)
     {
         printf("\tFermi-Dirac Distribution Integrals\n");
         SetFilePath("tests/Fermi-Dirac-distrib-integrals/data/");
@@ -580,7 +578,7 @@ void RunTests()
     // writes gap equation as function of mass for selected temperatures
     //    What exactly is that? I don't remember ...
     //
-    if (true)
+    if (false)
 	{
         printf("\tMass Gap Zeroed Equation for Selected Temperatures\n");
         SetFilePath("tests/zeroed-gap-equation/data/");
@@ -652,7 +650,7 @@ void RunTests()
     
     // Calculates zeroed gap and barionic densities equations so we can see both
     // and have an insight of what's going on
-    if (true)
+    if (false)
     {
         printf("\tMaps of Mass and Renormalized Chemical Potential Zeroed Equations\n");
         SetFilePath("tests/maps/data/");
@@ -779,7 +777,7 @@ void RunTests()
     
     // Prints mass and renormalized chemical potential calculation as function
     // of barionic density
-    if (true)
+    if (false)
     {
         printf("\tMass and Renormalized Chemical Potential for Finite Temperature\n");
         SetFilePath("tests/mass-renorm-chem-pot/data/");
@@ -851,7 +849,7 @@ void RunTests()
     }
     
 #pragma mark Entropy calculation methods (transient)
-    if (true)
+    if (false)
     {
         printf("\tEntropy calculation methods\n");
         SetFilePath("tests/transient/data/");
@@ -950,7 +948,7 @@ void RunTests()
     // have a 'closed' form. Here we use it to calculate the entropy
     // for a few parameters values just to see if we get a well
     // behaved solution.
-    if (true)
+    if (false)
     {
         printf("\tEntropy\n");
         SetFilePath("tests/entropy/data/");
@@ -1013,7 +1011,7 @@ void RunTests()
     }
     
 #pragma mark Reproduce Fig. 2.7 from Buballa Physics Reports
-    if (true)
+    if (false)
     {
         printf("\tReproduce Fig. 2.7 from Buballa Physics Reports\n");
         SetFilePath("tests/Buballa-Fig2.7/data/");
@@ -1118,7 +1116,59 @@ void RunTests()
         SetFilePath(NULL);
     }
     
-    printf("done\n");
+#pragma mark Test root finding for renormalized chemical potential
+    // After we reach the zero mass case, we use a onedimensional root finding
+    // to determine the renormalized chemical potential. However, for some
+    // reason the results seems to reach a maximum value. After this maximum,
+    // the root finding will fail. One possibility is that we reach a maximum
+    // value for the integral.
+    if (true)
+    {
+        printf("\tTest root finding for renormalized chemical potential\n");
+        SetFilePath("tests/renorm-chem-pot-transient/data/");
+        
+        SetParametersSet("Buballa_1");
+        
+        int num_pts = 1000;
+        
+        double mass = 0;
+        double barionic_density[12] = {0.1, 0.5, 0.7, 1.0, 1.4, 2.0, 2.1, 2.2, 2.3, 2.35, 2.4, 2.5};
+        
+        // Range of chemical potential which will be tested
+        double renorm_chem_pot_min = 0.0;
+        double renorm_chem_pot_max = 3000;
+        double step = (renorm_chem_pot_max - renorm_chem_pot_min) / (double)(num_pts - 1);
+        
+        gsl_vector * renorm_chem_pot_vector = gsl_vector_alloc(num_pts);
+        gsl_vector * zeroed_dens_eq_vector = gsl_vector_alloc(num_pts);
+
+        for (int i = 0; i < 12; i++){
+            
+            double mu_r = renorm_chem_pot_min;
+
+            for (int j = 0; j < num_pts; j++){
+                gsl_vector_set(renorm_chem_pot_vector, j, mu_r);
+                
+                double zeroed_dens_eq = ZeroedBarionicDensityEquationForFiniteTemperature(mass,
+                                                                                          mu_r,
+                                                                                          &(barionic_density[i]));
+                gsl_vector_set(zeroed_dens_eq_vector, j, zeroed_dens_eq);
+                
+                mu_r += step;
+            }
+            
+            char filename[256];
+            sprintf(filename, "zeroed_dens_eq_bar_dens_%d.dat", i);
+            
+            WriteVectorsToFile(filename,
+                               "# renormalized chemical potential, zeroed density equation \n",
+                               2,
+                               renorm_chem_pot_vector,
+                               zeroed_dens_eq_vector);
+        }
+        
+        SetFilePath(NULL);
+    }
 }
 
 double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p)

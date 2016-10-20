@@ -1,0 +1,9 @@
+set term png
+
+set out "graph/graph.png"
+
+input_file(i) = sprintf("data/zeroed_dens_eq_bar_dens_%d.dat", i)
+
+plot for [i=0:11] input_file(i) w lines notitle
+
+	
