@@ -1,5 +1,9 @@
 set term png
 
+unset key
+
+set xrange[0:600]
+
 set yrange[-20:10]
 set out "graph/Fig2.8R_BuballaR.png"
 plot "data/Fig2.8R_BuballaR_0.dat" w l, \

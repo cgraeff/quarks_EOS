@@ -373,17 +373,15 @@ double ThermodynamicPotentialForFiniteTemperature(double mass,
     double first_term = ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(mass,
                                                                                       renormalized_chemical_potential);
     
-    double second_term = pow(mass - parameters.bare_mass, 2.0)
-    / (4.0 * parameters.G_S * CONST_HBAR_C);
+    double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
     
     // If G_V == 0, we have to avoid a division by zero
     double third_term = 0.0;
     if (parameters.G_V != 0)
         third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
         / (4.0 * parameters.G_V * CONST_HBAR_C);
-    
-    // Trying + sign on third term like in T=0 case
-    return first_term + second_term + third_term;
+
+    return first_term + second_term - third_term;
 }
 
 double ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(double mass,
@@ -435,6 +433,7 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
     gsl_integration_workspace * workspace =
         gsl_integration_workspace_alloc(interval_num);
     
+    // FIXME: move parameters to Parameters.[h,c]
     double integral = 0;
     double abserr;
     double lower_limit = 0.0;

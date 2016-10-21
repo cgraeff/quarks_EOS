@@ -47,7 +47,7 @@ void RunTests()
 {
 #pragma mark Vacuum Mass Zeroed Equation
 
-    if (false)
+    if (true)
     {
         printf("\tVacuum Mass Zeroed Equation\n");
         SetFilePath("tests/vacuum-mass-equation/data/");
@@ -102,7 +102,7 @@ void RunTests()
     
     // Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408
     // (the figure uses parameters of Set II from the article)
-    if (false)
+    if (true)
     {
         printf("\tReproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611\n");
         SetFilePath("tests/Buballa-Fig1-R/data/");
@@ -179,7 +179,7 @@ void RunTests()
 
     // Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = 0)
-    if (false)
+    if (true)
     {
         printf("\tReproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports\n");
 
@@ -266,7 +266,7 @@ void RunTests()
     
     // Reproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports 407 (2005) 205-376
     // (the figure uses parameters of Set II from the article, with G_V = G_S)
-    if (false)
+    if (true)
     {
         printf("\tReproduce Fig. 2.8 (right) from  M. Buballa, Physics Reports\n");
         SetFilePath("tests/Buballa-Fig2.8-R/data/");
@@ -402,6 +402,10 @@ void RunTests()
 				" (as function of renormalized chemical potential)\n");
         fprintf(log_file,
                 "\tRenormalized chemical potential (as function of mass)\n");
+        fprintf(log_file,
+                "\tVacuum mass: %f\n", vacuum_mass);
+        fprintf(log_file,
+                "\tVacuum thermodynamic potential: %f\n", vacuum_thermodynamic_potential);
         
         PrintParametersToFile(log_file);
         
@@ -414,7 +418,7 @@ void RunTests()
     
     // Prints Fermi-Dirac distributions for selected values of temperature
     // and chemical potential as function of momentum
-    if (false)
+    if (true)
     {
         printf("\tFermi-Dirac Distributions\n");
         SetFilePath("tests/Fermi-Dirac-distributions/data/");
@@ -487,7 +491,7 @@ void RunTests()
 #pragma mark Fermi-Dirac Distribution Integrals
     
     // Tests integration of Fermi-Dirac distributions
-    if (false)
+    if (true)
     {
         printf("\tFermi-Dirac Distribution Integrals\n");
         SetFilePath("tests/Fermi-Dirac-distrib-integrals/data/");
@@ -578,7 +582,7 @@ void RunTests()
     // writes gap equation as function of mass for selected temperatures
     //    What exactly is that? I don't remember ...
     //
-    if (false)
+    if (true)
 	{
         printf("\tMass Gap Zeroed Equation for Selected Temperatures\n");
         SetFilePath("tests/zeroed-gap-equation/data/");
@@ -650,7 +654,7 @@ void RunTests()
     
     // Calculates zeroed gap and barionic densities equations so we can see both
     // and have an insight of what's going on
-    if (false)
+    if (true)
     {
         printf("\tMaps of Mass and Renormalized Chemical Potential Zeroed Equations\n");
         SetFilePath("tests/maps/data/");
@@ -777,7 +781,7 @@ void RunTests()
     
     // Prints mass and renormalized chemical potential calculation as function
     // of barionic density
-    if (false)
+    if (true)
     {
         printf("\tMass and Renormalized Chemical Potential for Finite Temperature\n");
         SetFilePath("tests/mass-renorm-chem-pot/data/");
@@ -849,7 +853,7 @@ void RunTests()
     }
     
 #pragma mark Entropy calculation methods (transient)
-    if (false)
+    if (true)
     {
         printf("\tEntropy calculation methods\n");
         SetFilePath("tests/transient/data/");
@@ -948,7 +952,7 @@ void RunTests()
     // have a 'closed' form. Here we use it to calculate the entropy
     // for a few parameters values just to see if we get a well
     // behaved solution.
-    if (false)
+    if (true)
     {
         printf("\tEntropy\n");
         SetFilePath("tests/entropy/data/");
@@ -1011,7 +1015,7 @@ void RunTests()
     }
     
 #pragma mark Reproduce Fig. 2.7 from Buballa Physics Reports
-    if (false)
+    if (true)
     {
         printf("\tReproduce Fig. 2.7 from Buballa Physics Reports\n");
         SetFilePath("tests/Buballa-Fig2.7/data/");

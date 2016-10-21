@@ -132,7 +132,7 @@ double ThermodynamicPotential(double mass,
     double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
     
     double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0)
-                        * (F_diff + chemical_potential * pow(fermi_momentum, 3.0) / 3.0)
+                        * (F_diff + renormalized_chemical_potential * pow(fermi_momentum, 3.0) / 3.0)
                         / pow(M_PI, 2.0);
     double second_term = pow(mass - parameters.bare_mass, 2.0)
   						 / (4.0 * parameters.G_S * CONST_HBAR_C);
@@ -143,10 +143,7 @@ double ThermodynamicPotential(double mass,
         third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
                      / (4.0 * parameters.G_V * CONST_HBAR_C);
     
-    // The sign on the third term below differs from M. Buballa, Physics Report 407 (2005) 205-376
-    // (and other references), but to reproduce the results of Fig. 2.8 (right) from the
-    // report, the sign must be positive.
-    return first_term + second_term + third_term;
+    return first_term + second_term - third_term;
 }
 
 double F_E(double mass, double momentum)

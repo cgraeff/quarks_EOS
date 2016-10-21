@@ -133,8 +133,8 @@ int SolveZeroTemperatureEOS(){
         gsl_vector_set(renormalized_chemical_potential_vector, i, renormalized_chemical_potential);
 
         double chemical_potential =	renormalized_chemical_potential
-                                    + 2.0 * parameters.G_V * NUM_FLAVORS * NUM_COLORS * pow(fermi_momentum, 3.0)
-                                      / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
+                                    + 2.0 * NUM_COLORS * parameters.G_V * CONST_HBAR_C * barionic_density;
+        
         gsl_vector_set(chemical_potential_vector, i, chemical_potential);
 
         double regularized_thermodynamic_potential = - vacuum_thermodynamic_potential
