@@ -110,6 +110,10 @@ int SolveZeroTemperatureEOS(){
     if (options.verbose)
 		printf("Solving gap equation and equations of state ...\n");
 
+    bool is_mass_zero = false;
+    double zero_mass_density = NAN;
+    double zero_mass_chemical_potential = NAN;
+    
     for (int i = 0; i < parameters.points_number; i++){
         
         gsl_vector_set(barionic_density_vector, i, barionic_density);
@@ -134,6 +138,16 @@ int SolveZeroTemperatureEOS(){
 
         double chemical_potential =	renormalized_chemical_potential
                                     + 2.0 * NUM_COLORS * parameters.G_V * CONST_HBAR_C * barionic_density;
+        
+        
+        if (is_mass_zero == false)
+            if (mass <= parameters.mass_and_renor_chem_pot_solution_zero_mass_tolerance){
+                
+                zero_mass_density = barionic_density;
+                zero_mass_chemical_potential = chemical_potential;
+
+                is_mass_zero = true;
+            }
         
         gsl_vector_set(chemical_potential_vector, i, chemical_potential);
 
@@ -161,6 +175,13 @@ int SolveZeroTemperatureEOS(){
     }
     if (options.verbose)
         printf("\n"); // As print inside the loop does't use new line, we need one now
+    
+    if (is_mass_zero == true)
+        printf("\tmass is zero at:\n"
+               "\t\tbarionic density: %f\n"
+               "\t\tchemical potential: %f\n",
+               zero_mass_density,
+               zero_mass_chemical_potential);
     
     gsl_vector * energy_density_per_particle_vector = VectorNewVectorFromDivisionElementByElement(energy_density_vector,
                                                                                                   barionic_density_vector);
@@ -270,6 +291,13 @@ int SolveZeroTemperatureEOS(){
                        barionic_density_vector,
                        energy_density_per_particle_vector);
     
+    WriteVectorsToFile("eos.dat",
+                       "# barionic density (fm^{-3}), energy density (MeV/fm^{-3}), pressure (MeV/fm^{-3})\n",
+                       3,
+                       barionic_density_vector,
+                       energy_density_vector,
+                       pressure_vector);
+    
     SetFilePath(NULL);
 
     /*
@@ -341,6 +369,10 @@ int SolveFiniteTemperatureEOS(){
     if (options.verbose)
         printf("Solving gap equation and equations of state ...\n");
     
+    bool is_mass_zero = false;
+    double zero_mass_density = NAN;
+    double zero_mass_chemical_potential = NAN;
+    
     for (int i = 0; i < parameters.points_number; i++){
         
         gsl_vector_set(barionic_density_vector, i, barionic_density);
@@ -361,6 +393,15 @@ int SolveFiniteTemperatureEOS(){
         
         double chemical_potential =	renormalized_chemical_potential
                                     + 2.0 * NUM_COLORS * parameters.G_V * CONST_HBAR_C * barionic_density;
+        
+        if (is_mass_zero == false)
+            if (mass <= parameters.mass_and_renor_chem_pot_solution_zero_mass_tolerance){
+                
+                zero_mass_density = barionic_density;
+                zero_mass_chemical_potential = chemical_potential;
+                
+                is_mass_zero = true;
+            }
         
         gsl_vector_set(chemical_potential_vector, i, chemical_potential);
         
@@ -394,6 +435,13 @@ int SolveFiniteTemperatureEOS(){
     if (options.verbose)
         printf("\n"); // As print inside the loop doesn't use new line, we need one now
 
+    if (is_mass_zero == true)
+        printf("\tmass is zero at:\n"
+               "\t\tbarionic density: %f\n"
+               "\t\tchemical potential: %f\n",
+               zero_mass_density,
+               zero_mass_chemical_potential);
+    
     // Calculate energy per particle
     gsl_vector * energy_density_per_particle_vector = VectorNewVectorFromDivisionElementByElement(energy_density_vector,
                                                                                                   barionic_density_vector);
@@ -457,7 +505,7 @@ int SolveFiniteTemperatureEOS(){
                        2,
                        barionic_density_vector,
                        energy_density_per_particle_vector);
-
+    
     SetFilePath(NULL);
 
     /*
