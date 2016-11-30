@@ -291,13 +291,6 @@ int SolveZeroTemperatureEOS(){
                        barionic_density_vector,
                        energy_density_per_particle_vector);
     
-    WriteVectorsToFile("eos.dat",
-                       "# barionic density (fm^{-3}), energy density (MeV/fm^{-3}), pressure (MeV/fm^{-3})\n",
-                       3,
-                       barionic_density_vector,
-                       energy_density_vector,
-                       pressure_vector);
-    
     SetFilePath(NULL);
 
     /*
