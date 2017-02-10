@@ -421,10 +421,6 @@ Parameters NewCopyOfParametersSetFromTemplate()
     p.loop_variable.min_value = 1.0E-3;
     p.loop_variable.max_value = 10.0;
 
-//    p.gap_minimum_mass = 0.0;
-//    p.gap_maximum_mass = 1000.0;
-//    p.gap_points_number = 2000;
-
     // Lower bound: Low, but not zero. In zero f(M) = 0 if bare_mass is zero,
     // and that may be a problem for root finding;
     p.zero_temperature.lower_bound = 1.0E-3;
