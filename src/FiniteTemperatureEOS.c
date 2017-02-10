@@ -15,6 +15,7 @@
 #include "CommandlineOptions.h"
 #include "FiniteTemperatureEOS.h"
 #include "RootFinding.h"
+#include "FermiDiracDistributions.h"
 
 typedef struct _multi_dim_root_params{
     double barionic_density;
@@ -26,10 +27,6 @@ int MultiDimensionalRootFinderHelperFunction(const gsl_vector *x,
 
 double ZeroMassSpecialCaseHelperFunction(double x,
                                          void  *par);
-
-double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void * parameters);
-double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
-                                                              void * params);
 
 double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit);
 
@@ -102,8 +99,7 @@ void SolveMultiRoots(double  barionic_density,
     
     // Check for zero mass special case. As mass != 0 is the
     // case that appears first, it is implemented first.
-    if (parameters.mass_and_renor_chem_pot_solution_mass_guess >
-        parameters.mass_and_renor_chem_pot_solution_zero_mass_tolerance){
+    if (parameters.finite_temperature.mass_guess > ZERO_MASS_TOL){
         
         gsl_multiroot_function f;
         f.f = &MultiDimensionalRootFinderHelperFunction;
@@ -113,17 +109,17 @@ void SolveMultiRoots(double  barionic_density,
         gsl_vector * initial_guess = gsl_vector_alloc(dimension);
         gsl_vector * return_results = gsl_vector_alloc(dimension);
         
-        gsl_vector_set(initial_guess, 0, sqrt(parameters.mass_and_renor_chem_pot_solution_mass_guess));
-        gsl_vector_set(initial_guess, 1, sqrt(parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess));
+        gsl_vector_set(initial_guess, 0, sqrt(parameters.finite_temperature.mass_guess));
+        gsl_vector_set(initial_guess, 1, sqrt(parameters.finite_temperature.renor_chem_pot_guess));
         
         int status = MultidimensionalRootFinder(dimension,
                                                 &f,
                                                 initial_guess,
-                                                parameters.mass_and_renor_chem_pot_solution_abs_error,
-                                                parameters.mass_and_renor_chem_pot_solution_rel_error,
-                                                parameters.mass_and_renor_chem_pot_solution_max_iter,
+                                                parameters.finite_temperature.abs_error,
+                                                parameters.finite_temperature.rel_error,
+                                                parameters.finite_temperature.max_iter,
                                                 return_results);
-        
+
         if (status != 0){
             printf("Something is wrong with the rootfinding.\n");
             abort();
@@ -139,23 +135,21 @@ void SolveMultiRoots(double  barionic_density,
         gsl_vector_free(return_results);
         
         // Save solution as guess for next iteration
-        if (parameters.mass_and_renor_chem_pot_solution_use_last_solution_as_guess == true){
-            parameters.mass_and_renor_chem_pot_solution_mass_guess = *return_mass;
-            parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = *return_renorm_chem_pot;
-        }
+        parameters.finite_temperature.mass_guess = *return_mass;
+        parameters.finite_temperature.renor_chem_pot_guess = *return_renorm_chem_pot;
         
         return;
-        
+
     }
     else{ // Handle special case: Zero mass case
-        
+
         gsl_function F;
         F.function = &ZeroMassSpecialCaseHelperFunction;
         F.params = &p;
         
         // Set root bounds observing the mappings
-        double lower_bound = sqrt(parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound);
-        double upper_bound = sqrt(parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound);
+        double lower_bound = sqrt(parameters.finite_temperature.renor_chem_pot_lower_bound);
+        double upper_bound = sqrt(parameters.finite_temperature.renor_chem_pot_upper_bound);
         
         // As we are left with just one variable and one equation to solve,
         // now an one-dimensional algorithm may be employed. Otherwise,
@@ -166,15 +160,15 @@ void SolveMultiRoots(double  barionic_density,
         int status = UnidimensionalRootFinder(&F,
                                               lower_bound,
                                               upper_bound,
-                                              parameters.mass_and_renor_chem_pot_solution_abs_error,
-                                              parameters.mass_and_renor_chem_pot_solution_rel_error,
-                                              parameters.mass_and_renor_chem_pot_solution_max_iter,
+                                              parameters.finite_temperature.abs_error,
+                                              parameters.finite_temperature.rel_error,
+                                              parameters.finite_temperature.max_iter,
                                               &return_result);
         if (status != 0){
             printf("\nBounds do not straddle root.\n");
             abort();
         }
-        
+
         // Save results in return variables,
         // taking care of the mappings
         *return_mass = 0.0;
@@ -243,9 +237,9 @@ double ZeroedGapEquationForFiniteTemperature(double mass, double renormalized_ch
     double integral = FermiDiracDistributionIntegralFromGapEquation(mass,
                                                                     renormalized_chemical_potential);
     
-    double constant = 2.0 * NUM_COLORS * NUM_FLAVORS * parameters.G_S / pow(M_PI * CONST_HBAR_C, 2.0);
+    double constant = 2.0 * NUM_COLORS * NUM_FLAVORS * parameters.model.G_S / pow(M_PI * CONST_HBAR_C, 2.0);
     
-    return mass - parameters.bare_mass - constant * mass * integral;
+    return mass - parameters.model.bare_mass - constant * mass * integral;
 }
 
 double ZeroedBarionicDensityEquationForFiniteTemperature(double mass,
@@ -261,125 +255,20 @@ double ZeroedBarionicDensityEquationForFiniteTemperature(double mass,
     return 3.0 * density - quarks_dens /  pow(CONST_HBAR_C, 3.0);
 }
 
-double FermiDiracDistributionFromDensityIntegral(double mass,
-                                                 double renormalized_chemical_potential)
-{
-    fermi_dirac_distrib_integrand p;
-    p.mass = mass;
-    p.chemical_potential = renormalized_chemical_potential;
-    p.temperature = parameters.temperature;
-    
-    gsl_function F;
-    F.function = &FermiDiracDistributionFromDensityIntegralIntegrand;
-    F.params = &p;
-
-  	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
-
-  	return integral;
-}
-
-double OnedimensionalIntegrator(gsl_function * F, double lower_limit, double upper_limit)
-{
-    gsl_integration_workspace * workspace =
-    gsl_integration_workspace_alloc(parameters.fermi_dirac_integrals_max_interval_num);
-    
-    double integral = 0;
-    double abserr;
-    gsl_integration_qag(F,
-                        lower_limit,
-                        upper_limit,
-                        parameters.fermi_dirac_integrals_abs_error,
-                        parameters.fermi_dirac_integrals_rel_error,
-                        parameters.fermi_dirac_integrals_max_sub_interval,
-                        parameters.fermi_dirac_integrals_integration_key,
-                        workspace,
-                        &integral,
-                        &abserr);
-    
-    gsl_integration_workspace_free(workspace);
-    
-    return integral;
-}
-
-double FermiDiracDistributionFromDensityIntegralIntegrand(double momentum, void * params)
-{
-    fermi_dirac_distrib_integrand * p = (fermi_dirac_distrib_integrand *) params;
-    
-    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-    
-    double particle_term = FermiDiracDistributionForParticles(E,
-                                                              p->chemical_potential,
-                                                              p->temperature);
-    double antiparticle_term = FermiDiracDistributionForAntiparticles(E,
-                                                                      p->chemical_potential,
-                                                                      p->temperature);
-    return (particle_term - antiparticle_term) * pow(momentum, 2.0);
-}
-
-double FermiDiracDistributionIntegralFromGapEquation(double mass,
-                                                     double renormalized_chemical_potential)
-{
-    // Maybe it's possible to write the first term as the scalar density
-    // at zero temperature
-    
-    fermi_dirac_distrib_integrand p;
-    p.mass = mass;
-    p.chemical_potential = renormalized_chemical_potential;
-    p.temperature = parameters.temperature;
-    
-    gsl_function F;
-    F.function = &FermiDiracDistributionIntegralFromGapEquationIntegrand;
-    F.params = &p;
-    
-	double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
-
-    return integral;
-}
-
-double FermiDiracDistributionIntegralFromGapEquationIntegrand(double momentum,
-                                                        void * params)
-{
-    fermi_dirac_distrib_integrand * p = (fermi_dirac_distrib_integrand *) params;
-    
-    double E = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-    
-    double particle_term = FermiDiracDistributionForParticles(E,
-                                                              p->chemical_potential,
-                                                              p->temperature);
-    double antiparticle_term = FermiDiracDistributionForAntiparticles(E,
-                                                                      p->chemical_potential,
-                                                                      p->temperature);
-    return (1.0 - particle_term - antiparticle_term) * pow(momentum, 2.0) / E;
-}
-
-double FermiDiracDistributionForParticles(double energy,
-                                          double chemical_potential,
-                                          double temperature)
-{
-    return 1.0 / (1.0 + exp((energy - chemical_potential)/temperature));
-}
-
-double FermiDiracDistributionForAntiparticles(double energy,
-                                              double chemical_potential,
-                                              double temperature)
-{
-    return 1.0 / (1.0 + exp((energy + chemical_potential)/temperature));
-}
-
 double ThermodynamicPotentialForFiniteTemperature(double mass,
                                                   double chemical_potential,
                                                   double renormalized_chemical_potential)
 {
     double first_term = ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(mass,
                                                                                       renormalized_chemical_potential);
-    
-    double second_term = pow(mass - parameters.bare_mass, 2.0) / (4.0 * parameters.G_S * CONST_HBAR_C);
-    
+
+    double second_term = pow(mass - parameters.model.bare_mass, 2.0) / (4.0 * parameters.model.G_S * CONST_HBAR_C);
+
     // If G_V == 0, we have to avoid a division by zero
     double third_term = 0.0;
-    if (parameters.G_V != 0)
-        third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
-        / (4.0 * parameters.G_V * CONST_HBAR_C);
+    if (parameters.model.G_V != 0)
+        third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0) //TODO: Check sign
+        / (4.0 * parameters.model.G_V * CONST_HBAR_C);
 
     return first_term + second_term - third_term;
 }
@@ -390,72 +279,64 @@ double ThermodynamicPotentialForFiniteTemperatureFreeGasContribution(double mass
     therm_pot_free_gas_contrib_params p;
     p.mass = mass;
     p.renormalized_chemical_potential = renormalized_chemical_potential;
-    p.temperature = parameters.temperature;
-    
+    p.temperature = parameters.finite_temperature.temperature;
+
     gsl_function F;
     F.function = &ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand;
     F.params = &p;
-    
-    double integral = OnedimensionalIntegrator(&F, 0.0, parameters.cutoff);
-    
+
+    double integral = OnedimensionalIntegrator(&F, 0.0, parameters.model.cutoff);
+
     return - NUM_COLORS * NUM_FLAVORS * integral / pow(M_PI, 2.0);
 }
 
 double ThermodynamicPotentialForFiniteTemperatureFreeGasContributionIntegrand(double momentum, void * parameters)
 {
     therm_pot_free_gas_contrib_params * p = (therm_pot_free_gas_contrib_params *)parameters;
-    
+
     double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-    
+
     /* From docs:
      If x is nearly zero, then the common expression log(1 + x) will not be able to produce accurate
      results, as most (or all) of the information in x will be lost by addition.  Instead, use log1p(x) to
      perform the same computation without undue loss of accuracy. */
     double first_term = p->temperature * log1p(exp(-(energy - p->renormalized_chemical_potential)/p->temperature));
     double second_term = p->temperature * log1p(exp(-(energy + p->renormalized_chemical_potential)/p->temperature));
-    
+
     return pow(momentum, 2.0) * (energy + first_term + second_term) / pow(CONST_HBAR_C, 3.0);
 }
 
 double Entropy(double mass, double temperature, double renormalized_chemical_potential)
 {
-    int interval_num = 1000;
-    
+	EntropyParameters params = parameters.finite_temperature.entropy;
+
     entropy_integrand_parameters p;
     p.mass = mass;
     p.temperature = temperature;
     p.renormalized_chemical_potential = renormalized_chemical_potential;
-    
+
     gsl_function F;
     F.function = &EntropyIntegrand;
     F.params = &p;
-    
+
     gsl_integration_workspace * workspace =
-        gsl_integration_workspace_alloc(interval_num);
-    
-    // FIXME: move parameters to Parameters.[h,c]
-    double integral = 0;
-    double abserr;
-    double lower_limit = 0.0;
-    double upper_limit = parameters.cutoff;
-    double abs_error = 1.0E-3;
-    double rel_error = 1.0E-3;
-    int max_sub_interval = interval_num;
-    int integration_key = GSL_INTEG_GAUSS61;
-    
+        gsl_integration_workspace_alloc(params.max_sub_interval);
+
+	double integral;
+	double abserr;
     gsl_integration_qag(&F,
-                        lower_limit,
-                        upper_limit,
-                        abs_error,
-                        rel_error,
-                        max_sub_interval,
-                        integration_key,
+                        params.lower_limit,
+                        params.upper_limit,
+                        params.abs_error,
+                        params.rel_error,
+                        params.max_sub_interval,
+                        params.integration_key,
                         workspace,
                         &integral,
                         &abserr);
-    
+
     gsl_integration_workspace_free(workspace);
-    
+
     return NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -3.0) * integral / pow(M_PI, 2.0);
 }
 
@@ -463,25 +344,25 @@ double Entropy(double mass, double temperature, double renormalized_chemical_pot
 double EntropyIntegrandFromDerivative(double momentum, void * parameters)
 {
     // This is the expression I obtained from $- \partial \omega / \partial T$
-    
+
     entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
-    
+
     double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-    
+
     double fd_dist_part = FermiDiracDistributionForParticles(energy,
                                                              p->renormalized_chemical_potential,
                                                              p->temperature);
-    
+
     double fd_dist_antipart = FermiDiracDistributionForAntiparticles(energy,
                                                                      p->renormalized_chemical_potential,
                                                                      p->temperature);
-    
+
     double particles_term = - log1p(-fd_dist_part)
                             + (energy - p->renormalized_chemical_potential) * fd_dist_part / p->temperature;
-    
+
     double antiparticles_term = - log1p(-fd_dist_antipart)
                                 + (energy + p->renormalized_chemical_potential) * fd_dist_antipart / p->temperature;
-    
+
     return pow(momentum, 2.0) * (particles_term + antiparticles_term);
 }
 
@@ -490,21 +371,21 @@ double EntropyIntegrandArt(double momentum, void * parameters)
     entropy_integrand_parameters * p = (entropy_integrand_parameters *)parameters;
     
     double energy = sqrt(pow(momentum, 2.0) + pow(p->mass, 2.0));
-    
+
     double fd_dist_part = FermiDiracDistributionForParticles(energy,
                                                              p->renormalized_chemical_potential,
                                                              p->temperature);
-    
+
     double fd_dist_antipart = FermiDiracDistributionForAntiparticles(energy,
                                                                      p->renormalized_chemical_potential,
                                                                      p->temperature);
-    
+
     double particles_term = fd_dist_part * log(fd_dist_part)
                             + (1.0 - fd_dist_part) * log1p(-fd_dist_part);
-    
+
     double antiparticles_term = fd_dist_antipart * log(fd_dist_antipart)
                                 + (1.0 - fd_dist_antipart) * log1p(-fd_dist_antipart);
-    
+
     return -pow(momentum, 2.0) * (particles_term + antiparticles_term);
 }
 
@@ -523,7 +404,7 @@ double EntropyIntegrand(double momentum, void * parameters)
     
     double first_term = g(p->temperature, energy, p->renormalized_chemical_potential);
     double second_term = g(p->temperature, energy, -p->renormalized_chemical_potential);
-    
+
     return pow(momentum, 2.0) * (first_term + second_term);
 }
 

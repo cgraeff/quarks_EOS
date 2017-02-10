@@ -32,11 +32,11 @@ double GapEquationSolver(double fermi_momentum)
     
     double root;
     int status = UnidimensionalRootFinder(&F,
-                                          parameters.gap_eq_solver_lower_bound,
-                                          parameters.gap_eq_solver_upper_bound,
-                                          parameters.gap_eq_solver_abs_error,
-                                          parameters.gap_eq_solver_rel_error,
-                                          parameters.gap_eq_solver_max_iterations,
+                                          parameters.zero_temperature.lower_bound,
+                                          parameters.zero_temperature.upper_bound,
+                                          parameters.zero_temperature.abs_error,
+                                          parameters.zero_temperature.rel_error,
+                                          parameters.zero_temperature.max_iterations,
                                           &root);
     if (status == -1){
         return 0;
@@ -51,9 +51,9 @@ double ZeroedGapEquation(double mass, void * input)
 	
 	double scalar_density = ScalarDensity(mass, param->fermi_momentum);
 
-	double gap_1st_term = 2.0  * CONST_HBAR_C * parameters.G_S * scalar_density;
+	double gap_1st_term = 2.0  * CONST_HBAR_C * parameters.model.G_S * scalar_density;
 
-	return mass + gap_1st_term - parameters.bare_mass;
+	return mass + gap_1st_term - parameters.model.bare_mass;
 }
 
 double VacuumMassDetermination()
@@ -65,11 +65,11 @@ double VacuumMassDetermination()
     
     double root;
     int status = UnidimensionalRootFinder(&F,
-                                          parameters.vac_mass_det_lower_bound,
-                                          parameters.vac_mass_det_upper_bound,
-                                          parameters.vac_mass_det_abs_error,
-                                          parameters.vac_mass_det_rel_error,
-                                          parameters.vac_mass_det_max_iterations,
+                                          parameters.vacuum_mass_determination.lower_bound,
+                                          parameters.vacuum_mass_determination.upper_bound,
+                                          parameters.vacuum_mass_determination.abs_error,
+                                          parameters.vacuum_mass_determination.rel_error,
+                                          parameters.vacuum_mass_determination.max_iterations,
                                           &root);
     
     if (status == -1){
@@ -81,12 +81,12 @@ double VacuumMassDetermination()
 
 double VacuumMassEquation(double mass, void * input)
 {
-    double F_diff = F0(mass, parameters.cutoff) - F0(mass, 0.0);
+    double F_diff = F0(mass, parameters.model.cutoff) - F0(mass, 0.0);
     double term = 2.0 * NUM_COLORS * NUM_FLAVORS * pow(CONST_HBAR_C, -2.0)
-  				  * parameters.G_S * mass * F_diff
+  				  * parameters.model.G_S * mass * F_diff
   				  / pow(M_PI, 2.0);
     
-    return mass - parameters.bare_mass - term;
+    return mass - parameters.model.bare_mass - term;
 }
 
 double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
@@ -94,7 +94,7 @@ double ZeroedRenormalizedChemicalPotentialEquation(double renor_chem_pot,
 {
   	renorm_chem_pot_equation_input * param = (renorm_chem_pot_equation_input *) input;
 
-  	double c = 2.0 * parameters.G_V * NUM_COLORS * NUM_FLAVORS
+  	double c = 2.0 * parameters.model.G_V * NUM_COLORS * NUM_FLAVORS
   				   / (3.0 * pow(M_PI * CONST_HBAR_C, 2.0));
     
     // The 'if' statement does the work of a step function
@@ -113,7 +113,7 @@ double ScalarDensity(double mass, double fermi_momentum)
     }
 
 	return NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0) * (mass / pow(M_PI, 2.0))
-           * (F0(mass, fermi_momentum) - F0(mass, parameters.cutoff));
+           * (F0(mass, fermi_momentum) - F0(mass, parameters.model.cutoff));
 }
 
 double F0(double mass, double momentum)
@@ -129,19 +129,19 @@ double ThermodynamicPotential(double mass,
                               double renormalized_chemical_potential)
 
 {
-    double F_diff = F_E(mass, parameters.cutoff) - F_E(mass, fermi_momentum);
+    double F_diff = F_E(mass, parameters.model.cutoff) - F_E(mass, fermi_momentum);
     
     double first_term = - NUM_FLAVORS * NUM_COLORS * pow(CONST_HBAR_C, -3.0)
                         * (F_diff + renormalized_chemical_potential * pow(fermi_momentum, 3.0) / 3.0)
                         / pow(M_PI, 2.0);
-    double second_term = pow(mass - parameters.bare_mass, 2.0)
-  						 / (4.0 * parameters.G_S * CONST_HBAR_C);
+    double second_term = pow(mass - parameters.model.bare_mass, 2.0)
+  						 / (4.0 * parameters.model.G_S * CONST_HBAR_C);
     
     // If G_V == 0, we have to avoid a division by zero
     double third_term = 0.0;
-    if (parameters.G_V != 0)
+    if (parameters.model.G_V != 0)
         third_term = pow(chemical_potential - renormalized_chemical_potential, 2.0)
-                     / (4.0 * parameters.G_V * CONST_HBAR_C);
+                     / (4.0 * parameters.model.G_V * CONST_HBAR_C);
     
     return first_term + second_term - third_term;
 }

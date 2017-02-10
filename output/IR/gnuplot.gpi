@@ -41,3 +41,20 @@ set term tikz size 14cm, 9cm
 set out "graph/thermodynamic_potential_vs_mass.tex"
 replot
 
+set ylabel '$\partial m / \partial \mu$'
+set xlabel '$\mu$ (MeV)'
+set term png
+set out "graph/der_mass_to_chem_pot.png"
+plot "data/der_mass_to_chem_pot.dat" w l, 0 notitle
+set term tikz size 14cm, 9cm
+set out "graph/der_mass_to_chem_pot.tex"
+replot
+
+set ylabel '$\partial^2 m / \partial \mu^2$ ($\rm{MeV}^{-1}$)'
+set xlabel '$\mu$ (MeV)'
+set term png
+set out "graph/sec_der_mass_to_chem_pot.png"
+plot "data/sec_der_mass_to_chem_pot.dat" w l, 0 notitle
+set term tikz size 14cm, 9cm
+set out "graph/sec_der_mass_to_chem_pot.tex"
+replot

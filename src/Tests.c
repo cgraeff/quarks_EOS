@@ -23,24 +23,6 @@
 #include "Maps.h"
 #include "RootFinding.h"
 
-int WriteZeroedGapEquation(char * filename,
-                           double minimum_mass,
-                           double maximum_mass,
-                           int points_number,
-                           double fermi_momentum);
-
-int WriteVacuumMassEquation(char * filename,
-                            double minimum_mass,
-                            double maximum_mass,
-                            int points_number);
-
-int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
-                                                     double minimum_renormalized_chemical_potential,
-                                                     double maximum_renormalized_chemical_potential,
-                                                     int points_number,
-                                                     double chemical_potential,
-                                                     double mass);
-
 double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p);
 
 void RunTests()
@@ -51,35 +33,78 @@ void RunTests()
     {
         printf("\tVacuum Mass Zeroed Equation\n");
         SetFilePath("tests/vacuum-mass-equation/data/");
-        
+
         SetParametersSet(options.parameterization);
 
-        WriteVacuumMassEquation("vacuum_mass_equation.dat", 0.0, 1000.0, 1000);
+		double min_mass = 0.0;
+		double max_mass = 1000.0;
+		int points_number = 1000;
 
-        WriteZeroedRenormalizedChemicalPotentialEquation("zeroed_renorm_chemical_pot_equation.dat",
-                                                         0.0,
-                                                         1000.0,
-                                                         1000,
-                                                         0.0,
-                                                         0.0);
+    	double step = Step(min_mass, max_mass, points_number);
+
+    	FILE * f = OpenFile("vacuum_mass_equation.dat");
+
+		double m = 0;
+    	while (m < points_number) {
+        	fprintf(f, "%20.15E\t%20.15E\n", m, VacuumMassEquation(m, NULL));
+        	m += step;
+    	}
+
+    	fclose(f);
+
+        SetFilePath("tests/vacuum-mass-equation/");
+        FILE * log_file = OpenFile("run.log");
+
+        fprintf(log_file,
+				"The following tests were executed for %s parameterization:\n",
+				parameters.parameters_set_identifier);
+        fprintf(log_file,
+                "\tVacuum mass equation calculation.\n\n");
+
+        PrintParametersToFile(log_file);
+
+        fclose(log_file);
+
+        SetFilePath(NULL);
+    }
+
+#pragma mark ZeroedGapEquation
+	if (true)
+    {
+        printf("\tVacuum Mass Zeroed Equation\n");
+        SetFilePath("tests/vacuum-mass-equation/data/");
+
+        SetParametersSet(options.parameterization);
+
+		double min_mass = 0.0;
+		double max_mass = 1000.0;
+		int points_number = 1000;
+
+    	double step = Step(min_mass, max_mass, points_number);
         
-        double barionic_density[4] = {parameters.minimum_density,
-                                      parameters.maximum_density * 1.0 / 3.0,
-                                      parameters.maximum_density * 2.0 / 3.0,
-                                      parameters.maximum_density};
+        double barionic_density[4] = {parameters.loop_variable.min_value,
+                                      parameters.loop_variable.max_value * 1.0 / 3.0,
+                                      parameters.loop_variable.max_value * 2.0 / 3.0,
+                                      parameters.loop_variable.max_value};
         for (int i = 0; i < 4; i++){
             double fermi_momentum = CONST_HBAR_C
                                     * pow(3.0 * pow(M_PI, 2.0) * barionic_density[i] / NUM_FLAVORS,
                                           1.0 / 3.0);
             char filename[256];
             sprintf(filename, "zeroed_gap_equation_%d.dat", i);
-            WriteZeroedGapEquation(filename,
-                                   0.0,
-                                   1000.0,
-                                   1000,
-                                   fermi_momentum);
+
+    		FILE * f = OpenFile(filename);
+
+    		gap_equation_input input;
+    		input.fermi_momentum = fermi_momentum;
+
+			double m = 0;
+    		while (m < max_mass) {
+        		fprintf(f, "%20.15E\t%20.15E\n", m, ZeroedGapEquation(m, &input));
+        		m += step;
+    		}
         }
-        
+
         SetFilePath("tests/vacuum-mass-equation/");
         FILE * log_file = OpenFile("run.log");
         
@@ -87,8 +112,6 @@ void RunTests()
 				"The following tests were executed for %s parameterization:\n",
 				parameters.parameters_set_identifier);
         fprintf(log_file,
-                "\tVacuum mass equation calculation.\n"
-				"\tZeroed renormalized chemical potential equation calculation"
                 "\tZeroed gap equation calculation\n\n");
         
         PrintParametersToFile(log_file);
@@ -97,7 +120,59 @@ void RunTests()
 
         SetFilePath(NULL);
     }
-    
+
+#pragma mark Zeroed Renormalized Chemical Potential
+	if (true)
+    {
+        printf("\tVacuum Mass Zeroed Equation\n");
+        SetFilePath("tests/vacuum-mass-equation/data/");
+
+        SetParametersSet(options.parameterization);
+
+		double mass = 0;
+		double chemical_potential = 0;
+
+		double min_renormalized_chemical_potential = 0.0;
+		double max_renormalized_chemical_potential = 1000.0;
+		int points_number = 1000;
+
+    	double step = Step(min_renormalized_chemical_potential,
+						   max_renormalized_chemical_potential,
+						   points_number);
+
+    	FILE * f = OpenFile("zeroed_renorm_chemical_pot_equation.dat");
+
+    	renorm_chem_pot_equation_input input;
+    	input.chemical_potential = chemical_potential;
+    	input.mass = mass;
+
+		double mu = 0;
+    	while (mu < points_number) {
+        	fprintf(f,
+        	        "%20.15E\t%20.15E\n",
+        	        mu,
+        	        ZeroedRenormalizedChemicalPotentialEquation(mu, &input));
+        	mu += step;
+    	}
+
+    	fclose(f);
+
+        SetFilePath("tests/vacuum-mass-equation/");
+        FILE * log_file = OpenFile("run.log");
+
+        fprintf(log_file,
+				"The following tests were executed for %s parameterization:\n",
+				parameters.parameters_set_identifier);
+        fprintf(log_file,
+				"\tZeroed renormalized chemical potential equation calculation\n\n");
+
+        PrintParametersToFile(log_file);
+
+        fclose(log_file);
+
+        SetFilePath(NULL);
+    }
+
 #pragma mark Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611
     
     // Reproduce Fig. 1 (right) from  M. Buballa, Nuclear Physics A 611 (1996) 393-408
@@ -108,11 +183,11 @@ void RunTests()
         SetFilePath("tests/Buballa-Fig1-R/data/");
         
         SetParametersSet("Buballa_2");
-        
+
         double chemical_potential[4] = {0.0, 350.0, 378.5, 410.0};
-        
+
         double vacuum_mass = VacuumMassDetermination();
-        
+
         double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0, 0.0);
 
         for (int i = 0; i < 4; i++){
@@ -122,14 +197,14 @@ void RunTests()
             int points_number = 1000;
 
             double step = (maximum_mass - minimum_mass) / (points_number - 1);
-            
+
             gsl_vector * mass_vector = gsl_vector_alloc(points_number);
             gsl_vector * output = gsl_vector_alloc(points_number);
 
             double m = 0;
 
             for (int j = 0; j < points_number; j++) {
-                
+
                 double renormalized_chemical_potential = chemical_potential[i];
 
                 double fermi_momentum = 0;
@@ -187,27 +262,53 @@ void RunTests()
 
         SetParametersSet("BuballaR_2");
         
-        // In the reference, the bare mass was zero for this test
-        parameters.bare_mass = 0;
+		int points_number = 1000;
+
+        parameters.model.bare_mass = 0; // In the reference, the bare mass was
+										// zero for this test
+
+		double mass = 0;
         
         double chemical_potential[4] = {0.0, 300.0, 368.6, 400.0};
+
+		double min_renormalized_chemical_potential = 0.0;
+		double max_renormalized_chemical_potential = 1000;
+
+		double min_mass = 0.0;
+        double max_mass = 1000.0;
+
+		double renorm_chem_pot_step = Step(min_renormalized_chemical_potential,
+						   				   max_renormalized_chemical_potential,
+						   				   points_number);
+
+		double mass_step = Step(min_mass, max_mass, points_number);
         
         double vacuum_mass = VacuumMassDetermination();
-        
+
         double vacuum_thermodynamic_potential = ThermodynamicPotential(vacuum_mass, 0.0, 0.0, 0.0);
-        
+
         for (int i = 0; i < 4; i++){
-            
+
             char filename_1[256];
             sprintf(filename_1, "ZeroedRenormalizedChemPotEquation_BR2L_%d.dat", i);
-            WriteZeroedRenormalizedChemicalPotentialEquation(filename_1, 0, 1000, 1000, chemical_potential[i], 0.0);
 
-            double minimum_mass = 0.0;
-            double maximum_mass = 1000.0;
-            int points_number = 1000;
-            
-            double step = (maximum_mass - minimum_mass) / (points_number - 1);
-            
+    		FILE * f = OpenFile(filename_1);
+
+    		renorm_chem_pot_equation_input input;
+    		input.chemical_potential = chemical_potential[i];
+    		input.mass = mass;
+
+			double mu = 0;
+    		while (mu < points_number) {
+        		fprintf(f,
+           	     		"%20.15E\t%20.15E\n",
+                		mu,
+                		ZeroedRenormalizedChemicalPotentialEquation(mu, &input));
+        		mu += renorm_chem_pot_step;
+   	 		}
+
+    		fclose(f);
+
             gsl_vector * mass_vector = gsl_vector_alloc(points_number);
             gsl_vector * output = gsl_vector_alloc(points_number);
             
@@ -230,7 +331,7 @@ void RunTests()
                 gsl_vector_set(mass_vector, j, m);
                 gsl_vector_set(output, j, thermodynamic_potential - vacuum_thermodynamic_potential);
                 
-                m += step;
+                m += mass_step;
             }
             
             char filename[256];
@@ -246,7 +347,7 @@ void RunTests()
         
         SetFilePath("tests/Buballa-Fig2.8-L/");
         FILE * log_file = OpenFile("run.log");
-        
+
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -254,7 +355,7 @@ void RunTests()
                 "\tCalculation of the hermodynamic potential as function of mass "
                 "(Reproduce Fig. 2.8 (left) from  M. Buballa, Physics Reports 407 (2005) 205-376.\n"
                 "\tFiles:tests/data/Fig2.8L_BuballaR_*.dat\n");
-        
+
         PrintParametersToFile(log_file);
         
         fclose(log_file);
@@ -273,23 +374,43 @@ void RunTests()
         
         SetParametersSet("BuballaR_2_GV");
         
-        // In the reference, the bare mass was zero for this test
-        parameters.bare_mass = 0;
+		int points_number = 1000;
+
+        parameters.model.bare_mass = 0; // In the reference, the bare mass was
+										// zero for this test
         
         double chemical_potential[4] = {0.0, 430.0, 440.0, 444.3};
 
         double mass[4] = {1.0, 100, 300, 700};
-        
+
+		double min_renorm_chemical_potential = 0.0;
+		double max_renorm_chemical_potential = 1000.0;
+
+		double step = Step(min_renorm_chemical_potential,
+						   max_renorm_chemical_potential,
+						   points_number);
+
         for (int i = 0; i < 4; i++){
             for (int j = 0; j < 4; j++){
                 char filename_1[256];
                 sprintf(filename_1, "ZeroedRenormalizedChemPotEquation_BR2R_%d_%d.dat", i, j);
-                WriteZeroedRenormalizedChemicalPotentialEquation(filename_1,
-																 0,
-																 1000,
-																 1000,
-																 chemical_potential[i],
-																 mass[i]);
+
+    			FILE * f = OpenFile(filename_1);
+
+    			renorm_chem_pot_equation_input input;
+    			input.chemical_potential = chemical_potential[i];
+    			input.mass = mass[j];
+
+				double mu = 0;
+    			while (mu < points_number) {
+        			fprintf(f,
+                			"%20.15E\t%20.15E\n",
+                			mu,
+                			ZeroedRenormalizedChemicalPotentialEquation(mu, &input));
+        			mu += step;
+    			}
+
+    			fclose(f);
             }
         }
         
@@ -320,8 +441,10 @@ void RunTests()
              * for each value of mass
              */
             
+			RenormalizedChemicalPotentialIntegrationParameters params =
+				parameters.renormalized_chemical_potential_integration;
+
             double m = 0;
-            
             for (int j = 0; j < points_number; j++) {
                 
                 double renormalized_chemical_potential;
@@ -337,17 +460,19 @@ void RunTests()
                 }
                 else{
                     int status = UnidimensionalRootFinder(&F,
-                                                          parameters.renormalized_chemical_potential_lower_bound,
-                                                          parameters.renormalized_chemical_potential_upper_bound,
-                                                          parameters.renormalized_chemical_potential_abs_error,
-                                                          parameters.renormalized_chemical_potential_rel_error,
-                                                          parameters.renormalized_chemical_potential_max_iter,
+                                                          params.lower_bound,
+                                                          params.upper_bound,
+                                                          params.abs_error,
+                                                          params.rel_error,
+                                                          params.max_iter,
                                                           &renormalized_chemical_potential);
                     if (status == -1)
                         renormalized_chemical_potential = 0;
                 }
                 
-                gsl_vector_set(renormalized_chemical_potential_vector, j, renormalized_chemical_potential);
+                gsl_vector_set(renormalized_chemical_potential_vector,
+							   j,
+							   renormalized_chemical_potential);
                 
                 double fermi_momentum = 0;
                 if (pow(renormalized_chemical_potential, 2.0) > pow(m, 2.0)){
@@ -386,10 +511,10 @@ void RunTests()
             gsl_vector_free(renormalized_chemical_potential_vector);
  
         }
-        
+
         SetFilePath("tests/Buballa-Fig2.8-R/");
         FILE * log_file = OpenFile("run.log");
-        
+
         fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -447,8 +572,13 @@ void RunTests()
 
                         double energy = sqrt(pow(momentum, 2.0) + pow(mass[k], 2.0));
                         
-                        double fp = FermiDiracDistributionForParticles(energy, chemical_potential[j], temperature[i]);
-                        double fa = FermiDiracDistributionForAntiparticles(energy, chemical_potential[j], temperature[i]);
+                        double fp = FermiDiracDistributionForParticles(energy,
+																	   chemical_potential[j],
+																	   temperature[i]);
+
+                        double fa = FermiDiracDistributionForAntiparticles(energy,
+																		   chemical_potential[j],
+																		   temperature[i]);
                         
                         gsl_vector_set(momentum_vector, l, momentum);
                         gsl_vector_set(fp_vector, l, fp);
@@ -456,7 +586,7 @@ void RunTests()
                         
                         momentum += step;
                     }
-                    
+
                     char filename[256];
                     sprintf(filename, "FD_%d_%d_%d.dat", i, j, k);
                     
@@ -482,7 +612,7 @@ void RunTests()
                 "and chemical potential as function of momentum\n");
         
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
         
         SetFilePath(NULL);
@@ -506,23 +636,28 @@ void RunTests()
         
         double renormalized_chemical_potential[4] = {100.0, 200.0, 400.0, 600.0};
         double temperature[4] = {5.0, 10.0, 15.0, 20.0};
-        
+
         gsl_vector * mass_vector = gsl_vector_alloc(num_points);
         gsl_vector * fermi_dirac_int_1 = gsl_vector_alloc(num_points);
         gsl_vector * fermi_dirac_int_2 = gsl_vector_alloc(num_points);
         
         for (int i = 0; i < 4; i++){
             
-            parameters.temperature = temperature[i];
-            
+            parameters.finite_temperature.temperature = temperature[i];
+
             for (int j = 0; j < 4; j++){
                 
                 double m = min_mass;
                 
                 for (int k = 0; k < num_points; k++){
                     
-                    double int_1 = FermiDiracDistributionFromDensityIntegral(m, renormalized_chemical_potential[j]);
-                    double int_2 = FermiDiracDistributionIntegralFromGapEquation(m, renormalized_chemical_potential[j]);
+                    double int_1 =
+						FermiDiracDistributionFromDensityIntegral(m,
+																  renormalized_chemical_potential[j]);
+
+                    double int_2 =
+						FermiDiracDistributionIntegralFromGapEquation(m,
+																	  renormalized_chemical_potential[j]);
                 
                     gsl_vector_set(mass_vector, k, m);
                     gsl_vector_set(fermi_dirac_int_1, k, int_1);
@@ -548,7 +683,7 @@ void RunTests()
                         "fermi_dirac_distribution_from_gap_eq_integral_%d_%d.dat",
                         i,
                         j);
-                
+
                 WriteVectorsToFile(filename,
                                    "# mass, integral of fermi dirac dist from gap eq\n",
                                    2,
@@ -556,7 +691,7 @@ void RunTests()
                                    fermi_dirac_int_2);
             }
         }
-        
+
         gsl_vector_free(mass_vector);
         gsl_vector_free(fermi_dirac_int_1);
         gsl_vector_free(fermi_dirac_int_2);
@@ -604,7 +739,7 @@ void RunTests()
 
 	  	for (int i = 0; i < 4; i++){
 
-		  	parameters.temperature = temperature[i];
+		  	parameters.finite_temperature.temperature = temperature[i];
 
 			for (int j = 0; j < 4; j++){
 
@@ -612,8 +747,13 @@ void RunTests()
 
 				for (int k = 0; k < n_pts; k++){
 
-			  		double integ = FermiDiracDistributionIntegralFromGapEquation(m, renormalized_chemical_potential[j]);
-			 		gsl_vector_set(zeroed_gap_vector, k, m - parameters.bare_mass - integ);
+			  		double integ =
+						FermiDiracDistributionIntegralFromGapEquation(m,
+																	  renormalized_chemical_potential[j]);
+
+			 		gsl_vector_set(zeroed_gap_vector,
+								   k,
+								   m - parameters.model.bare_mass - integ);
 
 				  	gsl_vector_set(m_vector, k, m);
 
@@ -636,7 +776,7 @@ void RunTests()
 
         SetFilePath("tests/zeroed-gap-equation/");
         FILE * log_file = OpenFile("run.log");
-        
+
 		fprintf(log_file,
                 "The following tests were executed for %s parameterization:\n",
                 parameters.parameters_set_identifier);
@@ -644,7 +784,7 @@ void RunTests()
                 "\tCalculation of zeroed gap eq for T != 0 as function of mass.\n");
         
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
 
         SetFilePath(NULL);
@@ -687,7 +827,7 @@ void RunTests()
 
         for (int i = 0; i < num_temperatures; i++){ // Temperature
 
-            parameters.temperature = temperature[i];
+            parameters.finite_temperature.temperature = temperature[i];
 
             for (int j = 0; j < num_densities; j++){
 
@@ -771,21 +911,21 @@ void RunTests()
                 "Calculates zeroed gap and barionic densities equations so we can see both\n"
                 "and have an insight of what's going on.\n");
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
 
         SetFilePath(NULL);
     }
 
 #pragma mark Mass and Renormalized Chemical Potential for Finite Temperature
-    
+
     // Prints mass and renormalized chemical potential calculation as function
     // of barionic density
     if (true)
     {
         printf("\tMass and Renormalized Chemical Potential for Finite Temperature\n");
         SetFilePath("tests/mass-renorm-chem-pot/data/");
-        
+
         SetParametersSet("BuballaR_2");
 
         int n_pts = 100;
@@ -803,7 +943,7 @@ void RunTests()
         for (int i = 0; i < 4; i++){
 
             double dens = min_barionic_density;
-            parameters.temperature = temperature[i];
+            parameters.finite_temperature.temperature = temperature[i];
 
             double mass;
             double renormalized_chemical_potential;
@@ -846,7 +986,7 @@ void RunTests()
                 "\tCalculation of mass and renormalized chemical potential as function of barionic density.\n");
         
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
 
         SetFilePath(NULL);
@@ -857,24 +997,24 @@ void RunTests()
     {
         printf("\tEntropy calculation methods\n");
         SetFilePath("tests/transient/data/");
-        
+
         SetParametersSet("BuballaR_2");
-        
+
         double mass[6] = {50.0, 100.0, 200.0, 300.0, 400.0, 500.0};
         double renormalized_chemical_potential[6] = {50.0, 100.0, 200.0, 300.0, 400.0, 500.0};
         double temperature[6] = {1.0, 5.0, 7.0, 10.0, 20.0, 35.0};
-        
+
         int n_pts = 1000;
         double min_momentum = 0.0;
-        double max_momentum = parameters.cutoff;
+        double max_momentum = parameters.model.cutoff;
         double mom_step = (max_momentum - min_momentum) / (double)(n_pts - 1);
-        
+
         // FIXME: Remove other methods of calculation once I'm sure the one adopted works fine
         gsl_vector * momentum_vector = gsl_vector_alloc(n_pts);
         gsl_vector * entropy_integrand_vector = gsl_vector_alloc(n_pts);
         gsl_vector * entropy_integrand_vector_deriv = gsl_vector_alloc(n_pts);
         gsl_vector * entropy_integrand_vector_art = gsl_vector_alloc(n_pts);
-        
+
         for (int i = 0; i < 6; i++){
             for (int j = 0; j < 6; j++){
                 for (int k = 0; k < 6; k++){
@@ -882,22 +1022,22 @@ void RunTests()
                     par.mass = mass[i];
                     par.renormalized_chemical_potential = renormalized_chemical_potential[j];
                     par.temperature = temperature[k];
-                    
+
                     double p = 0;
                     for (int l = 0; l < n_pts; l++){
-                        
+
                         double entropy_integrand = EntropyIntegrand(p, &par);
                         double entropy_integrand_deriv = EntropyIntegrandFromDerivative(p, &par);
                         double entropy_integrand_art = EntropyIntegrandArt(p, &par);
-                        
+
                         gsl_vector_set(momentum_vector, l, p);
                         gsl_vector_set(entropy_integrand_vector, l, entropy_integrand);
                         gsl_vector_set(entropy_integrand_vector_deriv, l, entropy_integrand_deriv);
                         gsl_vector_set(entropy_integrand_vector_art, l, entropy_integrand_art);
-                        
+
                         p += mom_step;
                     }
-                    
+
                     char filename[256];
                     sprintf(filename, "entropy_integrand_%d_%d_%d.dat", i, j, k);
                     
@@ -914,7 +1054,7 @@ void RunTests()
                                        2,
                                        momentum_vector,
                                        entropy_integrand_vector_deriv);
-                    
+
                     sprintf(filename, "entropy_integrand_art_%d_%d_%d.dat", i, j, k);
 
                     WriteVectorsToFile(filename,
@@ -922,7 +1062,7 @@ void RunTests()
                                        2,
                                        momentum_vector,
                                        entropy_integrand_vector_art);
-                    
+
                 }
             }
         }
@@ -931,22 +1071,22 @@ void RunTests()
         gsl_vector_free(entropy_integrand_vector);
         gsl_vector_free(entropy_integrand_vector_deriv);
         gsl_vector_free(entropy_integrand_vector_art);
-        
+
         SetFilePath("tests/transient/");
         FILE * log_file = OpenFile("run.log");
-        
+
         fprintf(log_file, "Verifies the best routine to calculate entropy.\n");
         fprintf(log_file,
                 "mass = {50.0, 100.0, 200.0, 300.0, 400.0, 500.0};\n"
                 "renormalized chemical potential = {50.0, 100.0, 200.0, 300.0, 400.0, 500.0};\n"
                 "temperature = {1.0, 5.0, 7.0, 10.0, 20.0, 35.0};\n");
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
 
         SetFilePath(NULL);
     }
-    
+
 #pragma mark Entropy
     // The entropy only depends on the kinectic term, so it does
     // have a 'closed' form. Here we use it to calculate the entropy
@@ -956,37 +1096,37 @@ void RunTests()
     {
         printf("\tEntropy\n");
         SetFilePath("tests/entropy/data/");
-        
+
         SetParametersSet("BuballaR_2");
-        
+
         int n_pts = 1000;
-        
+
         double temperature[4] = {1.0, 5.0, 10.0, 15.0};
         double renormalized_chemical_potential[4] = {50.0, 100.0, 200.0, 350.0};
-        
+
         double mass_min = 0.0;
         double mass_max = 400.0;
         double mass_step = (mass_max - mass_min) / (double)(n_pts - 1);
-        
+
         gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
         gsl_vector * entropy_vector = gsl_vector_alloc(n_pts);
-        
+
         for (int i = 0; i < 4; i++){
             for (int j = 0; j < 4; j++){
-                
+
                 double mass = mass_min;
                 for (int k = 0; k < n_pts; k++){
                     double entropy = Entropy(mass, temperature[i], renormalized_chemical_potential[j]);
-                
+
                     gsl_vector_set(mass_vector, k, mass);
                     gsl_vector_set(entropy_vector, k, entropy);
-                    
+
                     mass += mass_step;
                 }
-                
+
                 char filename[256];
                 sprintf(filename, "entropy_%d_%d.dat", i, j);
-                
+
                 WriteVectorsToFile(filename,
                                    "# mass, entropy\n",
                                    2,
@@ -994,51 +1134,51 @@ void RunTests()
                                    entropy_vector);
             }
         }
-        
+
         gsl_vector_free(mass_vector);
         gsl_vector_free(entropy_vector);
-        
+
         SetFilePath("tests/entropy/");
         FILE * log_file = OpenFile("run.log");
-        
+
         fprintf(log_file,
                 "The entropy only depends on the kinectic term, so it does\n"
                 "have a 'closed' form. Here we use it to calculate the entropy\n"
                 "for a few parameters values just to see if we get a well\n"
                 "behaved solution.\n");
-        
+
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
 
         SetFilePath(NULL);
     }
-    
+
 #pragma mark Reproduce Fig. 2.7 from Buballa Physics Reports
     if (true)
     {
         printf("\tReproduce Fig. 2.7 from Buballa Physics Reports\n");
         SetFilePath("tests/Buballa-Fig2.7/data/");
-        
+
         SetParametersSet("BuballaR_2");
-        
+
         int n_pts = 1000;
         double temperature_min = 0.0;
         double temperature_max = 300.0;
         double temperature_step = (temperature_max - temperature_min) / (double)(n_pts - 1);
-        
+
         gsl_vector * temperature_vector = gsl_vector_alloc(n_pts);
         gsl_vector * mass_vector = gsl_vector_alloc(n_pts);
-        
+
         double temperature = temperature_min;
         for (int i = 0; i < n_pts; i++){
-            
-            parameters.temperature = temperature;
-            
+
+            parameters.finite_temperature.temperature = temperature;
+
             // Prepare function to be passed to the root finding algorithm
             gsl_function F;
             F.function = &ZeroedGapEquationForFiniteTemperatureTest;
-            
+
             double mass;
             int status = UnidimensionalRootFinder(&F,
                                                   0.0,
@@ -1049,37 +1189,37 @@ void RunTests()
                                                   &mass);
             if (status == -1)
                 mass = 0;
-            
+
             gsl_vector_set(temperature_vector, i, temperature);
             gsl_vector_set(mass_vector, i, mass);
-            
+
             temperature += temperature_step;
         }
-        
+
         WriteVectorsToFile("mass_temperature.dat",
                            "# Reproduce Fig. 2.7 from Buballa, Physics Reports bare_mass not zero\n"
                            "# temperature, mass\n",
                            2,
                            temperature_vector,
                            mass_vector);
-        
+
         // Repeat for bare_mass = 0
-        parameters.bare_mass = 0;
-        
+        parameters.model.bare_mass = 0;
+
         temperature = temperature_min;
         for (int i = 0; i < n_pts; i++){
-            
+
             // FIXME: change the program to allow temperature as a variable
             // instead of as a parameter
-            parameters.temperature = temperature;
-            
+            parameters.finite_temperature.temperature = temperature;
+
             // Prepare function to be passed to the root finding algorithm
             gsl_function F;
             F.function = &ZeroedGapEquationForFiniteTemperatureTest;
 
             // This case will not have solutions beyond T = 220 MeV
             double mass = 0;
-            
+
             if (temperature < 220.0){
                 int status = UnidimensionalRootFinder(&F,
                                                       0.1,
@@ -1094,32 +1234,32 @@ void RunTests()
 
             gsl_vector_set(temperature_vector, i, temperature);
             gsl_vector_set(mass_vector, i, mass);
-            
+
             temperature += temperature_step;
         }
-        
+
         WriteVectorsToFile("mass_temperature_bare_mass_zero.dat",
                            "# Reproduce Fig. 2.7 from Buballa, Physics Reports bare_mass = 0\n"
                            "# temperature, mass\n",
                            2,
                            temperature_vector,
                            mass_vector);
-        
+
         gsl_vector_free(temperature_vector);
         gsl_vector_free(mass_vector);
-        
+
         SetFilePath("tests/Buballa-Fig2.7/");
         FILE * log_file = OpenFile("run.log");
-        
+
         fprintf(log_file, "Reproduce Fig. 2.7 from Buballa Physics Reports\n");
-        
+
         PrintParametersToFile(log_file);
-        
+
         fclose(log_file);
 
         SetFilePath(NULL);
     }
-    
+
 #pragma mark Test root finding for renormalized chemical potential
     // After we reach the zero mass case, we use a onedimensional root finding
     // to determine the renormalized chemical potential. However, for some
@@ -1130,37 +1270,37 @@ void RunTests()
     {
         printf("\tTest root finding for renormalized chemical potential\n");
         SetFilePath("tests/renorm-chem-pot-transient/data/");
-        
+
         SetParametersSet("Buballa_1");
-        
+
         int num_pts = 1000;
-        
+
         double mass = 0;
         double barionic_density[12] = {0.1, 0.5, 0.7, 1.0, 1.4, 2.0, 2.1, 2.2, 2.3, 2.35, 2.4, 2.5};
-        
+
         // Range of chemical potential which will be tested
         double renorm_chem_pot_min = 0.0;
         double renorm_chem_pot_max = 3000;
         double step = (renorm_chem_pot_max - renorm_chem_pot_min) / (double)(num_pts - 1);
-        
+
         gsl_vector * renorm_chem_pot_vector = gsl_vector_alloc(num_pts);
         gsl_vector * zeroed_dens_eq_vector = gsl_vector_alloc(num_pts);
 
         for (int i = 0; i < 12; i++){
-            
+
             double mu_r = renorm_chem_pot_min;
 
             for (int j = 0; j < num_pts; j++){
                 gsl_vector_set(renorm_chem_pot_vector, j, mu_r);
-                
+
                 double zeroed_dens_eq = ZeroedBarionicDensityEquationForFiniteTemperature(mass,
                                                                                           mu_r,
                                                                                           &(barionic_density[i]));
                 gsl_vector_set(zeroed_dens_eq_vector, j, zeroed_dens_eq);
-                
+
                 mu_r += step;
             }
-            
+
             char filename[256];
             sprintf(filename, "zeroed_dens_eq_bar_dens_%d.dat", i);
             
@@ -1180,79 +1320,4 @@ double ZeroedGapEquationForFiniteTemperatureTest(double mass, void * p)
     // As the barionic_density is zero, so are the renormalized_chemical_potential
     // and the chemical_potential
     return ZeroedGapEquationForFiniteTemperature(mass, 0.0, NULL);
-}
-
-int WriteVacuumMassEquation(char * filename,
-                            double minimum_mass,
-                            double maximum_mass,
-                            int points_number){
-    
-    double m = 0;
-    
-    double step = (maximum_mass - minimum_mass) / (points_number - 1);
-    
-    FILE * f = OpenFile(filename);
-    
-    while (m < points_number) {
-        fprintf(f, "%20.15E\t%20.15E\n", m, VacuumMassEquation(m, NULL));
-        m += step;
-    }
-    
-    fclose(f);
-    return 0;
-}
-
-int WriteZeroedRenormalizedChemicalPotentialEquation(char * filename,
-                                                     double minimum_renormalized_chemical_potential,
-                                                     double maximum_renormalized_chemical_potential,
-                                                     int points_number,
-                                                     double chemical_potential,
-                                                     double mass){
-    
-    double mu = 0;
-    
-    double step = (maximum_renormalized_chemical_potential - minimum_renormalized_chemical_potential)
-    / (points_number - 1);
-    
-    FILE * f = OpenFile(filename);
-    
-    renorm_chem_pot_equation_input input;
-    input.chemical_potential = chemical_potential;
-    input.mass = mass;
-    
-    while (mu < points_number) {
-        fprintf(f,
-                "%20.15E\t%20.15E\n",
-                mu,
-                ZeroedRenormalizedChemicalPotentialEquation(mu, &input));
-        mu += step;
-    }
-    
-    fclose(f);
-    
-    return 0;
-}
-
-int WriteZeroedGapEquation(char * filename,
-                           double minimum_mass,
-                           double maximum_mass,
-                           int points_number,
-                           double fermi_momentum){
-    
-    double m = 0;
-    
-    double step = (maximum_mass - minimum_mass) / (points_number - 1);
-    
-    FILE * f = OpenFile(filename);
-    
-    gap_equation_input input;
-    input.fermi_momentum = fermi_momentum;
-    
-    while (m < maximum_mass) {
-        fprintf(f, "%20.15E\t%20.15E\n", m, ZeroedGapEquation(m, &input));
-        m += step;
-    }
-    
-    fclose(f);
-    return 0;
 }

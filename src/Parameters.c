@@ -45,13 +45,17 @@ void ParametersSetup(void)
 
   	p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "Buballa_1";
-  	p.parameters_set_origin = "Set 1 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408";
-    p.bare_mass = 0.0;                                             // MeV
-    p.cutoff = 650.0;                                              // MeV
 
-	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.14 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.0;
+  	p.model.parameters_set_origin = "Set 1 from M. Buballa, "
+									"Nucl. Phys. A 611 (1996) 393-408";
+
+	p.model.bare_mass = 0.0;	// MeV
+    p.model.cutoff = 650.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.14 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.0;
 
   	AppendParametersSetToList(p);
     
@@ -59,13 +63,17 @@ void ParametersSetup(void)
 
   	p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "Buballa_2";
-  	p.parameters_set_origin = "Set 2 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408";
-    p.bare_mass = 0.0;                                             // MeV
-    p.cutoff = 600.0;                                              // MeV
 
-	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.45 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.0;
+  	p.model.parameters_set_origin = "Set 2 from M. Buballa, "
+									"Nucl. Phys. A 611 (1996) 393-408";
+
+	p.model.bare_mass = 0.0;	// MeV
+    p.model.cutoff = 600.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.45 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.0;
 
   	AppendParametersSetToList(p);
 
@@ -73,13 +81,17 @@ void ParametersSetup(void)
 
   	p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "Buballa_3";
-  	p.parameters_set_origin = "Set 3 from M. Buballa, Nucl. Phys. A 611 (1996) 393-408";
-    p.bare_mass = 0.0;                                             // MeV
-    p.cutoff = 570.0;                                              // MeV
 
-	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.84 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.0;
+  	p.model.parameters_set_origin = "Set 3 from M. Buballa, "
+									"Nucl. Phys. A 611 (1996) 393-408";
+
+	p.model.bare_mass = 0.0;	// MeV
+    p.model.cutoff = 570.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.84 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.0;
 
   	AppendParametersSetToList(p);
 
@@ -87,13 +99,17 @@ void ParametersSetup(void)
 
   	p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2";
-  	p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = 0";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
 
-	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.0;
+  	p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics "
+									"Reports 407 (2005) 205-376 with G_V = 0";
+
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
+
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.0;
 
   	AppendParametersSetToList(p);
 
@@ -101,42 +117,54 @@ void ParametersSetup(void)
 
   	p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV";
-  	p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
 
-	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = p.G_S;
+  	p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics "
+									"Reports 407 (2005) 205-376 with G_V = G_S";
+
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = p.model.G_S;
 
   	AppendParametersSetToList(p);
 
     ////
-    
+
     p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV_0.25";
-    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
+
+    p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports"
+									"407 (2005) 205-376 with G_V = 0.25 * G_S";
     
-    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.25 * p.G_S;
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
     
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.25 * p.model.G_S;
+
     AppendParametersSetToList(p);
-    
+
     ////
-    
+
     p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV_0.35";
-    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
+
+    p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports "
+									"407 (2005) 205-376 with G_V = 0.35 * G_S";
     
-    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.35 * p.G_S;
-    
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
+
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.35 * p.model.G_S;
+
     AppendParametersSetToList(p);
     
     
@@ -144,67 +172,185 @@ void ParametersSetup(void)
     
     p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV_0.45";
-    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
-    
-    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.45 * p.G_S;
+
+    p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports "
+									"407 (2005) 205-376 with G_V = 0.45 * G_S";
+
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
+
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.45 * p.model.G_S;
     
     AppendParametersSetToList(p);
     
     ////
-    
+
     p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV_0.55";
-    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
-    
-    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.55 * p.G_S;
-    
+
+    p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports "
+								    "407 (2005) 205-376 with G_V = 0.55 * G_S";
+
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
+
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.55 * p.model.G_S;
+
     AppendParametersSetToList(p);
     
     ////
     
     p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV_0.65";
-    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
+
+    p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports "
+									"407 (2005) 205-376 with G_V = 0.65 * G_S";
     
-    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.65 * p.G_S;
-    
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9; 	// MeV
+
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.65 * p.model.G_S;
+
     AppendParametersSetToList(p);
     
     ////
     
     p = NewCopyOfParametersSetFromTemplate();
     p.parameters_set_identifier = "BuballaR_2_GV_0.75";
-    p.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports 407 (2005) 205-376 with G_V = G_S";
-    p.bare_mass = 5.6;                                             // MeV
-    p.cutoff = 587.9;                                              // MeV
-    
-    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.75 * p.G_S;
-    
+
+    p.model.parameters_set_origin = "Set 2 from M. Buballa, Physics Reports "
+									"407 (2005) 205-376 with G_V = 0.75 * G_S";
+
+	p.model.bare_mass = 5.6;	// MeV
+    p.model.cutoff = 587.9;     // MeV
+
+    // The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.75 * p.model.G_S;
+
     AppendParametersSetToList(p);
-    
+
+  	////
+
+  	p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "PCP-0.0";
+
+  	p.model.parameters_set_origin = "Set from PRD 94 094001, 2016";
+
+	p.model.bare_mass = 5.1;	// MeV
+    p.model.cutoff = 648.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.11 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.0 * p.model.G_S;
+
+  	AppendParametersSetToList(p);
+
+  	////
+
+  	p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "PCP-0.1";
+
+  	p.model.parameters_set_origin = "Set from PRD 94 094001, 2016";
+
+	p.model.bare_mass = 5.1;	// MeV
+    p.model.cutoff = 648.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.11 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.1 * p.model.G_S;
+
+  	AppendParametersSetToList(p);
+
+  	////
+
+  	p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "PCP-0.2";
+
+  	p.model.parameters_set_origin = "Set from PRD 94 094001, 2016";
+
+	p.model.bare_mass = 5.1;	// MeV
+    p.model.cutoff = 648.0; 	// MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.11 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.2 * p.model.G_S;
+
+  	AppendParametersSetToList(p);
+
+  	////
+
+  	p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "PCP-0.3";
+
+  	p.model.parameters_set_origin = "Set from PRD 94 094001, 2016";
+
+	p.model.bare_mass = 5.1;	// MeV
+    p.model.cutoff = 648.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.11 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.3 * p.model.G_S;
+
+    AppendParametersSetToList(p);
+
+  	////
+
+  	p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "PCP-0.4";
+
+  	p.model.parameters_set_origin = "Set from PRD 94 094001, 2016";
+
+	p.model.bare_mass = 5.1;	// MeV
+    p.model.cutoff = 648.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.11 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.4 * p.model.G_S;
+
+  	AppendParametersSetToList(p);
+
+  	////
+
+  	p = NewCopyOfParametersSetFromTemplate();
+    p.parameters_set_identifier = "PCP-0.5";
+
+  	p.model.parameters_set_origin = "Set from PRD 94 094001, 2016";
+
+	p.model.bare_mass = 5.1;	// MeV
+    p.model.cutoff = 648.0;     // MeV
+
+	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0)
+	// corrects the dimension
+    p.model.G_S = 2.11 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.5 * p.model.G_S;
+
+  	AppendParametersSetToList(p);
+
   	// END DECLARATION OF PARAMETERS SETS
-    
+
     // Verify that the set identifiers are unique
     for (int i = 0; i < parameters_sets_list_count; i++){
         for (int j = 0; j < parameters_sets_list_count; j++){
-            
+
             if (i == j)
                 continue;
-            
+
             if(!strcasecmp(parameters_sets_list[i].parameters_set_identifier,
                            parameters_sets_list[j].parameters_set_identifier)){
                 printf("Two parameters sets share the \"%s\" identifier, but it should be unique.\n",
@@ -220,11 +366,11 @@ void ParametersSetup(void)
 		  	printf("Parameters set %s\n"
 				   "\tOrigin: %s\n",
 				   parameters_sets_list[i].parameters_set_identifier,
-				   parameters_sets_list[i].parameters_set_origin);
+				   parameters_sets_list[i].model.parameters_set_origin);
 		}
 		exit(EXIT_SUCCESS);
 	}
-    
+
     // If there isn't at least one set, exit
     if (parameters_sets_list_count == 0){
         printf("There are not parameters set declared. Declare at least one set.\n");
@@ -239,17 +385,17 @@ void SetParametersSet(char * parameters_set_identifier)
         parameters = parameters_sets_list[0];
         return;
     }
-        
+
     for (int i = 0; i < parameters_sets_list_count; i++){
-          
+
         Parameters p = parameters_sets_list[i];
-                          
+
         if (!strcasecmp(p.parameters_set_identifier, parameters_set_identifier)){
 			parameters = p;
             return;
 		}
     }
-    
+
     printf("Parameters set %s unrecognized.\n"
            "Use -l to list available parameterizations.\n",
            parameters_set_identifier);
@@ -258,66 +404,73 @@ void SetParametersSet(char * parameters_set_identifier)
 
 Parameters NewCopyOfParametersSetFromTemplate()
 {
-  	Parameters p;
+	Parameters p;
 
-  	p.parameters_set_origin = "A standard parameters set. With theory parameters from Set 2 of M. Buballa, Physics Reports 407 (2005) 205-376";
     p.parameters_set_identifier = "Template";
-    p.bare_mass = 5.6;
-    p.cutoff = 587.9;
+
+  	p.model.parameters_set_origin = "A standard parameters set. With theory parameters "
+					                "from Set 2 of M. Buballa, Physics Reports 407 (2005) 205-376";
+    p.model.bare_mass = 5.6;
+    p.model.cutoff = 587.9;
 
   	// The code expects [G_S] = fm^2, the pow(CONST_HBAR_C, 2.0) corrects the dimension
-    p.G_S = 2.44 * pow(CONST_HBAR_C / p.cutoff, 2.0);
-    p.G_V = 0.0;
+    p.model.G_S = 2.44 * pow(CONST_HBAR_C / p.model.cutoff, 2.0);
+    p.model.G_V = 0.0;
 
-  	p.points_number = 1000;
-    p.minimum_density = 1.0E-3;
-    p.maximum_density = 10.0;
+  	p.loop_variable.points_number = 1000;
+    p.loop_variable.min_value = 1.0E-3;
+    p.loop_variable.max_value = 10.0;
 
-    p.gap_minimum_mass = 0.0;
-    p.gap_maximum_mass = 1000.0;
-    p.gap_points_number = 2000;
+//    p.gap_minimum_mass = 0.0;
+//    p.gap_maximum_mass = 1000.0;
+//    p.gap_points_number = 2000;
 
     // Lower bound: Low, but not zero. In zero f(M) = 0 if bare_mass is zero,
     // and that may be a problem for root finding;
-    p.gap_eq_solver_lower_bound = 1.0E-3;
-    p.gap_eq_solver_upper_bound = 1000.0;  // MeV (about three times the nucleon mass)
-    p.gap_eq_solver_abs_error = 1.0E-5;
-    p.gap_eq_solver_rel_error = 5.0E-5;
-    p.gap_eq_solver_max_iterations = 2000;
+    p.zero_temperature.lower_bound = 1.0E-3;
+    p.zero_temperature.upper_bound = 1000.0;  // MeV (about three times the nucleon mass)
+    p.zero_temperature.abs_error = 1.0E-5;
+    p.zero_temperature.rel_error = 5.0E-5;
+    p.zero_temperature.max_iterations = 2000;
 
-    p.vac_mass_det_lower_bound = 1.0E-3;   // Low, but not zero. Same reason as above.
-    p.vac_mass_det_upper_bound = 1000.0;   // Near the value of the nucleon mass.
-    p.vac_mass_det_abs_error = 1.0E-5;
-    p.vac_mass_det_rel_error = 1.0E-5;
-    p.vac_mass_det_max_iterations = 2000;
+    p.vacuum_mass_determination.lower_bound = 1.0E-3;   // Low, but not zero. Same reason as above.
+    p.vacuum_mass_determination.upper_bound = 1000.0;   // Near the value of the nucleon mass.
+    p.vacuum_mass_determination.abs_error = 1.0E-5;
+    p.vacuum_mass_determination.rel_error = 1.0E-5;
+    p.vacuum_mass_determination.max_iterations = 2000;
 
-  	p.renormalized_chemical_potential_lower_bound = 1.0E-3;
-    p.renormalized_chemical_potential_upper_bound = 1000.0;
-    p.renormalized_chemical_potential_abs_error = 1.0E-5;
-    p.renormalized_chemical_potential_rel_error = 1.0E-5;
-    p.renormalized_chemical_potential_max_iter = 2000;
-    
-    p.temperature = 0.0; // (MeV)
+  	p.renormalized_chemical_potential_integration.lower_bound = 1.0E-3;
+    p.renormalized_chemical_potential_integration.upper_bound = 1000.0;
+    p.renormalized_chemical_potential_integration.abs_error = 1.0E-5;
+    p.renormalized_chemical_potential_integration.rel_error = 1.0E-5;
+    p.renormalized_chemical_potential_integration.max_iter = 2000;
+
+    p.finite_temperature.temperature = 0.0; // (MeV)
     
     // In the following, the guesses are used for the first iteration.
     // Any subsequent iteration uses as guesses the values of mass
     // and renormalized chemical potential from the previous iteration.
     // This shall work well for stepping of a control variable.
-    p.mass_and_renor_chem_pot_solution_max_iter = 4000;
-    p.mass_and_renor_chem_pot_solution_mass_guess = 300.0; // (MeV)
-    p.mass_and_renor_chem_pot_solution_renor_chem_pot_guess = 400.0; //(MeV)
-    p.mass_and_renor_chem_pot_solution_abs_error = 1.0E-5;
-    p.mass_and_renor_chem_pot_solution_rel_error = 1.0E-5;
-    p.mass_and_renor_chem_pot_solution_zero_mass_tolerance = 0.1;
-    p.mass_and_renor_chem_pot_solution_renor_chem_pot_lower_bound = 0.0;
-    p.mass_and_renor_chem_pot_solution_renor_chem_pot_upper_bound = 3000;
-    p.mass_and_renor_chem_pot_solution_use_last_solution_as_guess = true;
-    
-    p.fermi_dirac_integrals_max_interval_num = 8000;
-    p.fermi_dirac_integrals_integration_key = GSL_INTEG_GAUSS61;
-    p.fermi_dirac_integrals_max_sub_interval = 8000;
-    p.fermi_dirac_integrals_abs_error = 1.0E-10;
-    p.fermi_dirac_integrals_rel_error = 1.0E-10;
+    p.finite_temperature.max_iter = 4000;
+    p.finite_temperature.mass_guess = 300.0; // (MeV)
+    p.finite_temperature.renor_chem_pot_guess = 400.0; //(MeV)
+    p.finite_temperature.abs_error = 1.0E-5;
+    p.finite_temperature.rel_error = 1.0E-5;
+    p.finite_temperature.renor_chem_pot_lower_bound = 0.0;
+    p.finite_temperature.renor_chem_pot_upper_bound = 3000;
+
+    p.fermi_dirac_integrals.max_interval_num = 8000;
+    p.fermi_dirac_integrals.integration_key = GSL_INTEG_GAUSS61;
+    p.fermi_dirac_integrals.max_sub_interval = 8000;
+    p.fermi_dirac_integrals.abs_error = 1.0E-10;
+    p.fermi_dirac_integrals.rel_error = 1.0E-10;
+
+	p.finite_temperature.entropy.lower_limit = 0.0;
+    p.finite_temperature.entropy.upper_limit = parameters.model.cutoff;
+    p.finite_temperature.entropy.abs_error = 1.0E-3;
+    p.finite_temperature.entropy.rel_error = 1.0E-3;
+    p.finite_temperature.entropy.max_sub_interval = 1000;
+    p.finite_temperature.entropy.integration_key = GSL_INTEG_GAUSS61;
 
   	return p;
 }
@@ -332,53 +485,105 @@ void AppendParametersSetToList(Parameters a_set)
 void PrintParametersToFile(FILE * file)
 {
     fprintf(file, "\n--- PARAMETERS ---\n");
-    fprintf(file, "parameters_set_origin = %s\n", parameters.parameters_set_origin);
-    fprintf(file, "parameters_set_identifier = %s\n\n", parameters.parameters_set_identifier);
-    
-    fprintf(file, "G_S = %f\n", parameters.G_S);
-    fprintf(file, "G_V = %f\n", parameters.G_V);
-    fprintf(file, "cutoff = %f\n", parameters.cutoff);
-    fprintf(file, "bare_mass = %f\n", parameters.bare_mass);
-    fprintf(file, "temperature = %f\n\n", parameters.temperature);
-    
-    fprintf(file, "points_number = %d\n", parameters.points_number);
-    fprintf(file, "minimum_density = %f\n", parameters.minimum_density);
-    fprintf(file, "maximum_density = %f\n\n", parameters.maximum_density);
-    
-    fprintf(file, "gap_minimum_mass = %f\n", parameters.gap_minimum_mass);
-    fprintf(file, "gap_maximum_mass = %f\n", parameters.gap_maximum_mass);
-    fprintf(file, "gap_points_number = %f\n\n", parameters.gap_points_number);
-    
-    fprintf(file, "gap_eq_solver_max_iterations = %d\n", parameters.gap_eq_solver_max_iterations);
-    fprintf(file, "gap_eq_solver_lower_bound = %f\n", parameters.gap_eq_solver_lower_bound);
-    fprintf(file, "gap_eq_solver_upper_bound = %f\n", parameters.gap_eq_solver_upper_bound);
-    fprintf(file, "gap_eq_solver_abs_error = %f\n", parameters.gap_eq_solver_abs_error);
-    fprintf(file, "gap_eq_solver_rel_error = %f\n\n", parameters.gap_eq_solver_rel_error);
-    
-    fprintf(file, "vac_mass_det_max_iterations = %d\n", parameters.vac_mass_det_max_iterations);
-    fprintf(file, "vac_mass_det_lower_bound = %f\n", parameters.vac_mass_det_lower_bound);
-    fprintf(file, "vac_mass_det_upper_bound = %f\n", parameters.vac_mass_det_upper_bound);
-    fprintf(file, "vac_mass_det_abs_error = %f\n", parameters.vac_mass_det_abs_error);
-    fprintf(file, "vac_mass_det_rel_error = %f\n\n", parameters.vac_mass_det_rel_error);
-    
-    fprintf(file, "renormalized_chemical_potential_max_iter = %d\n", parameters.renormalized_chemical_potential_max_iter);
-    fprintf(file, "renormalized_chemical_potential_lower_bound = %f\n", parameters.renormalized_chemical_potential_lower_bound);
-    fprintf(file, "renormalized_chemical_potential_upper_bound = %f\n", parameters.renormalized_chemical_potential_upper_bound);
-    fprintf(file, "renormalized_chemical_potential_abs_error = %f\n", parameters.renormalized_chemical_potential_abs_error);
-    fprintf(file, "renormalized_chemical_potential_rel_error = %f\n\n", parameters.renormalized_chemical_potential_rel_error);
-    
-    fprintf(file, "mass_and_renor_chem_pot_solution_max_iter = %d\n", parameters.mass_and_renor_chem_pot_solution_max_iter);
-    fprintf(file, "mass_and_renor_chem_pot_solution_mass_guess = %f\n", parameters.mass_and_renor_chem_pot_solution_mass_guess);
-    fprintf(file, "mass_and_renor_chem_pot_solution_renor_chem_pot_guess = %f\n", parameters.mass_and_renor_chem_pot_solution_renor_chem_pot_guess);
-    fprintf(file, "mass_and_renorm_chem_pot_solution_abs_error = %f\n", parameters.mass_and_renor_chem_pot_solution_abs_error);
-    fprintf(file, "mass_and_renorm_chem_pot_solution_rel_error = %f\n\n", parameters.mass_and_renor_chem_pot_solution_rel_error);
-    
-    fprintf(file, "fermi_dirac_integrals_max_interval_num = %d\n", parameters.fermi_dirac_integrals_max_interval_num);
-    fprintf(file, "fermi_dirac_integrals_integration_key = %d\n", parameters.fermi_dirac_integrals_integration_key);
-    fprintf(file, "fermi_dirac_integrals_max_sub_interval = %d\n", parameters.fermi_dirac_integrals_max_sub_interval);
-    fprintf(file, "fermi_dirac_integrals_abs_error = %f\n", parameters.fermi_dirac_integrals_abs_error);
-    fprintf(file, "fermi_dirac_integrals_rel_error = %f\n\n", parameters.fermi_dirac_integrals_rel_error);
-    
+    fprintf(file, "set_identifier = %s\n\n", parameters.parameters_set_identifier);
 
+    fprintf(file, "set_origin = %s\n", parameters.model.parameters_set_origin);
+    fprintf(file, "G_S = %f\n", parameters.model.G_S);
+    fprintf(file, "G_V = %f\n", parameters.model.G_V);
+    fprintf(file, "cutoff = %f\n", parameters.model.cutoff);
+    fprintf(file, "bare_mass = %f\n", parameters.model.bare_mass);
+
+    fprintf(file, "points_number = %d\n", parameters.loop_variable.points_number);
+    fprintf(file, "minimum_density = %f\n", parameters.loop_variable.min_value);
+    fprintf(file, "maximum_density = %f\n\n", parameters.loop_variable.max_value);
+
+//    fprintf(file, "gap_minimum_mass = %f\n", parameters.gap_minimum_mass);
+//    fprintf(file, "gap_maximum_mass = %f\n", parameters.gap_maximum_mass);
+//    fprintf(file, "gap_points_number = %f\n\n", parameters.gap_points_number);
+
+    fprintf(file,
+			"zero_temperature.max_iterations = %d\n",
+			parameters.zero_temperature.max_iterations);
+    fprintf(file,
+			"zero_temperature.lower_bound = %f\n",
+			parameters.zero_temperature.lower_bound);
+    fprintf(file,
+			"zero_temperature.upper_bound = %f\n",
+			parameters.zero_temperature.upper_bound);
+    fprintf(file,
+			"zero_temperature.abs_error = %f\n",
+			parameters.zero_temperature.abs_error);
+    fprintf(file,
+			"zero_temperature.rel_error = %f\n\n",
+			parameters.zero_temperature.rel_error);
+
+    fprintf(file,
+			"vac_mass_det_max_iterations = %d\n",
+			parameters.vacuum_mass_determination.max_iterations);
+    fprintf(file,
+			"vac_mass_det_lower_bound = %f\n",
+			parameters.vacuum_mass_determination.lower_bound);
+    fprintf(file,
+			"vac_mass_det_upper_bound = %f\n",
+			parameters.vacuum_mass_determination.upper_bound);
+    fprintf(file,
+			"vac_mass_det_abs_error = %f\n",
+			parameters.vacuum_mass_determination.abs_error);
+    fprintf(file,
+			"vac_mass_det_rel_error = %f\n\n",
+			parameters.vacuum_mass_determination.rel_error);
+
+    fprintf(file,
+			"renormalized_chemical_potential_max.iter = %d\n",
+			parameters.renormalized_chemical_potential_integration.max_iter);
+    fprintf(file,
+			"renormalized_chemical_potential.lower_bound = %f\n",
+			parameters.renormalized_chemical_potential_integration.lower_bound);
+    fprintf(file,
+			"renormalized_chemical_potential.upper_bound = %f\n",
+			parameters.renormalized_chemical_potential_integration.upper_bound);
+    fprintf(file,
+			"renormalized_chemical_potential.abs_error = %f\n",
+			parameters.renormalized_chemical_potential_integration.abs_error);
+    fprintf(file,
+			"renormalized_chemical_potential.rel_error = %f\n\n",
+			parameters.renormalized_chemical_potential_integration.rel_error);
+
+	fprintf(file,
+			"temperature = %f\n\n",
+			parameters.finite_temperature.temperature);
+    fprintf(file,
+			"finite_temperature.max_iter = %d\n",
+			parameters.finite_temperature.max_iter);
+    fprintf(file,
+			"finite_temperature.mass_guess = %f\n",
+			parameters.finite_temperature.mass_guess);
+    fprintf(file,
+			"finite_temperature.renor_chem_pot_guess = %f\n",
+			parameters.finite_temperature.renor_chem_pot_guess);
+    fprintf(file,
+			"finite_temperature.abs_error = %f\n",
+			parameters.finite_temperature.abs_error);
+    fprintf(file,
+			"finite_temperature.rel_error = %f\n\n",
+			parameters.finite_temperature.rel_error);
+
+    fprintf(file,
+			"fermi_dirac_integrals.max_interval_num = %d\n",
+			parameters.fermi_dirac_integrals.max_interval_num);
+    fprintf(file,
+			"fermi_dirac_integrals.integration_key = %d\n",
+			parameters.fermi_dirac_integrals.integration_key);
+    fprintf(file,
+			"fermi_dirac_integrals.max_sub_interval = %d\n",
+			parameters.fermi_dirac_integrals.max_sub_interval);
+    fprintf(file,
+			"fermi_dirac_integrals.abs_error = %f\n",
+			parameters.fermi_dirac_integrals.abs_error);
+    fprintf(file,
+			"fermi_dirac_integrals.rel_error = %f\n\n",
+			parameters.fermi_dirac_integrals.rel_error);
+
+	return;
 }
 

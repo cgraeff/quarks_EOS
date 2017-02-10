@@ -26,4 +26,13 @@ set term tikz size 14cm, 9cm
 set out "graph/pressure.tex"
 replot
 
-
+set xrange[0:10000]
+set yrange[0:120000]
+set ylabel "$p$ (MeV)"
+set xlabel '$\varepsilon$ ($\rm{MeV/\rm{fm}^{-3}$)'
+set term png
+set out "graph/pressure_vs_energy_density.png"
+plot "data/pressure_vs_energy_density.dat" w l
+set term tikz size 14cm, 9cm
+set out "graph/pressure_vs_energy_density.tex"
+replot

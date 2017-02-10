@@ -39,4 +39,6 @@ gsl_vector * VectorNewVectorFromDivisionElementByElement(gsl_vector * numerator,
 void SetFilePath(const char path[]);
 FILE * OpenFile(const char filename[]);
 
+double Step(double min, double max, int num_points);
+
 #endif /* AuxiliaryFunctions_h */

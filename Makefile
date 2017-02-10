@@ -2,7 +2,11 @@ SHELL := /bin/bash # Use bash as shell
 TARGET = qeos
 
 # List set for multirun
-MULTIRUN_SETS = Buballa_1 Buballa_2 Buballa_3 BuballaR_2 BuballaR_2_GV BuballaR_2_GV_0.25 BuballaR_2_GV_0.35 BuballaR_2_GV_0.45 BuballaR_2_GV_0.55 BuballaR_2_GV_0.65 BuballaR_2_GV_0.75 
+MULTIRUN_SETS = Buballa_1 Buballa_2 Buballa_3 \
+		BuballaR_2 \
+		BuballaR_2_GV BuballaR_2_GV_0.25 BuballaR_2_GV_0.35 BuballaR_2_GV_0.45 \
+		BuballaR_2_GV_0.55 BuballaR_2_GV_0.65 BuballaR_2_GV_0.75 \
+		PCP-0.0 PCP-0.1 PCP-0.2 PCP-0.3 PCP-0.4 PCP-0.5
 
 .PHONY: all run graph tests tgraph clean
 

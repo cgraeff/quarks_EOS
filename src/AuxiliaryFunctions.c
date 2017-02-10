@@ -282,3 +282,15 @@ void SetFilePath(const char path[])
 
     open_file_prefix_path = path;
 }
+
+double Step(double min, double max, int num_points){
+
+	double step = (max - min) / (double)(num_points - 1);
+
+	if (step < 0){
+		printf("Step: Negative step. Check bounds.");
+		abort();
+	}
+
+	return step;
+}
